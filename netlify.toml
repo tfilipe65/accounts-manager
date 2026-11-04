@@ -1,0 +1,29 @@
+# Netlify configuration for Accounts Manager.
+#
+# The Next.js adapter is deliberately NOT listed as a plugin here -- Netlify
+# detects Next and installs its runtime automatically, and their own guidance
+# is not to pin the adapter version so each build picks up whatever version
+# supports the Next release in use (this app is on 16.2), same convention as
+# the sibling Employee Manager / Woodgrain Estimating / Project Manager apps.
+
+[build]
+  command = "npm run build"
+  # The Next runtime reads the build output from here and turns the server
+  # work into functions; it is not served as a static directory.
+  publish = ".next"
+
+[build.environment]
+  # Pinned so a change to Netlify's default image can't move it under us.
+  NODE_VERSION = "22"
+
+# `pg` opens a TCP connection to Postgres, so anything touching the database
+# must run in a Node function, not on the edge -- already the default for
+# route handlers and server components.
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=(), payment=()"

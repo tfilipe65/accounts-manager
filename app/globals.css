@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f5f2;
+  --foreground: #1c2b39;
+  --primary: #1b4b66;
+  --primary-dark: #0f3245;
+  --accent: #d4a017;
+  --surface: #ffffff;
+  --line: #dcd4c0;
+  --debit: #1b6b3a;
+  --credit: #a3231f;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-accent: var(--accent);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-debit: var(--debit);
+  --color-credit: var(--credit);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  button,
+  [type="button"],
+  [type="submit"],
+  [type="reset"] {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  .input {
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  .input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+}
