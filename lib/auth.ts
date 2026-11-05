@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { queryOne } from "./db";
 import { authSecretKey } from "./authSecret";
-
-const COOKIE_NAME = "session";
+import { getMaster } from "./master-admin";
+import { COMPANY_COOKIE, multiCompany, sessionCookieName } from "./company-cookie";
 
 export type Role = "ADMIN" | "USER";
 export type SessionUser = { id: number; username: string; name: string; role: Role };
@@ -26,13 +26,23 @@ export async function hasAnyUser(): Promise<boolean> {
   return Number(row?.n ?? 0) > 0;
 }
 
-export async function createSession(user: SessionUser) {
-  const token = await new SignJWT({ ...user })
+// The session is kept per company (cookie name and a claim inside it), so signing in to one company
+// never signs you in to another.
+async function activeCompany(): Promise<string | undefined> {
+  if (!multiCompany()) return undefined;
+  return (await cookies()).get(COMPANY_COOKIE)?.value;
+}
+
+// viaMaster: the session was opened by the master administrator rather than a company login. It then only
+// lasts while the master administrator is signed in (checked here and in middleware.ts).
+export async function createSession(user: SessionUser, company?: string, viaMaster = false) {
+  const companySlug = company ?? (await activeCompany());
+  const token = await new SignJWT({ ...user, company: companySlug, ...(viaMaster ? { viaMaster: true } : {}) })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("7d")
     .sign(authSecretKey());
   const store = await cookies();
-  store.set(COOKIE_NAME, token, {
+  store.set(sessionCookieName(companySlug), token, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
@@ -42,15 +52,18 @@ export async function createSession(user: SessionUser) {
 
 export async function destroySession() {
   const store = await cookies();
-  store.delete(COOKIE_NAME);
+  store.delete(sessionCookieName(await activeCompany()));
 }
 
 export async function getSession(): Promise<SessionUser | null> {
   const store = await cookies();
-  const token = store.get(COOKIE_NAME)?.value;
+  const company = await activeCompany();
+  const token = store.get(sessionCookieName(company))?.value;
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, authSecretKey());
+    if ((payload.company as string | undefined) !== company) return null;
+    if (payload.viaMaster && !(await getMaster())) return null;
     return payload as unknown as SessionUser;
   } catch {
     return null;
@@ -82,4 +95,14 @@ export async function requireAdmin(): Promise<SessionUser> {
   if (!session) redirect("/login");
   if (session.role !== "ADMIN") redirect("/no-access");
   return session;
+}
+
+/**
+ * The sections this user may open, or null for all of them. Read from the database on each call so a
+ * change an admin makes in Settings applies straight away, without the user having to log in again.
+ */
+export async function getAllowedSections(user: SessionUser): Promise<string[] | null> {
+  if (user.role === "ADMIN") return null;
+  const row = await queryOne<{ permissions: string[] | null }>("SELECT permissions FROM users WHERE id = $1", [user.id]);
+  return row?.permissions ?? null;
 }

@@ -1,6 +1,7 @@
 "use server";
 
-import { updateAppSettings, createUser, deleteUser, closeYear, reopenYear, type AppSettings } from "@/lib/actions/settings-actions";
+import { SECTIONS } from "@/lib/sections";
+import { updateAppSettings, createUser, deleteUser, setUserSections, closeYear, reopenYear, type AppSettings } from "@/lib/actions/settings-actions";
 
 function str(fd: FormData, name: string): string | null {
   const v = String(fd.get(name) || "").trim();
@@ -45,6 +46,18 @@ export async function createUserFormAction(_prev: { error?: string; success?: bo
     await createUser({ username, name, password, role });
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Could not create user." };
+  }
+  return { success: true };
+}
+
+export async function saveUserSectionsAction(id: number, _prev: { error?: string; success?: boolean } | undefined, fd: FormData) {
+  const chosen = fd.getAll("sections").map(String);
+  // Everything ticked is stored as "no restriction", so sections added later are open to the user too.
+  const all = SECTIONS.every((s) => chosen.includes(s.key));
+  try {
+    await setUserSections(id, all ? null : chosen);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not save." };
   }
   return { success: true };
 }

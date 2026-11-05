@@ -37,6 +37,7 @@ next-env.d.ts
 
 # desktop app: real company data built locally, never committed
 /db/seed.sql
+/db/profiles/
 /db/workbook-export/
 /desktop-bundle/
 /src-tauri/target/

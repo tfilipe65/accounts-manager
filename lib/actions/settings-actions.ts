@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { query, queryOne } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { SECTIONS } from "@/lib/sections";
 
 export type AppSettings = {
   company_name: string;
@@ -108,17 +109,26 @@ export async function reopenYear(): Promise<void> {
   revalidatePath("/settings");
 }
 
-export type UserRow = { id: number; username: string; name: string; role: "ADMIN" | "USER" };
+export type UserRow = { id: number; username: string; name: string; role: "ADMIN" | "USER"; permissions: string[] | null };
 
 export async function listUsers(): Promise<UserRow[]> {
   await requireAdmin();
-  return query<UserRow>("SELECT id, username, name, role FROM users ORDER BY id");
+  return query<UserRow>("SELECT id, username, name, role, permissions FROM users ORDER BY id");
 }
 
 export async function createUser(input: { username: string; name: string; password: string; role: "ADMIN" | "USER" }): Promise<void> {
   await requireAdmin();
   const hash = bcrypt.hashSync(input.password, 10);
   await query("INSERT INTO users (username, password_hash, name, role) VALUES ($1,$2,$3,$4)", [input.username, hash, input.name, input.role]);
+  revalidatePath("/settings");
+}
+
+/** Which sections a user may open. null = all of them (admins always have all, whatever is stored). */
+export async function setUserSections(id: number, sections: string[] | null): Promise<void> {
+  await requireAdmin();
+  const valid = new Set(SECTIONS.map((s) => s.key));
+  const clean = sections === null ? null : sections.filter((s) => valid.has(s));
+  await query("UPDATE users SET permissions = $2 WHERE id = $1", [id, clean]);
   revalidatePath("/settings");
 }
 

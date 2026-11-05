@@ -10,13 +10,16 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { queryOne } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
+import { currentCompanySlug } from "@/lib/current-company";
+import { reportingYearCookieName } from "@/lib/company-cookie";
 
-const COOKIE_NAME = "ry";
+// One year choice per company: Test sits in 2020 while a live company is in the current year.
+const cookieName = async () => reportingYearCookieName(await currentCompanySlug());
 
 export async function getEffectiveReportingYear(): Promise<number> {
   await requireSession();
   const store = await cookies();
-  const raw = store.get(COOKIE_NAME)?.value;
+  const raw = store.get(await cookieName())?.value;
   const fromCookie = raw ? Number(raw) : NaN;
   if (Number.isFinite(fromCookie)) return fromCookie;
 
@@ -27,6 +30,6 @@ export async function getEffectiveReportingYear(): Promise<number> {
 export async function setReportingYearAction(year: number, path: string): Promise<void> {
   await requireSession();
   const store = await cookies();
-  store.set(COOKIE_NAME, String(year), { httpOnly: false, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
+  store.set(await cookieName(), String(year), { httpOnly: false, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
   revalidatePath(path);
 }

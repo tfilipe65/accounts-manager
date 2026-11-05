@@ -6,7 +6,9 @@
 //   node scripts\import-workbook.mjs --apply --replace  (wipe the transaction tables first)
 //
 // Close the app first -- the embedded database allows one process at a time.
-// Options: --data-dir <folder> (default: the app's own data folder), --export-dir <folder>.
+// Options: --company <slug> (default: test, the company holding the workbook data), --data-dir <folder>
+// (default: the app's own data folder), --export-dir <folder>. Open the company in the app once first,
+// so its database exists.
 //
 // Mapping (checked against the workbook's own columns):
 //   Income sheet          -> sales_invoices + sales_invoice_lines   (grouped by the sales ID in column D)
@@ -52,7 +54,11 @@ const problems = [];
 const warn = (m) => problems.push(m);
 
 // ---------- database ----------
-const db = new PGlite(path.join(DATA_DIR, "db"), { parsers: { 1082: (v) => v } });
+const COMPANY = opt("--company", "test");
+const DB_DIR = path.join(DATA_DIR, "companies", COMPANY, "db");
+if (!fs.existsSync(DB_DIR)) throw new Error(`No database for company "${COMPANY}" at ${DB_DIR}. Open the company in the app once, then close the app.`);
+console.log(`Company: ${COMPANY}`);
+const db = new PGlite(DB_DIR, { parsers: { 1082: (v) => v } });
 await db.waitReady;
 const q = async (sql, p = []) => (await db.query(sql, p)).rows;
 const lookup = async (sql, key) => new Map((await q(sql)).map((r) => [key(r), r.id]));

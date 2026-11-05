@@ -1,34 +1,17 @@
 import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
+import type { Company } from "@/lib/companies";
+import { multiCompany } from "@/lib/company-cookie";
+import { SECTIONS } from "@/lib/sections";
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { getAvailableReportingYears } from "@/lib/actions/dashboard-actions";
 import { getEffectiveReportingYear } from "@/lib/reporting-year";
 import { getClosedThroughYear } from "@/lib/year-close";
 import ReportingYearSelector from "@/components/ReportingYearSelector";
 
-const LINKS: { href: string; label: string; adminOnly?: boolean }[] = [
-  { href: "/", label: "Dashboard" },
-  { href: "/chart-of-accounts", label: "Chart of Accounts" },
-  { href: "/customers", label: "Customers" },
-  { href: "/suppliers", label: "Suppliers" },
-  { href: "/products-services", label: "Products & Services" },
-  { href: "/projects", label: "Projects" },
-  { href: "/income", label: "Income" },
-  { href: "/expense", label: "Expense" },
-  { href: "/banking", label: "Banking & Cash" },
-  { href: "/journal", label: "Journal Entries" },
-  { href: "/opening-balance", label: "Opening Balance" },
-  { href: "/trial-balance", label: "Trial Balance" },
-  { href: "/profit-and-loss", label: "Profit & Loss" },
-  { href: "/vat-report", label: "VAT Report" },
-  { href: "/ageing", label: "Ageing" },
-  { href: "/project-report", label: "Project Report" },
-  { href: "/top10", label: "Top 10s" },
-  { href: "/settings", label: "Settings", adminOnly: true },
-];
-
-export default async function Nav({ user }: { user: SessionUser }) {
-  const links = LINKS.filter((l) => !l.adminOnly || user.role === "ADMIN");
+export default async function Nav({ user, company, allowed }: { user: SessionUser; company?: Company; allowed: string[] | null }) {
+  const links: { href: string; label: string }[] = SECTIONS.filter((s) => !allowed || allowed.includes(s.key));
+  if (user.role === "ADMIN") links.push({ href: "/settings", label: "Settings" });
   const [years, effectiveYear, closedThroughYear] = await Promise.all([
     getAvailableReportingYears(),
     getEffectiveReportingYear(),
@@ -39,6 +22,12 @@ export default async function Nav({ user }: { user: SessionUser }) {
       <div className="px-5 py-5">
         <span className="text-lg font-semibold leading-tight">Accounts Manager</span>
         <span className="ml-2 text-xs text-white/50">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
+        {company && (
+          <div className="mt-2 flex items-center gap-2 border-t border-white/15 pt-2 text-sm font-medium text-white">
+            {company.name}
+            {company.test && <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold uppercase text-black">Test</span>}
+          </div>
+        )}
       </div>
       <ReportingYearSelector years={years} effectiveYear={effectiveYear} closedThroughYear={closedThroughYear} />
       <nav className="flex flex-1 flex-col gap-1 px-3">
@@ -56,6 +45,11 @@ export default async function Nav({ user }: { user: SessionUser }) {
         <span>
           {user.name} <span className="text-white/50">({user.role === "ADMIN" ? "Admin" : "User"})</span>
         </span>
+        {multiCompany() && (
+          <Link href="/companies" className="rounded-md border border-white/30 px-3 py-1.5 text-center hover:bg-white/10">
+            Switch company
+          </Link>
+        )}
         <form action={logoutAction}>
           <button type="submit" className="w-full rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10">
             Log out
