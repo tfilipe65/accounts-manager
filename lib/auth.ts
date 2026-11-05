@@ -21,6 +21,11 @@ export async function verifyCredentials(username: string, password: string): Pro
   return { id: row.id, username: row.username, name: row.name, role: row.role };
 }
 
+export async function hasAnyUser(): Promise<boolean> {
+  const row = await queryOne<{ n: string | number }>("SELECT COUNT(*) AS n FROM users");
+  return Number(row?.n ?? 0) > 0;
+}
+
 export async function createSession(user: SessionUser) {
   const token = await new SignJWT({ ...user })
     .setProtectedHeader({ alg: "HS256" })

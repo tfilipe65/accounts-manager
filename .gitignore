@@ -34,3 +34,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# desktop app: real company data built locally, never committed
+/db/seed.sql
+/db/workbook-export/
+/desktop-bundle/
+/src-tauri/target/
+/src-tauri/gen/

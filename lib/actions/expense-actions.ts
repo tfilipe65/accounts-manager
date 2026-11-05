@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 import { query, queryOne, withTransaction } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
-import type { PoolClient } from "pg";
+import type { Queryable } from "@/lib/db";
 
 export type PurchaseInvoiceLineInput = {
   description: string | null;
@@ -123,7 +123,7 @@ export async function getPurchaseInvoiceForEdit(id: number): Promise<PurchaseInv
   };
 }
 
-async function insertLines(client: PoolClient, purchaseInvoiceId: number, lines: PurchaseInvoiceLineInput[]): Promise<void> {
+async function insertLines(client: Queryable, purchaseInvoiceId: number, lines: PurchaseInvoiceLineInput[]): Promise<void> {
   for (let i = 0; i < lines.length; i++) {
     const l = lines[i];
     await client.query(

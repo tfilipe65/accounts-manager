@@ -38,6 +38,7 @@ export default async function Nav({ user }: { user: SessionUser }) {
     <header className="fixed inset-y-0 left-0 z-40 flex w-56 flex-col overflow-y-auto bg-primary text-white shadow-[14px_0_34px_-6px_rgba(0,0,0,0.42)]">
       <div className="px-5 py-5">
         <span className="text-lg font-semibold leading-tight">Accounts Manager</span>
+        <span className="ml-2 text-xs text-white/50">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
       </div>
       <ReportingYearSelector years={years} effectiveYear={effectiveYear} closedThroughYear={closedThroughYear} />
       <nav className="flex flex-1 flex-col gap-1 px-3">

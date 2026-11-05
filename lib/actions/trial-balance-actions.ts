@@ -35,6 +35,10 @@
 // this kind of formula: there's no independent "right answer" to check
 // against, only the fact that debits must equal credits.
 //
+// 5-10 only count documents dated on or after the latest opening-balance date (see openingDate
+// below). #7/#8 settle with money moving either way: a refund in against a purchase (or out
+// against a sale) reduces what was paid.
+//
 // Every one of 4-9 is a LEFT JOIN against its own GROUP BY subquery -- never
 // joined directly against accounts in a way that could fan out, since each
 // subquery already collapses to one row per account_no before joining.
@@ -74,6 +78,12 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
     account_no_sales_tax_payable: number | null;
     account_no_purchase_tax_payable: number | null;
   }>("SELECT account_no_ar, account_no_ap, account_no_sales_tax_payable, account_no_purchase_tax_payable FROM app_settings WHERE id = 1");
+
+  // Documents dated before the opening balances are already carried inside them (e.g. the 2019
+  // invoices still unpaid on 1 Jan 2020 sit in the opening AR/AP). They stay in the registers so
+  // later payments can settle them and ageing sees them, but they must not post a second time here.
+  const openingDate =
+    (await queryOne<{ d: string | null }>("SELECT MAX(date)::text AS d FROM opening_balances"))?.d ?? null;
 
   const rows = await query<{
     account_no: number;
@@ -125,40 +135,40 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
     LEFT JOIN (
       SELECT sil.account_no, SUM(sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc)) AS net
       FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id
-      WHERE $5::date IS NULL OR si.date <= $5::date GROUP BY sil.account_no
+      WHERE ($5::date IS NULL OR si.date <= $5::date) AND ($6::date IS NULL OR si.date >= $6::date) GROUP BY sil.account_no
     ) sil ON sil.account_no = a.account_no
     LEFT JOIN (
       SELECT pil.account_no, SUM(pil.amount_inc_vat / (1 + pil.vat_perc)) AS net
       FROM purchase_invoice_lines pil JOIN purchase_invoices pi ON pi.id = pil.purchase_invoice_id
-      WHERE $5::date IS NULL OR pi.date <= $5::date GROUP BY pil.account_no
+      WHERE ($5::date IS NULL OR pi.date <= $5::date) AND ($6::date IS NULL OR pi.date >= $6::date) GROUP BY pil.account_no
     ) pil ON pil.account_no = a.account_no
     LEFT JOIN (
       SELECT SUM(sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc) * (1 + sil.vat_perc)) AS gross
       FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id
-      WHERE $5::date IS NULL OR si.date <= $5::date
+      WHERE ($5::date IS NULL OR si.date <= $5::date) AND ($6::date IS NULL OR si.date >= $6::date)
     ) ar ON true
     LEFT JOIN (
-      SELECT SUM(in_amount + in_vat) AS paid FROM bank_transactions
+      SELECT SUM(in_amount + in_vat - out_amount - out_vat) AS paid FROM bank_transactions
       WHERE sales_invoice_id IS NOT NULL AND ($5::date IS NULL OR payment_date <= $5::date)
     ) ar_paid ON true
     LEFT JOIN (
       SELECT SUM(pil.amount_inc_vat) AS gross
       FROM purchase_invoice_lines pil JOIN purchase_invoices pi ON pi.id = pil.purchase_invoice_id
-      WHERE $5::date IS NULL OR pi.date <= $5::date
+      WHERE ($5::date IS NULL OR pi.date <= $5::date) AND ($6::date IS NULL OR pi.date >= $6::date)
     ) ap ON true
     LEFT JOIN (
-      SELECT SUM(out_amount + out_vat) AS paid FROM bank_transactions
+      SELECT SUM(out_amount + out_vat - in_amount - in_vat) AS paid FROM bank_transactions
       WHERE purchase_invoice_id IS NOT NULL AND ($5::date IS NULL OR payment_date <= $5::date)
     ) ap_paid ON true
     LEFT JOIN (
       SELECT SUM(sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc) * sil.vat_perc) AS vat
       FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id
-      WHERE $5::date IS NULL OR si.date <= $5::date
+      WHERE ($5::date IS NULL OR si.date <= $5::date) AND ($6::date IS NULL OR si.date >= $6::date)
     ) sales_vat ON true
     LEFT JOIN (
       SELECT SUM(pil.amount_inc_vat - pil.amount_inc_vat / (1 + pil.vat_perc)) AS vat
       FROM purchase_invoice_lines pil JOIN purchase_invoices pi ON pi.id = pil.purchase_invoice_id
-      WHERE $5::date IS NULL OR pi.date <= $5::date
+      WHERE ($5::date IS NULL OR pi.date <= $5::date) AND ($6::date IS NULL OR pi.date >= $6::date)
     ) purch_vat ON true
     ORDER BY a.account_no
     `,
@@ -168,6 +178,7 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
       settings?.account_no_sales_tax_payable ?? 0,
       settings?.account_no_purchase_tax_payable ?? 0,
       cutoff,
+      openingDate,
     ]
   );
 

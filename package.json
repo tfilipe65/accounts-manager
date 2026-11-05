@@ -8,10 +8,15 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "seed": "node scripts/seed-from-json.mjs",
-    "set-password": "node scripts/set-user-password.mjs"
+    "desktop:prepare": "node scripts/prepare-desktop.mjs",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build",
+    "db:seed": "node scripts/build-seed.mjs",
+    "db:export-workbook": "powershell -NoProfile -File scripts/export-workbook.ps1",
+    "db:import-workbook": "node scripts/import-workbook.mjs"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.5.15",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.8",
     "next": "16.2.12",
@@ -21,6 +26,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tauri-apps/cli": "^2.12.4",
     "@types/node": "^22",
     "@types/pg": "^8.11.10",
     "@types/react": "^19",
