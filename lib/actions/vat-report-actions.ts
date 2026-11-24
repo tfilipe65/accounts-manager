@@ -42,6 +42,7 @@ export async function getVatReport(year?: number): Promise<{ rows: VatQuarterRow
       SELECT EXTRACT(YEAR FROM si.date)::int AS year, CEIL(EXTRACT(MONTH FROM si.date) / 3.0)::int AS quarter,
              sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc) * sil.vat_perc AS vat
       FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id
+      WHERE si.doc_type <> 'Proforma'
       UNION ALL
       SELECT EXTRACT(YEAR FROM payment_date)::int AS year, CEIL(EXTRACT(MONTH FROM payment_date) / 3.0)::int AS quarter, in_vat AS vat
       FROM bank_transactions WHERE account_no IS NOT NULL AND in_vat <> 0

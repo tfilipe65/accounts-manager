@@ -1,66 +1,33 @@
-import { getYearlyPL } from "@/lib/actions/pl-actions";
+import Link from "next/link";
+import { getStatement } from "@/lib/actions/pl-actions";
 import { getEffectiveReportingYear } from "@/lib/reporting-year";
-import { formatMoney as fmt } from "@/lib/formatters";
+import { buildRows, periodLabels } from "@/lib/pl-rows";
+import { sum } from "@/lib/pl-structure";
+import StatementTable from "@/components/StatementTable";
+
+export const dynamic = "force-dynamic";
 
 export default async function ProfitAndLossPage() {
   const year = await getEffectiveReportingYear();
-  const pl = await getYearlyPL(year);
+  const s = await getStatement(year);
+  const rows = buildRows(s, "quarters");
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-primary">Profit &amp; Loss</h1>
-      <p className="text-sm text-neutral-600">Reporting year {year}.</p>
-
-      <div className="overflow-x-auto rounded-lg border border-line bg-surface">
-        <table className="w-full text-sm">
-          <tbody className="divide-y divide-line">
-            <Row label="Revenue" amount={pl.revenue} bold />
-            <Row label="Cost of Sales" amount={pl.costOfSales} negative />
-            <Row label="Gross Profit" amount={pl.grossProfit} bold border />
-
-            <tr>
-              <td className="px-4 py-1.5 pt-4 text-xs font-semibold uppercase tracking-wide text-neutral-600" colSpan={2}>
-                Operating Expenses
-              </td>
-            </tr>
-            {pl.expensesBySubgroup.map((l) => (
-              <Row key={l.subgroup_no} label={l.subgroup_name} amount={l.amount} indent />
-            ))}
-            <Row label="Total Expenses" amount={pl.totalExpenses} negative bold />
-
-            <Row label="Net Income" amount={pl.netIncome} bold border large />
-          </tbody>
-        </table>
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-primary">Profit &amp; Loss</h1>
+          <p className="text-sm text-neutral-600">Reporting year {year}, by quarter, with each line as a share of sales.</p>
+        </div>
+        <Link href="/income-statement" className="text-sm text-primary hover:underline">
+          Month by month &rarr;
+        </Link>
       </div>
+      <StatementTable columns={periodLabels("quarters")} rows={rows} revenueTotal={sum(s.revenue)} />
+      <p className="text-xs text-neutral-500">
+        Operating expenses are the overheads of running the business. Other income &amp; gains and other expenses &amp; losses sit below the operating result, so
+        one-off items do not flatter or hide how the core business performed. Proforma invoices are never counted.
+      </p>
     </div>
-  );
-}
-
-function Row({
-  label,
-  amount,
-  bold,
-  negative,
-  border,
-  indent,
-  large,
-}: {
-  label: string;
-  amount: number;
-  bold?: boolean;
-  negative?: boolean;
-  border?: boolean;
-  indent?: boolean;
-  large?: boolean;
-}) {
-  return (
-    <tr className={border ? "border-t-2 border-primary" : ""}>
-      <td className={`px-4 py-2 ${indent ? "pl-8 text-neutral-600" : ""} ${bold ? "font-semibold" : ""} ${large ? "text-lg text-primary" : ""}`}>
-        {label}
-      </td>
-      <td className={`px-4 py-2 text-right ${bold ? "font-semibold" : ""} ${large ? "text-lg text-primary" : ""} ${amount < 0 ? "text-credit" : ""}`}>
-        {negative ? `(${fmt(Math.abs(amount))})` : fmt(amount)}
-      </td>
-    </tr>
   );
 }

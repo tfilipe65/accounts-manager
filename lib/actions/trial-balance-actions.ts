@@ -135,7 +135,7 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
     LEFT JOIN (
       SELECT sil.account_no, SUM(sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc)) AS net
       FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id
-      WHERE ($5::date IS NULL OR si.date <= $5::date) AND ($6::date IS NULL OR si.date >= $6::date) GROUP BY sil.account_no
+      WHERE si.doc_type <> 'Proforma' AND ($5::date IS NULL OR si.date <= $5::date) AND ($6::date IS NULL OR si.date >= $6::date) GROUP BY sil.account_no
     ) sil ON sil.account_no = a.account_no
     LEFT JOIN (
       SELECT pil.account_no, SUM(pil.amount_inc_vat / (1 + pil.vat_perc)) AS net
@@ -145,7 +145,7 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
     LEFT JOIN (
       SELECT SUM(sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc) * (1 + sil.vat_perc)) AS gross
       FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id
-      WHERE ($5::date IS NULL OR si.date <= $5::date) AND ($6::date IS NULL OR si.date >= $6::date)
+      WHERE si.doc_type <> 'Proforma' AND ($5::date IS NULL OR si.date <= $5::date) AND ($6::date IS NULL OR si.date >= $6::date)
     ) ar ON true
     LEFT JOIN (
       SELECT SUM(in_amount + in_vat - out_amount - out_vat) AS paid FROM bank_transactions
@@ -163,7 +163,7 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
     LEFT JOIN (
       SELECT SUM(sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc) * sil.vat_perc) AS vat
       FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id
-      WHERE ($5::date IS NULL OR si.date <= $5::date) AND ($6::date IS NULL OR si.date >= $6::date)
+      WHERE si.doc_type <> 'Proforma' AND ($5::date IS NULL OR si.date <= $5::date) AND ($6::date IS NULL OR si.date >= $6::date)
     ) sales_vat ON true
     LEFT JOIN (
       SELECT SUM(pil.amount_inc_vat - pil.amount_inc_vat / (1 + pil.vat_perc)) AS vat

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { addCompany, getCompany } from "@/lib/companies";
 import { COMPANY_COOKIE } from "@/lib/company-cookie";
+import { passwordProblem } from "@/lib/password-policy";
 import { createSession } from "@/lib/auth";
 import {
   createMasterAdmin,
@@ -36,7 +37,8 @@ export async function setupMasterAction(_prev: FormState, formData: FormData): P
   const password = String(formData.get("password") || "");
   const confirm = String(formData.get("confirm") || "");
   if (!name || !username || !password) return { error: "Enter your name, a username and a password." };
-  if (password.length < 6) return { error: "The password needs at least 6 characters." };
+  const problem = passwordProblem(password);
+  if (problem) return { error: problem };
   if (password !== confirm) return { error: "The two passwords do not match." };
   await createMasterSession(createMasterAdmin({ name, username, password }));
   redirect("/companies");

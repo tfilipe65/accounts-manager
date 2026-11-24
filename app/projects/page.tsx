@@ -2,6 +2,7 @@ import Link from "next/link";
 import { query } from "@/lib/db";
 import { formatDate } from "@/lib/formatters";
 import { deleteProjectAction } from "@/lib/actions/project-form-actions";
+import { getLabels } from "@/lib/labels";
 
 type Project = {
   id: number;
@@ -13,14 +14,15 @@ type Project = {
 };
 
 export default async function ProjectsPage() {
+  const labels = await getLabels();
   const projects = await query<Project>("SELECT id, code, name, start_date, end_date, status FROM projects ORDER BY start_date");
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-primary">Projects</h1>
+        <h1 className="text-2xl font-semibold text-primary">{labels.project}</h1>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-neutral-600">{projects.length} projects</span>
+          <span className="text-sm text-neutral-600">{projects.length} {labels.project.toLowerCase()}</span>
           <Link href="/projects/new" className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">
             + New project
           </Link>

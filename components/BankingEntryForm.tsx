@@ -15,6 +15,7 @@ export default function BankingEntryForm({
   accounts,
   salesInvoices,
   purchaseInvoices,
+  employees = [],
   action = createBankTransactionFormAction,
   initial,
   submitLabel = "Add entry",
@@ -24,6 +25,7 @@ export default function BankingEntryForm({
   accounts: AccountOption[];
   salesInvoices: InvoiceOption[];
   purchaseInvoices: InvoiceOption[];
+  employees?: { id: number; name: string }[];
   action?: (prev: FormState, fd: FormData) => Promise<FormState>;
   initial?: BankTransactionInput;
   submitLabel?: string;
@@ -82,7 +84,7 @@ export default function BankingEntryForm({
         <div className="flex flex-wrap gap-4 text-sm">
           {(
             [
-              ["account", "An account (bank fee, transfer, ...)"],
+              ["account", "An account (bank fee, wages, ...)"],
               ["sales", "A sales invoice payment"],
               ["purchase", "A purchase invoice payment"],
               ["none", "Nothing"],
@@ -102,16 +104,28 @@ export default function BankingEntryForm({
         </div>
 
         {linkType === "account" && (
-          <select name="account_no" className="input" defaultValue={initial?.account_no ?? ""}>
-            <option value="" disabled>
-              Select account
-            </option>
-            {accounts.map((a) => (
-              <option key={a.account_no} value={a.account_no}>
-                {a.account_no} {a.name}
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <select name="account_no" className="input" defaultValue={initial?.account_no ?? ""}>
+              <option value="" disabled>
+                Select account
               </option>
-            ))}
-          </select>
+              {accounts.map((a) => (
+                <option key={a.account_no} value={a.account_no}>
+                  {a.account_no} {a.name}
+                </option>
+              ))}
+            </select>
+            {employees.length > 0 && (
+              <select name="employee_id" className="input" defaultValue={initial?.employee_id ?? ""}>
+                <option value="">No employee (not a payment to staff)</option>
+                {employees.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         )}
         {linkType === "sales" && (
           <select name="sales_invoice_id" className="input" defaultValue={initial?.sales_invoice_id ?? ""}>

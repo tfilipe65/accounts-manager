@@ -42,3 +42,8 @@ next-env.d.ts
 /desktop-bundle/
 /src-tauri/target/
 /src-tauri/gen/
+
+# Excel workbooks and their lock files hold company data
+/docs/*.xlsb
+/docs/*.xlsx
+~$*

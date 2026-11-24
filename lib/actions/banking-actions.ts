@@ -1,15 +1,15 @@
 "use server";
 
-// Bank/cash registers. Accounts Manager.xlsb's better-engineered design --
-// one unified register with an account selector -- rather than
-// Teia_Accounts.xlsb's 3 hardcoded Bank_1/2/3 sheets + a separate Cash sheet.
-// Each row is either a payment against a sales/purchase invoice (matched by
-// id here, by invoice NUMBER text in the workbook) or a direct entry against
-// a ledger account (bank charges, transfers, etc.) -- never more than one,
-// enforced by the bank_transactions_one_link CHECK constraint.
+// Bank/cash registers -- one unified register with an account selector. Any number of bank
+// accounts and cash boxes can exist (lib/actions/bank-account-actions.ts manages them); each is
+// tied to its own ledger account in the chart.
+// Each row is either a payment against a sales/purchase invoice (matched by id) or a direct
+// entry against a ledger account (bank charges, wages, transfers, etc.) -- never more than one,
+// enforced by the bank_transactions_one_link CHECK constraint. A direct entry can also name the
+// employee it was for. The two legs of a transfer between our own accounts share a transfer_id.
 
 import { revalidatePath } from "next/cache";
-import { query, queryOne } from "@/lib/db";
+import { query, queryOne, withTransaction } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
 
@@ -18,36 +18,72 @@ export type BankAccountSummary = {
   key: string;
   name: string;
   account_no: number;
+  bank_name: string | null;
+  iban: string | null;
+  is_cash: boolean;
+  active: boolean;
   opening_balance: number;
   balance: number;
+  unreconciled: number;
 };
 
-/** @param asOfDate Point-in-time cutoff ("YYYY-MM-DD") -- balance as it stood then, not as of now. Defaults to no cutoff. */
-export async function listBankAccounts(asOfDate?: string): Promise<BankAccountSummary[]> {
+/**
+ * @param asOfDate Point-in-time cutoff ("YYYY-MM-DD") -- balance as it stood then, not as of now. Defaults to no cutoff.
+ * @param includeInactive Closed accounts are hidden unless asked for.
+ */
+export async function listBankAccounts(asOfDate?: string, includeInactive = false): Promise<BankAccountSummary[]> {
   await requireSession();
   const cutoff = asOfDate ?? null;
-  const rows = await query<{ id: number; key: string; name: string; account_no: number; opening: string; moved: string }>(
+  const rows = await query<{
+    id: number;
+    key: string;
+    name: string;
+    account_no: number;
+    bank_name: string | null;
+    iban: string | null;
+    is_cash: boolean;
+    active: boolean;
+    opening: string;
+    moved: string;
+    unreconciled: string;
+  }>(
     `
-    SELECT ba.id, ba.key, ba.name, ba.account_no,
+    SELECT ba.id, ba.key, ba.name, ba.account_no, ba.bank_name, ba.iban, ba.is_cash, ba.active,
            COALESCE(ob.opening, 0) AS opening,
-           COALESCE(bt.moved, 0) AS moved
+           COALESCE(bt.moved, 0) AS moved,
+           COALESCE(bt.unreconciled, 0) AS unreconciled
     FROM bank_accounts ba
     LEFT JOIN (
       SELECT account_no, SUM(debit - credit) AS opening FROM opening_balances
       WHERE $1::date IS NULL OR date <= $1::date GROUP BY account_no
     ) ob ON ob.account_no = ba.account_no
     LEFT JOIN (
-      SELECT bank_account_id, SUM(in_amount + in_vat - out_amount - out_vat) AS moved
+      SELECT bank_account_id,
+             SUM(in_amount + in_vat - out_amount - out_vat) AS moved,
+             COUNT(*) FILTER (WHERE NOT reconciled) AS unreconciled
       FROM bank_transactions WHERE $1::date IS NULL OR payment_date <= $1::date GROUP BY bank_account_id
     ) bt ON bt.bank_account_id = ba.id
-    ORDER BY ba.id
+    WHERE $2::boolean OR ba.active
+    ORDER BY ba.is_cash, ba.id
   `,
-    [cutoff]
+    [cutoff, includeInactive]
   );
   return rows.map((r) => {
     const opening = Number(r.opening);
     const moved = Number(r.moved);
-    return { id: r.id, key: r.key, name: r.name, account_no: r.account_no, opening_balance: opening, balance: opening + moved };
+    return {
+      id: r.id,
+      key: r.key,
+      name: r.name,
+      account_no: r.account_no,
+      bank_name: r.bank_name,
+      iban: r.iban,
+      is_cash: r.is_cash,
+      active: r.active,
+      opening_balance: opening,
+      balance: opening + moved,
+      unreconciled: Number(r.unreconciled),
+    };
   });
 }
 
@@ -55,7 +91,10 @@ export type BankTransactionRow = {
   id: number;
   payment_date: string;
   description: string | null;
-  link_label: string | null; // e.g. "Sales Inv INV-001", "Acct 2000 General Sales"
+  link_label: string | null; // e.g. "Sales invoice INV-001", "2000 General Sales", "Transfer"
+  employee_name: string | null;
+  transfer_id: string | null;
+  reconciled: boolean;
   vat_perc: number | null;
   in_amount: number;
   in_vat: number;
@@ -75,6 +114,9 @@ export async function listBankTransactions(bankAccountId: number, year?: number)
     purchase_invoice_number: string | null;
     account_no: number | null;
     account_name: string | null;
+    employee_name: string | null;
+    transfer_id: string | null;
+    reconciled: boolean;
     vat_perc: string | null;
     in_amount: string;
     in_vat: string;
@@ -84,12 +126,13 @@ export async function listBankTransactions(bankAccountId: number, year?: number)
     `SELECT bt.id, bt.payment_date, bt.description,
             si.invoice_number AS sales_invoice_number,
             pi.invoice_number AS purchase_invoice_number,
-            bt.account_no, a.name AS account_name,
+            bt.account_no, a.name AS account_name, e.name AS employee_name, bt.transfer_id, bt.reconciled,
             bt.vat_perc, bt.in_amount, bt.in_vat, bt.out_amount, bt.out_vat
      FROM bank_transactions bt
      LEFT JOIN sales_invoices si ON si.id = bt.sales_invoice_id
      LEFT JOIN purchase_invoices pi ON pi.id = bt.purchase_invoice_id
      LEFT JOIN accounts a ON a.account_no = bt.account_no
+     LEFT JOIN employees e ON e.id = bt.employee_id
      WHERE bt.bank_account_id = $1 AND ($2::int IS NULL OR EXTRACT(YEAR FROM bt.payment_date) = $2::int)
      ORDER BY bt.payment_date, bt.id`,
     [bankAccountId, yearFilter]
@@ -98,13 +141,18 @@ export async function listBankTransactions(bankAccountId: number, year?: number)
     id: r.id,
     payment_date: r.payment_date,
     description: r.description,
-    link_label: r.sales_invoice_number
-      ? `Sales invoice ${r.sales_invoice_number}`
-      : r.purchase_invoice_number
-        ? `Purchase invoice ${r.purchase_invoice_number}`
-        : r.account_no
-          ? `${r.account_no} ${r.account_name ?? ""}`.trim()
-          : null,
+    link_label: r.transfer_id
+      ? "Transfer between accounts"
+      : r.sales_invoice_number
+        ? `Sales invoice ${r.sales_invoice_number}`
+        : r.purchase_invoice_number
+          ? `Purchase invoice ${r.purchase_invoice_number}`
+          : r.account_no
+            ? `${r.account_no} ${r.account_name ?? ""}`.trim()
+            : null,
+    employee_name: r.employee_name,
+    transfer_id: r.transfer_id,
+    reconciled: r.reconciled,
     vat_perc: r.vat_perc != null ? Number(r.vat_perc) : null,
     in_amount: Number(r.in_amount),
     in_vat: Number(r.in_vat),
@@ -121,6 +169,7 @@ export type BankTransactionInput = {
   sales_invoice_id: number | null;
   purchase_invoice_id: number | null;
   account_no: number | null;
+  employee_id: number | null;
   vat_perc: number | null;
   in_amount: number;
   in_vat: number;
@@ -133,7 +182,16 @@ function linkFields(input: BankTransactionInput) {
     sales_invoice_id: input.link_type === "sales" ? input.sales_invoice_id : null,
     purchase_invoice_id: input.link_type === "purchase" ? input.purchase_invoice_id : null,
     account_no: input.link_type === "account" ? input.account_no : null,
+    // An employee only makes sense on a direct entry (wages, expense refunds).
+    employee_id: input.link_type === "account" ? input.employee_id : null,
   };
+}
+
+function revalidateBanking() {
+  revalidatePath("/banking");
+  revalidatePath("/income");
+  revalidatePath("/expense");
+  revalidatePath("/employees");
 }
 
 export async function createBankTransaction(input: BankTransactionInput): Promise<void> {
@@ -142,8 +200,8 @@ export async function createBankTransaction(input: BankTransactionInput): Promis
   const link = linkFields(input);
   await query(
     `INSERT INTO bank_transactions
-      (bank_account_id, payment_date, description, sales_invoice_id, purchase_invoice_id, account_no, vat_perc, in_amount, in_vat, out_amount, out_vat)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+      (bank_account_id, payment_date, description, sales_invoice_id, purchase_invoice_id, account_no, employee_id, vat_perc, in_amount, in_vat, out_amount, out_vat)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
     [
       input.bank_account_id,
       input.payment_date,
@@ -151,6 +209,7 @@ export async function createBankTransaction(input: BankTransactionInput): Promis
       link.sales_invoice_id,
       link.purchase_invoice_id,
       link.account_no,
+      link.employee_id,
       input.vat_perc,
       input.in_amount,
       input.in_vat,
@@ -158,12 +217,10 @@ export async function createBankTransaction(input: BankTransactionInput): Promis
       input.out_vat,
     ]
   );
-  revalidatePath("/banking");
-  revalidatePath("/income");
-  revalidatePath("/expense");
+  revalidateBanking();
 }
 
-export async function getBankTransaction(id: number): Promise<BankTransactionInput | null> {
+export async function getBankTransaction(id: number): Promise<(BankTransactionInput & { transfer_id: string | null }) | null> {
   await requireSession();
   const row = await query<{
     bank_account_id: number;
@@ -172,13 +229,16 @@ export async function getBankTransaction(id: number): Promise<BankTransactionInp
     sales_invoice_id: number | null;
     purchase_invoice_id: number | null;
     account_no: number | null;
+    employee_id: number | null;
+    transfer_id: string | null;
     vat_perc: string | null;
     in_amount: string;
     in_vat: string;
     out_amount: string;
     out_vat: string;
   }>(
-    `SELECT bank_account_id, payment_date, description, sales_invoice_id, purchase_invoice_id, account_no, vat_perc, in_amount, in_vat, out_amount, out_vat
+    `SELECT bank_account_id, payment_date, description, sales_invoice_id, purchase_invoice_id, account_no, employee_id, transfer_id,
+            vat_perc, in_amount, in_vat, out_amount, out_vat
      FROM bank_transactions WHERE id = $1`,
     [id]
   );
@@ -199,6 +259,8 @@ export async function getBankTransaction(id: number): Promise<BankTransactionInp
     sales_invoice_id: r.sales_invoice_id,
     purchase_invoice_id: r.purchase_invoice_id,
     account_no: r.account_no,
+    employee_id: r.employee_id,
+    transfer_id: r.transfer_id,
     vat_perc: r.vat_perc != null ? Number(r.vat_perc) : null,
     in_amount: Number(r.in_amount),
     in_vat: Number(r.in_vat),
@@ -209,14 +271,18 @@ export async function getBankTransaction(id: number): Promise<BankTransactionInp
 
 export async function updateBankTransaction(id: number, input: BankTransactionInput): Promise<void> {
   const session = await requireSession();
-  const existing = await queryOne<{ payment_date: string }>("SELECT payment_date FROM bank_transactions WHERE id = $1", [id]);
+  const existing = await queryOne<{ payment_date: string; transfer_id: string | null }>(
+    "SELECT payment_date, transfer_id FROM bank_transactions WHERE id = $1",
+    [id]
+  );
+  if (existing?.transfer_id) throw new Error("A transfer has two sides. Delete it and enter it again to change it.");
   if (existing) await assertYearOpen(existing.payment_date, session);
   await assertYearOpen(input.payment_date, session);
   const link = linkFields(input);
   await query(
     `UPDATE bank_transactions SET
        bank_account_id=$2, payment_date=$3, description=$4, sales_invoice_id=$5, purchase_invoice_id=$6,
-       account_no=$7, vat_perc=$8, in_amount=$9, in_vat=$10, out_amount=$11, out_vat=$12
+       account_no=$7, employee_id=$8, vat_perc=$9, in_amount=$10, in_vat=$11, out_amount=$12, out_vat=$13
      WHERE id=$1`,
     [
       id,
@@ -226,6 +292,7 @@ export async function updateBankTransaction(id: number, input: BankTransactionIn
       link.sales_invoice_id,
       link.purchase_invoice_id,
       link.account_no,
+      link.employee_id,
       input.vat_perc,
       input.in_amount,
       input.in_vat,
@@ -233,25 +300,89 @@ export async function updateBankTransaction(id: number, input: BankTransactionIn
       input.out_vat,
     ]
   );
-  revalidatePath("/banking");
-  revalidatePath("/income");
-  revalidatePath("/expense");
+  revalidateBanking();
 }
 
 export async function deleteBankTransaction(id: number): Promise<void> {
   const session = await requireSession();
-  const existing = await queryOne<{ payment_date: string }>("SELECT payment_date FROM bank_transactions WHERE id = $1", [id]);
+  const existing = await queryOne<{ payment_date: string; transfer_id: string | null }>(
+    "SELECT payment_date, transfer_id FROM bank_transactions WHERE id = $1",
+    [id]
+  );
   if (existing) await assertYearOpen(existing.payment_date, session);
-  await query("DELETE FROM bank_transactions WHERE id = $1", [id]);
+  // Both sides of a transfer go together.
+  if (existing?.transfer_id) await query("DELETE FROM bank_transactions WHERE transfer_id = $1", [existing.transfer_id]);
+  else await query("DELETE FROM bank_transactions WHERE id = $1", [id]);
+  revalidateBanking();
+}
+
+/** Tick / untick "matched against the bank statement". */
+export async function setBankTransactionReconciled(id: number, reconciled: boolean): Promise<void> {
+  await requireSession();
+  await query("UPDATE bank_transactions SET reconciled = $2 WHERE id = $1", [id, reconciled]);
   revalidatePath("/banking");
-  revalidatePath("/income");
-  revalidatePath("/expense");
+}
+
+/** Tick every line of this account dated on or before a statement date. */
+export async function reconcileBankAccountThrough(bankAccountId: number, throughDate: string): Promise<number> {
+  await requireSession();
+  const rows = await query<{ id: number }>(
+    "UPDATE bank_transactions SET reconciled = true WHERE bank_account_id = $1 AND NOT reconciled AND payment_date <= $2::date RETURNING id",
+    [bankAccountId, throughDate]
+  );
+  revalidatePath("/banking");
+  return rows.length;
+}
+
+export type TransferInput = {
+  from_bank_account_id: number;
+  to_bank_account_id: number;
+  date: string;
+  amount: number;
+  description: string | null;
+};
+
+/** The ledger account both sides of a transfer post to (nets to zero). */
+async function transferAccountNo(): Promise<number> {
+  const row =
+    (await queryOne<{ account_no: number }>("SELECT account_no FROM accounts WHERE account_no = 1170")) ??
+    (await queryOne<{ account_no: number }>("SELECT account_no FROM accounts WHERE name ILIKE 'Transfers%' ORDER BY account_no LIMIT 1"));
+  if (!row) throw new Error("The chart of accounts has no 'Transfers Between A/C's' account. Add one (account 1170) first.");
+  return row.account_no;
+}
+
+/** Move money between two of our own accounts: an "out" on one and an "in" on the other, tied together. */
+export async function createTransfer(input: TransferInput): Promise<void> {
+  const session = await requireSession();
+  await assertYearOpen(input.date, session);
+  if (input.from_bank_account_id === input.to_bank_account_id) throw new Error("Choose two different accounts.");
+  if (!(input.amount > 0)) throw new Error("Enter an amount greater than zero.");
+  const accountNo = await transferAccountNo();
+  const names = await query<{ id: number; name: string }>("SELECT id, name FROM bank_accounts WHERE id = ANY($1::int[])", [
+    [input.from_bank_account_id, input.to_bank_account_id],
+  ]);
+  const nameOf = (id: number) => names.find((n) => n.id === id)?.name ?? "account";
+  const transferId = crypto.randomUUID();
+  const note = input.description ? ` - ${input.description}` : "";
+  await withTransaction(async (tx) => {
+    await tx.query(
+      `INSERT INTO bank_transactions (bank_account_id, payment_date, description, account_no, out_amount, transfer_id)
+       VALUES ($1,$2,$3,$4,$5,$6)`,
+      [input.from_bank_account_id, input.date, `Transfer to ${nameOf(input.to_bank_account_id)}${note}`, accountNo, input.amount, transferId]
+    );
+    await tx.query(
+      `INSERT INTO bank_transactions (bank_account_id, payment_date, description, account_no, in_amount, transfer_id)
+       VALUES ($1,$2,$3,$4,$5,$6)`,
+      [input.to_bank_account_id, input.date, `Transfer from ${nameOf(input.from_bank_account_id)}${note}`, accountNo, input.amount, transferId]
+    );
+  });
+  revalidateBanking();
 }
 
 export async function listOpenSalesInvoiceOptions(): Promise<{ id: number; label: string }[]> {
   await requireSession();
   const rows = await query<{ id: number; invoice_number: string; customer_name: string }>(
-    `SELECT si.id, si.invoice_number, c.name AS customer_name FROM sales_invoices si JOIN customers c ON c.id = si.customer_id ORDER BY si.date DESC`
+    `SELECT si.id, si.invoice_number, c.name AS customer_name FROM sales_invoices si JOIN customers c ON c.id = si.customer_id WHERE si.doc_type <> 'Proforma' ORDER BY si.date DESC`
   );
   return rows.map((r) => ({ id: r.id, label: `${r.invoice_number} — ${r.customer_name}` }));
 }
@@ -262,4 +393,25 @@ export async function listOpenPurchaseInvoiceOptions(): Promise<{ id: number; la
     `SELECT pi.id, pi.invoice_number, s.name AS supplier_name FROM purchase_invoices pi JOIN suppliers s ON s.id = pi.supplier_id ORDER BY pi.date DESC`
   );
   return rows.map((r) => ({ id: r.id, label: `${r.invoice_number} — ${r.supplier_name}` }));
+}
+
+export type ReconciliationFigures = { bookBalance: number; reconciledBalance: number; unreconciledCount: number };
+
+/** Book balance against the balance of just the lines ticked as matched with the statement (every year, not only the one on screen). */
+export async function getReconciliationFigures(bankAccountId: number): Promise<ReconciliationFigures> {
+  await requireSession();
+  const row = await queryOne<{ opening: string; moved: string; reconciled: string; unreconciled: string }>(
+    `SELECT COALESCE((SELECT SUM(debit - credit) FROM opening_balances ob JOIN bank_accounts ba ON ba.account_no = ob.account_no WHERE ba.id = $1), 0) AS opening,
+            COALESCE(SUM(in_amount + in_vat - out_amount - out_vat), 0) AS moved,
+            COALESCE(SUM(in_amount + in_vat - out_amount - out_vat) FILTER (WHERE reconciled), 0) AS reconciled,
+            COUNT(*) FILTER (WHERE NOT reconciled) AS unreconciled
+     FROM bank_transactions WHERE bank_account_id = $1`,
+    [bankAccountId]
+  );
+  const opening = Number(row?.opening ?? 0);
+  return {
+    bookBalance: opening + Number(row?.moved ?? 0),
+    reconciledBalance: opening + Number(row?.reconciled ?? 0),
+    unreconciledCount: Number(row?.unreconciled ?? 0),
+  };
 }

@@ -78,7 +78,8 @@ export async function getReceivablesAgeing(asOfDate?: string): Promise<{ rows: A
     paid: string;
   }>(
     `
-    SELECT si.id, si.invoice_number, c.name AS party_name, si.date, c.payment_term_days,
+    SELECT si.id, si.invoice_number, c.name AS party_name, si.date,
+           COALESCE(c.payment_term_days, (SELECT payment_term_days FROM app_settings WHERE id = 1)) AS payment_term_days,
            COALESCE(lt.gross, 0) AS gross, COALESCE(pt.paid, 0) AS paid
     FROM sales_invoices si
     JOIN customers c ON c.id = si.customer_id
@@ -90,7 +91,7 @@ export async function getReceivablesAgeing(asOfDate?: string): Promise<{ rows: A
       SELECT sales_invoice_id, SUM(in_amount + in_vat) AS paid
       FROM bank_transactions WHERE sales_invoice_id IS NOT NULL AND ($1::date IS NULL OR payment_date <= $1::date) GROUP BY sales_invoice_id
     ) pt ON pt.sales_invoice_id = si.id
-    WHERE $1::date IS NULL OR si.date <= $1::date
+    WHERE si.doc_type <> 'Proforma' AND ($1::date IS NULL OR si.date <= $1::date)
   `,
     [cutoff]
   );
@@ -113,7 +114,8 @@ export async function getPayablesAgeing(asOfDate?: string): Promise<{ rows: Agei
     paid: string;
   }>(
     `
-    SELECT pi.id, pi.invoice_number, s.name AS party_name, pi.date, s.payment_term_days,
+    SELECT pi.id, pi.invoice_number, s.name AS party_name, pi.date,
+           COALESCE(s.payment_term_days, (SELECT payment_term_days FROM app_settings WHERE id = 1)) AS payment_term_days,
            COALESCE(lt.gross, 0) AS gross, COALESCE(pt.paid, 0) AS paid
     FROM purchase_invoices pi
     JOIN suppliers s ON s.id = pi.supplier_id

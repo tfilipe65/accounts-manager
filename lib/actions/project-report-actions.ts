@@ -26,7 +26,8 @@ export async function getProjectReport(): Promise<ProjectReportRow[]> {
     FROM projects p
     LEFT JOIN (
       SELECT project_id, SUM(quantity * price_ex_vat * (1 - discount_perc)) AS net
-      FROM sales_invoice_lines WHERE project_id IS NOT NULL GROUP BY project_id
+      FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id
+      WHERE sil.project_id IS NOT NULL AND si.doc_type <> 'Proforma' GROUP BY sil.project_id
     ) rev ON rev.project_id = p.id
     LEFT JOIN (
       SELECT project_id, SUM(amount_inc_vat / (1 + vat_perc)) AS net

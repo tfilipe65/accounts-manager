@@ -41,6 +41,9 @@ out.push(
     ";"
 );
 
+// Stock is a current asset (the workbook filed it under non-current assets).
+out.push(`UPDATE account_subgroups SET group_no = 4 WHERE subgroup_no = 90;`);
+
 // accounts.tsv: account_no, name, subgroup_no
 out.push(
   `INSERT INTO accounts (account_no, name, subgroup_no) VALUES\n` +
@@ -56,12 +59,14 @@ out.push(`INSERT INTO app_settings
   (id, company_name, currency, date_format, fiscal_year_start_month, reporting_year,
    first_invoice_number, invoice_prefix, invoice_suffix, payment_term_days, payment_term_reminder_days,
    validity_period_offer_days, vat_rate_1, vat_rate_2, vat_rate_3, age_analysis_1_days, age_analysis_2_days, age_analysis_3_days,
-   account_no_ar, account_no_ap, account_no_sales, account_no_sales_tax_payable, account_no_purchase_tax_payable, account_no_vat_paid_received)
+   account_no_ar, account_no_ap, account_no_sales, account_no_sales_tax_payable, account_no_purchase_tax_payable, account_no_vat_paid_received,
+   account_no_interest_expense)
 VALUES
   (1, 'New company', '€', 'dd-mmm-yyyy', 1, EXTRACT(YEAR FROM now())::int,
    1, 'INV', '-' || EXTRACT(YEAR FROM now())::int, 14, 7,
    60, 0.23, 0.13, 0.06, 30, 60, 90,
-   300, 1000, 2000, 1120, 1130, 3000);`);
+   300, 1000, 2000, 1120, 1130, 3000,
+   3030);`);
 
 out.push(`INSERT INTO bank_accounts (key, name, account_no, is_cash) VALUES
 ('BANK1', 'Bank account 1', 100, false),
@@ -90,7 +95,15 @@ const testProfile = [
   read("seed_master_data.sql").trim(),
 ].join("\n\n") + "\n";
 
-const profiles = { "teia-firme": teiaDetails + "\n", test: testProfile };
+// Property management: what other businesses call projects, Casas Algarve calls properties.
+const propertyLabels = `UPDATE app_settings SET project_label = 'Properties' WHERE id = 1;\n`;
+
+const profiles = {
+  "teia-firme": teiaDetails + "\n",
+  test: testProfile,
+  "casas-algarve": propertyLabels,
+  "casas-algarve-clients": propertyLabels,
+};
 
 const profileDir = path.join(path.dirname(OUT), "profiles");
 mkdirSync(profileDir, { recursive: true });

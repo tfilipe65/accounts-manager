@@ -2,23 +2,63 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
-import { queryOne } from "./db";
+import { query, queryOne } from "./db";
+import { writeAudit } from "./audit";
 import { authSecretKey } from "./authSecret";
 import { getMaster } from "./master-admin";
 import { COMPANY_COOKIE, multiCompany, sessionCookieName } from "./company-cookie";
 
 export type Role = "ADMIN" | "USER";
-export type SessionUser = { id: number; username: string; name: string; role: Role };
+export type SessionUser = { id: number; username: string; name: string; role: Role; mustChangePassword?: boolean };
 
-export async function verifyCredentials(username: string, password: string): Promise<SessionUser | null> {
-  const row = await queryOne<{ id: number; username: string; password_hash: string; name: string; role: Role }>(
-    "SELECT id, username, password_hash, name, role FROM users WHERE username = $1",
+export const MAX_FAILED_LOGINS = 5;
+const LOCK_MINUTES = 15;
+
+/**
+ * Check a login. After MAX_FAILED_LOGINS wrong passwords in a row the user is locked for a while;
+ * a switched-off user cannot sign in at all. Both are written to the audit log.
+ */
+export async function verifyCredentials(username: string, password: string): Promise<{ user: SessionUser } | { error: string }> {
+  const row = await queryOne<{
+    id: number;
+    username: string;
+    password_hash: string;
+    name: string;
+    role: Role;
+    active: boolean;
+    failed_attempts: number;
+    locked_until: string | null;
+    must_change_password: boolean;
+  }>(
+    `SELECT id, username, password_hash, name, role, active, failed_attempts, locked_until, must_change_password
+     FROM users WHERE lower(username) = lower($1)`,
     [username]
   );
-  if (!row) return null;
-  const ok = bcrypt.compareSync(password, row.password_hash);
-  if (!ok) return null;
-  return { id: row.id, username: row.username, name: row.name, role: row.role };
+  if (!row) {
+    await writeAudit(null, "login.failed", `unknown user "${username}"`);
+    return { error: "Incorrect username or password." };
+  }
+  if (!row.active) {
+    await writeAudit(row, "login.refused", "user is switched off");
+    return { error: "This login has been switched off. Ask the administrator." };
+  }
+  if (row.locked_until && new Date(row.locked_until).getTime() > Date.now()) {
+    const minutes = Math.ceil((new Date(row.locked_until).getTime() - Date.now()) / 60000);
+    return { error: `Too many wrong passwords. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}, or ask the administrator to unlock it.` };
+  }
+  if (!bcrypt.compareSync(password, row.password_hash)) {
+    const attempts = row.failed_attempts + 1;
+    const lock = attempts >= MAX_FAILED_LOGINS;
+    await query(
+      `UPDATE users SET failed_attempts = $2, locked_until = CASE WHEN $3::boolean THEN now() + ($4 || ' minutes')::interval ELSE locked_until END WHERE id = $1`,
+      [row.id, lock ? 0 : attempts, lock, String(LOCK_MINUTES)]
+    );
+    await writeAudit(row, lock ? "login.locked" : "login.failed", `wrong password (${attempts} of ${MAX_FAILED_LOGINS})`);
+    return { error: lock ? `Too many wrong passwords. This login is locked for ${LOCK_MINUTES} minutes.` : "Incorrect username or password." };
+  }
+  await query("UPDATE users SET failed_attempts = 0, locked_until = NULL, last_login = now() WHERE id = $1", [row.id]);
+  await writeAudit(row, "login");
+  return { user: { id: row.id, username: row.username, name: row.name, role: row.role, mustChangePassword: row.must_change_password } };
 }
 
 export async function hasAnyUser(): Promise<boolean> {
@@ -64,7 +104,17 @@ export async function getSession(): Promise<SessionUser | null> {
     const { payload } = await jwtVerify(token, authSecretKey());
     if ((payload.company as string | undefined) !== company) return null;
     if (payload.viaMaster && !(await getMaster())) return null;
-    return payload as unknown as SessionUser;
+    const user = payload as unknown as SessionUser;
+    if (user.id > 0) {
+      // Role, name and on/off are read fresh, so what an admin changes applies at once.
+      const row = await queryOne<{ id: number; username: string; name: string; role: Role; active: boolean; must_change_password: boolean }>(
+        "SELECT id, username, name, role, active, must_change_password FROM users WHERE id = $1",
+        [user.id]
+      );
+      if (!row || !row.active) return null;
+      return { id: row.id, username: row.username, name: row.name, role: row.role, mustChangePassword: row.must_change_password };
+    }
+    return user;
   } catch {
     return null;
   }

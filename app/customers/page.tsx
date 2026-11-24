@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { query } from "@/lib/db";
+import { getLabels } from "@/lib/labels";
 import { deleteCustomerAction } from "@/lib/actions/customer-form-actions";
 
 type Customer = {
@@ -14,6 +15,7 @@ type Customer = {
 };
 
 export default async function CustomersPage() {
+  const labels = await getLabels();
   const customers = await query<Customer>(
     "SELECT id, name, city, country, contact, telephone, email, vat_number FROM customers ORDER BY name"
   );
@@ -21,11 +23,11 @@ export default async function CustomersPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-primary">Customers</h1>
+        <h1 className="text-2xl font-semibold text-primary">{labels.client}</h1>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-neutral-600">{customers.length} customers</span>
+          <span className="text-sm text-neutral-600">{customers.length} {labels.client.toLowerCase()}</span>
           <Link href="/customers/new" className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">
-            + New customer
+            + New {labels.client.toLowerCase().replace(/s$/, "")}
           </Link>
         </div>
       </div>

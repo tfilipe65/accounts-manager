@@ -17,6 +17,7 @@ export async function getTopCustomers(): Promise<Top10Row[]> {
     FROM sales_invoice_lines sil
     JOIN sales_invoices si ON si.id = sil.sales_invoice_id
     JOIN customers c ON c.id = si.customer_id
+    WHERE si.doc_type <> 'Proforma'
     GROUP BY c.name ORDER BY amount DESC LIMIT 10
   `)
   ).map((r) => ({ name: r.name, amount: Number(r.amount) }));
@@ -42,7 +43,9 @@ export async function getTopProducts(): Promise<Top10Row[]> {
     SELECT COALESCE(p.name, sil.subject, '(unnamed)') AS name,
            SUM(sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc)) AS amount
     FROM sales_invoice_lines sil
+    JOIN sales_invoices si ON si.id = sil.sales_invoice_id
     LEFT JOIN products_services p ON p.id = sil.product_service_id
+    WHERE si.doc_type <> 'Proforma'
     GROUP BY COALESCE(p.name, sil.subject, '(unnamed)') ORDER BY amount DESC LIMIT 10
   `)
   ).map((r) => ({ name: r.name, amount: Number(r.amount) }));

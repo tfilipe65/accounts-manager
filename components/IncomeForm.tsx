@@ -5,7 +5,7 @@ import type { AccountOption, NamedOption, ProjectOption, ProductOption } from "@
 import type { SalesInvoiceDetail, SalesInvoiceLineInput } from "@/lib/actions/income-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
 
-const DOC_TYPES = ["Invoice", "Credit Note", "Proforma", "Tax Refund", "Interest", "Other"];
+const DOC_TYPES = ["Invoice", "Credit Note", "Proforma", "Commission", "Tax Refund", "Interest", "Other"];
 
 const BLANK_LINE: SalesInvoiceLineInput = {
   product_service_id: null,

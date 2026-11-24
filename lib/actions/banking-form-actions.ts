@@ -2,7 +2,14 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createBankTransaction, updateBankTransaction, deleteBankTransaction, type BankTransactionInput } from "@/lib/actions/banking-actions";
+import {
+  createBankTransaction,
+  updateBankTransaction,
+  deleteBankTransaction,
+  createTransfer,
+  reconcileBankAccountThrough,
+  type BankTransactionInput,
+} from "@/lib/actions/banking-actions";
 
 function toInput(fd: FormData): BankTransactionInput {
   const linkType = String(fd.get("link_type") || "none") as BankTransactionInput["link_type"];
@@ -14,6 +21,7 @@ function toInput(fd: FormData): BankTransactionInput {
     sales_invoice_id: fd.get("sales_invoice_id") ? Number(fd.get("sales_invoice_id")) : null,
     purchase_invoice_id: fd.get("purchase_invoice_id") ? Number(fd.get("purchase_invoice_id")) : null,
     account_no: fd.get("account_no") ? Number(fd.get("account_no")) : null,
+    employee_id: fd.get("employee_id") ? Number(fd.get("employee_id")) : null,
     vat_perc: fd.get("vat_perc") ? Number(fd.get("vat_perc")) : null,
     in_amount: Number(fd.get("in_amount") || 0),
     in_vat: Number(fd.get("in_vat") || 0),
@@ -65,4 +73,30 @@ export async function updateBankTransactionFormAction(
 export async function deleteBankTransactionAction(id: number, bankAccountKey: string) {
   await deleteBankTransaction(id);
   revalidatePath(`/banking?account=${bankAccountKey}`);
+}
+
+export async function transferFormAction(_prev: { error?: string; success?: boolean } | undefined, fd: FormData) {
+  try {
+    await createTransfer({
+      from_bank_account_id: Number(fd.get("from_bank_account_id")),
+      to_bank_account_id: Number(fd.get("to_bank_account_id")),
+      date: String(fd.get("date") || ""),
+      amount: Number(fd.get("amount") || 0),
+      description: String(fd.get("description") || "").trim() || null,
+    });
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not record the transfer." };
+  }
+  return { success: true };
+}
+
+export async function reconcileThroughFormAction(bankAccountId: number, _prev: { error?: string; success?: boolean; count?: number } | undefined, fd: FormData) {
+  const through = String(fd.get("through") || "");
+  if (!through) return { error: "Choose the statement date." };
+  try {
+    const count = await reconcileBankAccountThrough(bankAccountId, through);
+    return { success: true, count };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not reconcile." };
+  }
 }

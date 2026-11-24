@@ -3,8 +3,9 @@
 import { useActionState } from "react";
 import { updateSettingsFormAction } from "@/lib/actions/settings-form-actions";
 import type { AppSettings } from "@/lib/actions/settings-actions";
+import type { AccountOption } from "@/lib/actions/reference-actions";
 
-export default function SettingsForm({ initial }: { initial: AppSettings }) {
+export default function SettingsForm({ initial, accounts }: { initial: AppSettings; accounts: AccountOption[] }) {
   const [state, formAction, pending] = useActionState(updateSettingsFormAction, undefined);
 
   return (
@@ -15,6 +16,18 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
         </Field>
         <Field label="VAT Number">
           <input name="vat_number" defaultValue={initial.vat_number ?? ""} className="input" />
+        </Field>
+        <Field label="Address">
+          <input name="address" defaultValue={initial.address ?? ""} className="input" />
+        </Field>
+        <Field label="ZIP">
+          <input name="zip" defaultValue={initial.zip ?? ""} className="input" />
+        </Field>
+        <Field label="City">
+          <input name="city" defaultValue={initial.city ?? ""} className="input" />
+        </Field>
+        <Field label="Country">
+          <input name="country" defaultValue={initial.country ?? ""} className="input" />
         </Field>
         <Field label="Bank Name">
           <input name="bank_name" defaultValue={initial.bank_name ?? ""} className="input" />
@@ -45,6 +58,25 @@ export default function SettingsForm({ initial }: { initial: AppSettings }) {
         </Field>
         <Field label="Reporting Year">
           <input type="number" name="reporting_year" defaultValue={initial.reporting_year} className="input" />
+        </Field>
+        <Field label="Default payment terms (days)">
+          <input type="number" min={0} name="payment_term_days" defaultValue={initial.payment_term_days} className="input" />
+        </Field>
+        <Field label="What you call your clients">
+          <input name="client_label" defaultValue={initial.client_label} className="input" />
+        </Field>
+        <Field label="What you call your projects">
+          <input name="project_label" defaultValue={initial.project_label} className="input" />
+        </Field>
+        <Field label="Interest expense account (for interest cover)">
+          <select name="account_no_interest_expense" defaultValue={initial.account_no_interest_expense ?? ""} className="input">
+            <option value="">None</option>
+            {accounts.map((a) => (
+              <option key={a.account_no} value={a.account_no}>
+                {a.account_no} {a.name}
+              </option>
+            ))}
+          </select>
         </Field>
         <Field label="VAT Rate 1">
           <input type="number" step="any" name="vat_rate_1" defaultValue={initial.vat_rate_1} className="input" />
