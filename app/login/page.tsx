@@ -4,13 +4,12 @@ import LoginForm from "./LoginForm";
 import SetupForm from "./SetupForm";
 import { hasAnyUser } from "@/lib/auth";
 import { getCurrentCompany } from "@/lib/current-company";
-import { multiCompany } from "@/lib/company-cookie";
 
 export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
   const company = await getCurrentCompany();
-  if (multiCompany() && !company) redirect("/companies");
+  if (!company) redirect("/companies");
   const needsSetup = !(await hasAnyUser());
   const name = company?.name ?? "Teia Firme Lda";
   return (
@@ -23,11 +22,9 @@ export default async function LoginPage() {
             : `${name} — sign in to continue.`}
         </p>
         {needsSetup ? <SetupForm /> : <LoginForm />}
-        {multiCompany() && (
-          <Link href="/companies" className="mt-6 block text-center text-sm text-neutral-500 hover:text-primary">
+                  <Link href="/companies" className="mt-6 block text-center text-sm text-neutral-500 hover:text-primary">
             Choose another company
           </Link>
-        )}
       </div>
     </div>
   );

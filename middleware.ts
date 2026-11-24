@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { authSecretKey } from "@/lib/authSecret";
-import { COMPANY_COOKIE, MASTER_COOKIE, multiCompany, sessionCookieName } from "@/lib/company-cookie";
+import { COMPANY_COOKIE, MASTER_COOKIE, sessionCookieName } from "@/lib/company-cookie";
 
 const PUBLIC_PATHS = ["/login", "/companies"];
 
@@ -17,9 +17,9 @@ export async function middleware(req: NextRequest) {
   headers.set("x-pathname", pathname);
   const proceed = () => NextResponse.next({ request: { headers } });
 
-  // Desktop app: nothing works until a company is chosen.
-  const company = multiCompany() ? req.cookies.get(COMPANY_COOKIE)?.value : undefined;
-  if (multiCompany() && !company && !pathname.startsWith("/companies")) {
+  // Nothing works until a company is chosen.
+  const company = req.cookies.get(COMPANY_COOKIE)?.value;
+  if (!company && !pathname.startsWith("/companies")) {
     const url = req.nextUrl.clone();
     url.pathname = "/companies";
     return NextResponse.redirect(url);

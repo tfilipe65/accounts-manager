@@ -7,18 +7,11 @@ const { version } = JSON.parse(fs.readFileSync(path.join(__dirname, "package.jso
 const nextConfig: NextConfig = {
   // Shown beside the app name so a screen always says which build it is.
   env: { NEXT_PUBLIC_APP_VERSION: version },
-  // Build a self-contained bundle for the office server, which runs the app
-  // as a long-lived `next start` process rather than as serverless functions.
-  // Gated on BUILD_STANDALONE so it is inert everywhere it is not wanted:
-  // Netlify's Next runtime does its own packaging and must keep the default
-  // output, and this app stays deployed there until the migration is tested.
-  // Set BUILD_STANDALONE=1 in the server's .env before `npm run build`.
+  // The desktop installer ships a self-contained server (BUILD_STANDALONE=1, set by
+  // scripts/prepare-desktop.mjs); ordinary `next dev` / `next build` leave this off.
   output: process.env.BUILD_STANDALONE === "1" ? "standalone" : undefined,
-  // `pg` resolves optional native/extra entry points (pg-native, pg-cloudflare)
-  // at require time, which bundlers either fail on or silently stub. Keeping it
-  // external means it loads from node_modules at runtime, same convention as
-  // the sibling Employee Manager / Woodgrain Estimating apps.
-  serverExternalPackages: ["pg", "@electric-sql/pglite"],
+  // The embedded database loads its WebAssembly files from node_modules at run time.
+  serverExternalPackages: ["@electric-sql/pglite"],
   // The server bundle must carry only what the app needs. The file tracer follows the project folder
   // (the app reads its schema and seed from a folder at run time), so without this it would copy the
   // installer's own previous build output, the Rust target folder and the Excel documents into it.

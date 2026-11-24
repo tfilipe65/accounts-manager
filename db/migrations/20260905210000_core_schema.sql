@@ -13,8 +13,7 @@
 -- this schema, not separate storage. Recomputing a report is a query, not a
 -- migration.
 --
--- Applied via the Supabase MCP apply_migration tool; kept here too so schema
--- history lives in the repo, same convention as the sibling apps.
+-- Applied to each company's embedded database when it is first opened (lib/db.ts), in file-name order.
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,

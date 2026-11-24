@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
 import type { Company } from "@/lib/companies";
-import { multiCompany } from "@/lib/company-cookie";
 import { SECTIONS, MENU_GROUPS } from "@/lib/sections";
 import type { Labels } from "@/lib/labels";
 import { logoutAction } from "@/lib/actions/auth-actions";
@@ -64,11 +63,9 @@ export default async function Nav({ user, company, allowed, labels }: { user: Se
             My account
           </Link>
         )}
-        {multiCompany() && (
-          <Link href="/companies" className="rounded-md border border-white/30 px-3 py-1.5 text-center hover:bg-white/10">
+                  <Link href="/companies" className="rounded-md border border-white/30 px-3 py-1.5 text-center hover:bg-white/10">
             Switch company
           </Link>
-        )}
         <form action={logoutAction}>
           <button type="submit" className="w-full rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10">
             Log out

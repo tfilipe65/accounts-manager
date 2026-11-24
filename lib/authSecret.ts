@@ -1,8 +1,8 @@
 // Single source of the session-signing secret, shared by lib/auth.ts and
 // middleware.ts. In production a real AUTH_SECRET is required and the process
 // refuses to sign/verify sessions without one; locally a dev fallback keeps a
-// fresh checkout running. Edge-runtime safe (middleware.ts runs there on
-// Netlify) -- plain process.env reads and TextEncoder only, no node: imports.
+// fresh checkout running. Edge-runtime safe (middleware.ts runs there)
+// -- plain process.env reads and TextEncoder only, no node: imports.
 
 const DEV_FALLBACK = "dev-only-secret-change-me-in-production";
 const MIN_LENGTH = 32;

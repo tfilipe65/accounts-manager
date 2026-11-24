@@ -20,7 +20,6 @@
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.8",
     "next": "16.2.12",
-    "pg": "^8.13.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -28,7 +27,6 @@
     "@tailwindcss/postcss": "^4",
     "@tauri-apps/cli": "^2.12.4",
     "@types/node": "^22",
-    "@types/pg": "^8.11.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

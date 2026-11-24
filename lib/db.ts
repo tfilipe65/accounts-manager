@@ -1,59 +1,47 @@
-// Database entry point. Two backends behind the same three functions:
+// Database entry point. The app is a desktop app: every company has its own embedded Postgres
+// (PGlite) with its files on this PC, under
+//   %LOCALAPPDATA%\net.algarvebuilders.accounts-manager\companies\<company>\db
+// (override the base folder with ACCOUNTS_DATA_DIR). The company is the one in the `company`
+// cookie (lib/companies.ts). There is no database server and nothing leaves the PC; lib/backup.ts
+// keeps dated copies so the data can be put back.
 //
-//   * DATABASE_URL set  -> real Postgres (Supabase / office server) through `pg`: one company.
-//   * DATABASE_URL unset -> the desktop app: one embedded Postgres (PGlite) per company, under
-//     %LOCALAPPDATA%\net.algarvebuilders.accounts-manager\companies\<company>\db (override the base
-//     folder with ACCOUNTS_DATA_DIR). The company is the one in the `company` cookie (lib/companies.ts).
-//
-// Both speak the same SQL, so going live is: point DATABASE_URL at the server and move the data.
-// The schema is the files in supabase/migrations; they are applied to a company's database when it
-// is first opened (and recorded in _migrations). A brand-new company database is filled once from
+// The schema is the files in db/migrations; they are applied to a company's database when it is
+// first opened (and recorded in _migrations). A brand-new company database is filled once from
 // db/seed.sql (the chart of accounts and defaults) plus db/profiles/<company>.sql when that exists;
 // both are built by scripts/build-seed.mjs.
 
-import { Pool, types, type QueryResultRow } from "pg";
 import type { PGlite } from "@electric-sql/pglite";
 import fs from "fs";
 import path from "path";
 import { resourcesDir } from "./data-dir";
 import { getCurrentCompany } from "./current-company";
 import { companyDbDir, type Company } from "./companies";
+import { autoBackup } from "./backup";
 
-// DATE columns (oid 1082) default to JS Date objects, which then round-trip
-// through a timezone on every .toISOString()/.toLocaleDateString() call --
-// anywhere behind UTC silently shows the previous day for a plain calendar
-// date with no time component. Every date in this schema (invoice dates,
-// opening balances, ...) is a bare YYYY-MM-DD with no meaningful time or
-// timezone, so keep it as the string Postgres already sends -- no Date
-// object, no conversion, no bug.
-types.setTypeParser(1082, (val) => val);
+// A result row: any set of named columns (the same loose shape the old Postgres driver used).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type QueryResultRow = { [column: string]: any };
 
-/** What a transaction body gets: just `query`, identical on both backends. */
+/** What a transaction body gets: just `query`. */
 export type Queryable = {
   query<T extends QueryResultRow = QueryResultRow>(text: string, params?: unknown[]): Promise<{ rows: T[] }>;
 };
 
 declare global {
-  var __pgPool__: Pool | undefined;
   var __pgliteByCompany__: Map<string, Promise<PGlite>> | undefined;
 }
 
-export function usingLocalDatabase(): boolean {
-  return !process.env.DATABASE_URL;
-}
-
-function getPool(): Pool {
-  if (!global.__pgPool__) {
-    global.__pgPool__ = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-  }
-  return global.__pgPool__;
-}
+// DATE columns (oid 1082) default to JS Date objects, which then round-trip through a timezone on
+// every .toISOString()/.toLocaleDateString() call -- anywhere behind UTC silently shows the previous
+// day for a plain calendar date. Every date in this schema (invoice dates, opening balances, ...) is
+// a bare YYYY-MM-DD with no time or timezone, so keep it as the string Postgres already sends.
+export const PGLITE_OPTIONS = { parsers: { 1082: (v: string) => v } };
 
 async function applyMigrationsAndSeed(db: PGlite, company: Company): Promise<void> {
   await db.exec("CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())");
   const applied = new Set((await db.query<{ name: string }>("SELECT name FROM _migrations")).rows.map((r) => r.name));
 
-  const migDir = path.join(resourcesDir(), "supabase", "migrations");
+  const migDir = path.join(resourcesDir(), "db", "migrations");
   const files = fs.existsSync(migDir) ? fs.readdirSync(migDir).filter((f) => f.endsWith(".sql")).sort() : [];
   for (const file of files) {
     if (applied.has(file)) continue;
@@ -85,7 +73,7 @@ async function currentCompany(): Promise<Company> {
 }
 
 // One open database per company, kept for the life of the server and opened on first use.
-function getLocal(company: Company): Promise<PGlite> {
+export function openCompanyDatabase(company: Company): Promise<PGlite> {
   const open = (global.__pgliteByCompany__ ??= new Map());
   let db = open.get(company.slug);
   if (!db) {
@@ -93,9 +81,11 @@ function getLocal(company: Company): Promise<PGlite> {
       const { PGlite } = await import("@electric-sql/pglite");
       const dir = companyDbDir(company.slug);
       fs.mkdirSync(dir, { recursive: true });
-      const instance = new PGlite(dir, { parsers: { 1082: (v: string) => v } });
+      const instance = new PGlite(dir, PGLITE_OPTIONS);
       await instance.waitReady;
       await applyMigrationsAndSeed(instance, company);
+      // The first time a company is opened on a day, keep a dated copy of it.
+      await autoBackup(instance, company);
       return instance;
     })();
     open.set(company.slug, db);
@@ -105,13 +95,22 @@ function getLocal(company: Company): Promise<PGlite> {
   return db;
 }
 
-export async function query<T extends QueryResultRow = QueryResultRow>(text: string, params: unknown[] = []): Promise<T[]> {
-  if (usingLocalDatabase()) {
-    const db = await getLocal(await currentCompany());
-    return (await db.query<T>(text, params)).rows;
+/** Close a company's database and forget it (it is reopened on next use). Used when putting a backup back. */
+export async function closeCompanyDatabase(slug: string): Promise<void> {
+  const open = global.__pgliteByCompany__;
+  const db = open?.get(slug);
+  if (!db) return;
+  open?.delete(slug);
+  try {
+    await (await db).close();
+  } catch {
+    // already closed
   }
-  const result = await getPool().query<T>(text, params);
-  return result.rows;
+}
+
+export async function query<T extends QueryResultRow = QueryResultRow>(text: string, params: unknown[] = []): Promise<T[]> {
+  const db = await openCompanyDatabase(await currentCompany());
+  return (await db.query<T>(text, params)).rows;
 }
 
 export async function queryOne<T extends QueryResultRow = QueryResultRow>(text: string, params: unknown[] = []): Promise<T | null> {
@@ -119,25 +118,9 @@ export async function queryOne<T extends QueryResultRow = QueryResultRow>(text: 
   return rows[0] ?? null;
 }
 
-// Multi-statement writes (an invoice header plus its lines, replacing a set
-// of lines on edit, etc.) need one connection held across BEGIN/COMMIT --
-// query()/queryOne() each borrow a fresh connection from the pool, which
-// would silently split a "transaction" across different backends.
+// Multi-statement writes (an invoice header plus its lines, replacing a set of lines on edit, etc.)
+// run inside one transaction so they either all happen or none do.
 export async function withTransaction<T>(fn: (client: Queryable) => Promise<T>): Promise<T> {
-  if (usingLocalDatabase()) {
-    const db = await getLocal(await currentCompany());
-    return db.transaction(async (tx) => fn({ query: (text, params) => tx.query(text, params) as never }));
-  }
-  const client = await getPool().connect();
-  try {
-    await client.query("BEGIN");
-    const result = await fn(client);
-    await client.query("COMMIT");
-    return result;
-  } catch (e) {
-    await client.query("ROLLBACK");
-    throw e;
-  } finally {
-    client.release();
-  }
+  const db = await openCompanyDatabase(await currentCompany());
+  return db.transaction(async (tx) => fn({ query: (text, params) => tx.query(text, params) as never }));
 }

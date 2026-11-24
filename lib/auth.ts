@@ -6,7 +6,7 @@ import { query, queryOne } from "./db";
 import { writeAudit } from "./audit";
 import { authSecretKey } from "./authSecret";
 import { getMaster } from "./master-admin";
-import { COMPANY_COOKIE, multiCompany, sessionCookieName } from "./company-cookie";
+import { COMPANY_COOKIE, sessionCookieName } from "./company-cookie";
 
 export type Role = "ADMIN" | "USER";
 export type SessionUser = { id: number; username: string; name: string; role: Role; mustChangePassword?: boolean };
@@ -69,7 +69,6 @@ export async function hasAnyUser(): Promise<boolean> {
 // The session is kept per company (cookie name and a claim inside it), so signing in to one company
 // never signs you in to another.
 async function activeCompany(): Promise<string | undefined> {
-  if (!multiCompany()) return undefined;
   return (await cookies()).get(COMPANY_COOKIE)?.value;
 }
 

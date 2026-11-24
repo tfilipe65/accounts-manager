@@ -1,9 +1,12 @@
 import { getAppSettings, listUsers, getClosedThroughYear, listAuditLog } from "@/lib/actions/settings-actions";
 import { listAllAccountOptions } from "@/lib/actions/reference-actions";
 import { requireAdmin } from "@/lib/auth";
+import { getCurrentCompany } from "@/lib/current-company";
+import { backupsDir, listBackups } from "@/lib/backup";
 import SettingsForm from "@/components/SettingsForm";
 import UsersPanel from "@/components/UsersPanel";
 import YearCloseForm from "@/components/YearCloseForm";
+import BackupPanel from "@/components/BackupPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +24,8 @@ export default async function SettingsPage() {
     listAllAccountOptions(),
     listAuditLog(100),
   ]);
+  const company = await getCurrentCompany();
+  const backups = company ? listBackups(company.slug) : [];
   const nextYearToClose = closedThroughYear != null ? closedThroughYear + 1 : settings.reporting_year;
 
   return (
@@ -33,6 +38,11 @@ export default async function SettingsPage() {
       <SettingsForm initial={settings} accounts={accounts.filter((a) => a.normal_balance === "debit")} />
 
       <YearCloseForm closedThroughYear={closedThroughYear} nextYearToClose={nextYearToClose} />
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold text-primary">Backup</h2>
+        <BackupPanel backups={backups} folder={company ? backupsDir(company.slug) : ""} />
+      </div>
 
       <div>
         <h2 className="mb-3 text-lg font-semibold text-primary">Logins</h2>
