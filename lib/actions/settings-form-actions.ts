@@ -1,6 +1,6 @@
 "use server";
 
-import { SECTIONS } from "@/lib/sections";
+import { PERMISSION_SECTIONS } from "@/lib/sections";
 import {
   updateAppSettings,
   createUser,
@@ -111,7 +111,7 @@ export async function unlockUserFormAction(id: number, _prev: FormState, _fd: Fo
 export async function saveUserSectionsAction(id: number, _prev: FormState, fd: FormData) {
   const chosen = fd.getAll("sections").map(String);
   // Everything ticked is stored as "no restriction", so sections added later are open to the user too.
-  const all = SECTIONS.every((s) => chosen.includes(s.key));
+  const all = PERMISSION_SECTIONS.every((s) => chosen.includes(s.key));
   try {
     await setUserSections(id, all ? null : chosen);
   } catch (e) {

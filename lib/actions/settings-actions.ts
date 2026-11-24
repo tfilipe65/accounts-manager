@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { query, queryOne } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
-import { SECTIONS } from "@/lib/sections";
+import { PERMISSION_SECTIONS } from "@/lib/sections";
 import { writeAudit } from "@/lib/audit";
 import { passwordProblem } from "@/lib/password-policy";
 
@@ -116,6 +116,8 @@ export async function closeYear(): Promise<number> {
     "SELECT closed_through_year, reporting_year FROM app_settings WHERE id = 1"
   );
   const yearToClose = settings?.closed_through_year != null ? settings.closed_through_year + 1 : (settings?.reporting_year ?? new Date().getFullYear());
+  // A lock is for years that are over: the year still running is where the work is.
+  if (yearToClose >= new Date().getFullYear()) throw new Error(`${yearToClose} is still in progress. Only finished years can be locked.`);
   await query("UPDATE app_settings SET closed_through_year = $1 WHERE id = 1", [yearToClose]);
   await writeAudit(admin, "year.close", String(yearToClose));
   revalidatePath("/settings");
@@ -197,7 +199,7 @@ export async function updateUser(id: number, input: { name: string; role: "ADMIN
 /** Which sections a user may open. null = all of them (admins always have all, whatever is stored). */
 export async function setUserSections(id: number, sections: string[] | null): Promise<void> {
   const admin = await requireAdmin();
-  const valid = new Set(SECTIONS.map((s) => s.key));
+  const valid = new Set(PERMISSION_SECTIONS.map((s) => s.key));
   const clean = sections === null ? null : sections.filter((s) => valid.has(s));
   await query("UPDATE users SET permissions = $2 WHERE id = $1", [id, clean]);
   await writeAudit(admin, "user.permissions", `user #${id}: ${clean === null ? "all sections" : clean.length + " sections"}`);

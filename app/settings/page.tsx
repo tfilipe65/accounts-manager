@@ -37,7 +37,7 @@ export default async function SettingsPage() {
 
       <SettingsForm initial={settings} accounts={accounts.filter((a) => a.normal_balance === "debit")} />
 
-      <YearCloseForm closedThroughYear={closedThroughYear} nextYearToClose={nextYearToClose} />
+      <YearCloseForm closedThroughYear={closedThroughYear} nextYearToClose={nextYearToClose} canClose={nextYearToClose < new Date().getFullYear()} />
 
       <div>
         <h2 className="mb-3 text-lg font-semibold text-primary">Backup</h2>

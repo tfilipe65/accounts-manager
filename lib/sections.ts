@@ -6,10 +6,11 @@
 export const MENU_GROUPS = ["Admin", "Master data", "Transactions", "Data analysis", "Reports"] as const;
 export type MenuGroup = (typeof MENU_GROUPS)[number];
 
-export const SECTIONS: { key: string; href: string; label: string; group: MenuGroup }[] = [
+// adminOnly: only administrators see and open it, whatever a user's permissions say.
+export const SECTIONS: { key: string; href: string; label: string; group: MenuGroup; adminOnly?: boolean }[] = [
   // Admin
-  { key: "chart-of-accounts", href: "/chart-of-accounts", label: "Chart of Accounts", group: "Admin" },
-  { key: "checks", href: "/checks", label: "Checks", group: "Admin" },
+  { key: "chart-of-accounts", href: "/chart-of-accounts", label: "Chart of Accounts", group: "Admin", adminOnly: true },
+  { key: "checks", href: "/checks", label: "Checks", group: "Admin", adminOnly: true },
   // Master data
   { key: "customers", href: "/customers", label: "Clients", group: "Master data" },
   { key: "suppliers", href: "/suppliers", label: "Suppliers", group: "Master data" },
@@ -36,6 +37,13 @@ export const SECTIONS: { key: string; href: string; label: string; group: MenuGr
   { key: "vat-report", href: "/vat-report", label: "IVA Report", group: "Reports" },
   { key: "reports", href: "/reports", label: "Inc / Exp Report", group: "Reports" },
 ];
+
+/** The sections an administrator can give or take away from a user (the admin-only ones are not theirs to give). */
+export const PERMISSION_SECTIONS = SECTIONS.filter((s) => !s.adminOnly);
+
+export function isAdminOnlySection(key: string): boolean {
+  return SECTIONS.some((s) => s.key === key && s.adminOnly);
+}
 
 /** Which section a URL path belongs to, or null for pages outside the permission list (settings, login, ...). */
 export function sectionForPath(pathname: string): string | null {

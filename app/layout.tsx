@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSession, getAllowedSections } from "@/lib/auth";
 import { getCurrentCompany } from "@/lib/current-company";
-import { sectionForPath } from "@/lib/sections";
+import { sectionForPath, isAdminOnlySection } from "@/lib/sections";
 import { getLabels } from "@/lib/labels";
 import Nav from "@/components/Nav";
 import NoAccessPage from "@/app/no-access/page";
@@ -26,7 +26,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   if (session?.mustChangePassword && !pathname.startsWith("/account")) redirect("/account");
   const labels = session ? await getLabels() : { client: "Clients", project: "Projects" };
   const section = sectionForPath(pathname);
-  const denied = !!session && !!allowed && !!section && !allowed.includes(section);
+  const denied =
+    !!session && !!section && ((!!allowed && !allowed.includes(section)) || (session.role !== "ADMIN" && isAdminOnlySection(section)));
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full bg-background text-foreground" style={{ fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif" }}>

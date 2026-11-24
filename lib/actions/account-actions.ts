@@ -15,7 +15,7 @@
 
 import { revalidatePath } from "next/cache";
 import { query, queryOne } from "@/lib/db";
-import { requireSession } from "@/lib/auth";
+import { requireSession, requireAdminForAction } from "@/lib/auth";
 
 export type AccountInput = { account_no: number; name: string; subgroup_no: number };
 export type Account = AccountInput & { is_reserved: boolean };
@@ -26,13 +26,13 @@ export async function getAccount(accountNo: number): Promise<Account | null> {
 }
 
 export async function createAccount(input: AccountInput): Promise<void> {
-  await requireSession();
+  await requireAdminForAction();
   await query("INSERT INTO accounts (account_no, name, subgroup_no) VALUES ($1,$2,$3)", [input.account_no, input.name, input.subgroup_no]);
   revalidatePath("/chart-of-accounts");
 }
 
 export async function updateAccount(originalAccountNo: number, input: AccountInput): Promise<void> {
-  await requireSession();
+  await requireAdminForAction();
   await query("UPDATE accounts SET account_no = $2, name = $3, subgroup_no = $4 WHERE account_no = $1", [
     originalAccountNo,
     input.account_no,
@@ -43,7 +43,7 @@ export async function updateAccount(originalAccountNo: number, input: AccountInp
 }
 
 export async function deleteAccount(accountNo: number): Promise<void> {
-  await requireSession();
+  await requireAdminForAction();
   await query("DELETE FROM accounts WHERE account_no = $1", [accountNo]);
   revalidatePath("/chart-of-accounts");
 }

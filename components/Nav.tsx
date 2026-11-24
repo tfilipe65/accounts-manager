@@ -8,10 +8,11 @@ import { getAvailableReportingYears } from "@/lib/actions/dashboard-actions";
 import { getEffectiveReportingYear } from "@/lib/reporting-year";
 import { getClosedThroughYear } from "@/lib/year-close";
 import ReportingYearSelector from "@/components/ReportingYearSelector";
+import NavMenu from "@/components/NavMenu";
 
 export default async function Nav({ user, company, allowed, labels }: { user: SessionUser; company?: Company; allowed: string[] | null; labels: Labels }) {
   // Menu groups as in the Excel main menu. Settings (admin only) belongs to the Admin group, first.
-  const visible = SECTIONS.filter((s) => !allowed || allowed.includes(s.key)).map((s) => ({
+  const visible = SECTIONS.filter((s) => (!allowed || allowed.includes(s.key)) && (!s.adminOnly || user.role === "ADMIN")).map((s) => ({
     href: s.href,
     group: s.group,
     label: s.key === "customers" ? labels.client : s.key === "projects" ? labels.project : s.label,
@@ -38,22 +39,7 @@ export default async function Nav({ user, company, allowed, labels }: { user: Se
         )}
       </div>
       <ReportingYearSelector years={years} effectiveYear={effectiveYear} closedThroughYear={closedThroughYear} />
-      <nav className="flex flex-1 flex-col gap-4 px-3 pb-4">
-        {groups.map((g) => (
-          <div key={g.name} className="flex flex-col gap-0.5">
-            <span className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-white/45">{g.name}</span>
-            {g.links.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </div>
-        ))}
-      </nav>
+      <NavMenu groups={groups} />
       <div className="flex flex-col gap-2 border-t border-white/15 px-4 py-4 text-sm text-white/80">
         <span>
           {user.name} <span className="text-white/50">({user.role === "ADMIN" ? "Admin" : "User"})</span>

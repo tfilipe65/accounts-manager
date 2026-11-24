@@ -10,7 +10,7 @@ import {
   updateUserFormAction,
 } from "@/lib/actions/settings-form-actions";
 import type { UserRow } from "@/lib/actions/settings-actions";
-import { SECTIONS } from "@/lib/sections";
+import { PERMISSION_SECTIONS } from "@/lib/sections";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-policy";
 
 type FormState = { error?: string; success?: boolean } | undefined;
@@ -112,13 +112,13 @@ export default function UsersPanel({ users, currentUserId }: { users: UserRow[];
 
 function SectionsEditor({ user }: { user: UserRow }) {
   const [state, action, pending] = useActionState(saveUserSectionsAction.bind(null, user.id), undefined as FormState);
-  const summary = user.permissions === null ? "All" : `${user.permissions.length} of ${SECTIONS.length}`;
+  const summary = user.permissions === null ? "All" : `${user.permissions.length} of ${PERMISSION_SECTIONS.length}`;
   return (
     <details>
       <summary className="cursor-pointer text-primary hover:underline">{summary}</summary>
       <form action={action} className="mt-2 flex flex-col gap-2 rounded-md border border-line bg-background p-3">
         <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-          {SECTIONS.map((s) => (
+          {PERMISSION_SECTIONS.map((s) => (
             <label key={s.key} className="flex items-center gap-2 text-sm">
               <input type="checkbox" name="sections" value={s.key} defaultChecked={user.permissions === null || user.permissions.includes(s.key)} />
               {s.label}

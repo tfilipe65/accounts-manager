@@ -95,8 +95,8 @@ async function withCounts(rows: AgeingRow[]): Promise<BucketTotal[]> {
   return totals.map((t) => ({ ...t, count: rows.filter((r) => r.bucket === t.bucket).length }));
 }
 
-// Every year that actually has data, plus app_settings.reporting_year and the current calendar year
-// (so the picker always offers somewhere sensible even on a freshly seeded company).
+// The years the picker offers: every year from five back to two ahead of the current year, widened to
+// cover any year that has data or that Settings points at, with no gaps.
 export async function getAvailableReportingYears(): Promise<number[]> {
   await requireSession();
   const settings = await queryOne<{ reporting_year: number }>("SELECT reporting_year FROM app_settings WHERE id = 1");
@@ -107,10 +107,11 @@ export async function getAvailableReportingYears(): Promise<number[]> {
     UNION SELECT EXTRACT(YEAR FROM date)::int FROM sales_invoices
     UNION SELECT EXTRACT(YEAR FROM date)::int FROM purchase_invoices
   `);
-  const years = new Set(rows.map((r) => r.year));
-  years.add(settings?.reporting_year ?? new Date().getFullYear());
-  years.add(new Date().getFullYear());
-  return Array.from(years).sort((a, b) => a - b);
+  const current = new Date().getFullYear();
+  const known = [...rows.map((r) => r.year), settings?.reporting_year ?? current, current];
+  const first = Math.min(current - 5, ...known);
+  const last = Math.max(current + 2, ...known);
+  return Array.from({ length: last - first + 1 }, (_, i) => first + i);
 }
 
 async function keyFigures(kind: "sales" | "purchases", year: number, cutoff: string | null): Promise<KeyFigures> {
