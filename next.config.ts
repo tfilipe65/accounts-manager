@@ -19,6 +19,12 @@ const nextConfig: NextConfig = {
   // external means it loads from node_modules at runtime, same convention as
   // the sibling Employee Manager / Woodgrain Estimating apps.
   serverExternalPackages: ["pg", "@electric-sql/pglite"],
+  // The server bundle must carry only what the app needs. The file tracer follows the project folder
+  // (the app reads its schema and seed from a folder at run time), so without this it would copy the
+  // installer's own previous build output, the Rust target folder and the Excel documents into it.
+  outputFileTracingExcludes: {
+    "/*": ["./desktop-bundle/**", "./src-tauri/**", "./docs/**", "./db/**", "./.claude/**", "./scripts/**"],
+  },
   // An unrelated stray package-lock.json in C:\Users\tony\ otherwise makes
   // Turbopack misdetect that as the workspace root instead of this project.
   turbopack: {

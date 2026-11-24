@@ -22,6 +22,9 @@ if (!existsSync(path.join(root, "db", "seed.sql"))) {
   run("node", ["scripts/build-seed.mjs"]);
 }
 
+// Clear the previous bundle first, so a build never traces or packages the last one.
+rmSync(out, { recursive: true, force: true });
+
 run("npx", ["next", "build"], { BUILD_STANDALONE: "1" });
 
 rmSync(out, { recursive: true, force: true });
