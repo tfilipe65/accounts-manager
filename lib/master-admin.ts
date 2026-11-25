@@ -42,9 +42,13 @@ export function verifyMaster(username: string, password: string): Master | null 
   return bcrypt.compareSync(password, record.passwordHash) ? { username: record.username, name: record.name } : null;
 }
 
+// The master sign-in is kept for 90 days, so it survives closing and reopening the app (it is a saved cookie, not a
+// session one). It ends when the administrator signs out, or after 90 days.
+export const MASTER_SESSION_DAYS = 90;
+
 export async function createMasterSession(master: Master): Promise<void> {
-  const token = await new SignJWT({ ...master }).setProtectedHeader({ alg: "HS256" }).setExpirationTime("7d").sign(authSecretKey());
-  (await cookies()).set(MASTER_COOKIE, token, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 7 });
+  const token = await new SignJWT({ ...master }).setProtectedHeader({ alg: "HS256" }).setExpirationTime(`${MASTER_SESSION_DAYS}d`).sign(authSecretKey());
+  (await cookies()).set(MASTER_COOKIE, token, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * MASTER_SESSION_DAYS });
 }
 
 export async function destroyMasterSession(): Promise<void> {

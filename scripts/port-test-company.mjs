@@ -114,6 +114,8 @@ async function copy(table, { mapCols = [], bank = false } = {}) {
 const counts = {};
 await db.exec("BEGIN");
 try {
+  // The company's own logins come across too (people must not have to create them again).
+  counts.users = await copy("users");
   for (const t of ["customers", "suppliers", "projects", "products_services"]) counts[t] = await copy(t, { mapCols: ["account_no"] });
   counts.sales_invoices = await copy("sales_invoices");
   counts.sales_invoice_lines = await copy("sales_invoice_lines", { mapCols: ["account_no"] });

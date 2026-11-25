@@ -76,16 +76,18 @@ async function activeCompany(): Promise<string | undefined> {
 // lasts while the master administrator is signed in (checked here and in middleware.ts).
 export async function createSession(user: SessionUser, company?: string, viaMaster = false) {
   const companySlug = company ?? (await activeCompany());
+  // A session opened by the master administrator lasts as long as the master sign-in (90 days); a company login, a week.
+  const days = viaMaster ? 90 : 7;
   const token = await new SignJWT({ ...user, company: companySlug, ...(viaMaster ? { viaMaster: true } : {}) })
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("7d")
+    .setExpirationTime(`${days}d`)
     .sign(authSecretKey());
   const store = await cookies();
   store.set(sessionCookieName(companySlug), token, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * days,
   });
 }
 
