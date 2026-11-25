@@ -1,8 +1,8 @@
 "use client";
 
-// The sidebar menu: the groups of the Excel main menu, each one collapsible. Which groups are
-// collapsed is remembered in this browser (localStorage). A collapsed group still shows the page
-// you are on, so you never lose your place.
+// The sidebar menu: the groups of the Excel main menu, each one collapsible. Every group starts
+// collapsed; the ones you open are remembered in this browser (localStorage). A collapsed group still
+// shows the page you are on, so you never lose your place.
 
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 
 type Group = { name: string; links: { href: string; label: string }[] };
 
-const KEY = "accounts-manager.nav-collapsed";
+const KEY = "accounts-manager.nav-open";
 const listeners = new Set<() => void>();
 
 function subscribe(onChange: () => void) {
@@ -41,9 +41,9 @@ function write(value: string) {
 
 export default function NavMenu({ groups }: { groups: Group[] }) {
   const pathname = usePathname();
-  // Server render and first paint: everything open; the saved choice applies straight after.
+  // Server render and first paint: everything collapsed; the groups you opened apply straight after.
   const saved = useSyncExternalStore(subscribe, read, () => "");
-  const collapsed = new Set(saved.split("|").filter(Boolean));
+  const open = new Set(saved.split("|").filter(Boolean));
 
   const toggle = (name: string) => {
     const next = new Set(read().split("|").filter(Boolean));
@@ -56,7 +56,7 @@ export default function NavMenu({ groups }: { groups: Group[] }) {
   return (
     <nav className="flex flex-1 flex-col gap-2 px-3 pb-4">
       {groups.map((g) => {
-        const closed = collapsed.has(g.name);
+        const closed = !open.has(g.name);
         const shown = closed ? g.links.filter((l) => isActive(l.href)) : g.links;
         return (
           <div key={g.name} className="flex flex-col gap-0.5">

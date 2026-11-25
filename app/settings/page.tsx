@@ -7,6 +7,7 @@ import SettingsForm from "@/components/SettingsForm";
 import UsersPanel from "@/components/UsersPanel";
 import YearCloseForm from "@/components/YearCloseForm";
 import BackupPanel from "@/components/BackupPanel";
+import SampleDataPanel from "@/components/SampleDataPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,11 @@ export default async function SettingsPage() {
       <div>
         <h2 className="mb-3 text-lg font-semibold text-primary">Backup</h2>
         <BackupPanel backups={backups} folder={company ? backupsDir(company.slug) : ""} />
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold text-primary">Sample data</h2>
+        <SampleDataPanel companyName={company?.name ?? "this company"} />
       </div>
 
       <div>

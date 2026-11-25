@@ -78,6 +78,12 @@ export default function SettingsForm({ initial, accounts }: { initial: AppSettin
             ))}
           </select>
         </Field>
+        <Field label="VAT return is filed">
+          <select name="vat_return_period" defaultValue={initial.vat_return_period} className="input">
+            <option value="quarterly">Quarterly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </Field>
         <Field label="VAT Rate 1">
           <input type="number" step="any" name="vat_rate_1" defaultValue={initial.vat_rate_1} className="input" />
         </Field>

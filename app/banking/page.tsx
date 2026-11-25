@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import {
   listBankAccounts,
   listBankTransactions,
@@ -11,6 +12,10 @@ import { listUnlinkedCashAccounts } from "@/lib/actions/bank-account-actions";
 import { listEmployeeOptions } from "@/lib/actions/employee-actions";
 import { listAccountOptions, listAllAccountOptions } from "@/lib/actions/reference-actions";
 import { getSession } from "@/lib/auth";
+import { accountNoByRole } from "@/lib/roles";
+import { queryOne } from "@/lib/db";
+import { groupRegister, partNote, splitInputFromRows } from "@/lib/banking-group";
+import SplitDialog from "@/components/SplitDialog";
 import { getEffectiveReportingYear } from "@/lib/reporting-year";
 import { getClosedThroughYear } from "@/lib/year-close";
 import { formatDate, formatMoney as fmt } from "@/lib/formatters";
@@ -65,7 +70,32 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
   const today = new Date().toISOString().slice(0, 10);
   const formDate = Number(today.slice(0, 4)) === year ? today : `${year}-12-31`;
   const counters = allAccountOptions.filter((a) => a.normal_balance === "credit");
-  const defaultCounter = counters.find((a) => a.account_no === 1200)?.account_no ?? null;
+  const capitalNo = await accountNoByRole("share_capital");
+  const defaultCounter = counters.find((a) => a.account_no === capitalNo)?.account_no ?? null;
+
+  // What the split window needs: the accounts its one-click starting points use, and the VAT rates.
+  const [loanPrincipal, interestExpense, bankCharges, withholding, socialSecurity, rateRow] = await Promise.all([
+    accountNoByRole("loan_principal"),
+    accountNoByRole("interest_expense"),
+    accountNoByRole("bank_charges"),
+    accountNoByRole("withholding_payable"),
+    accountNoByRole("social_security_payable"),
+    queryOne<{ vat_rate_1: string | null; vat_rate_2: string | null; vat_rate_3: string | null; vat_rate_4: string | null }>(
+      "SELECT vat_rate_1, vat_rate_2, vat_rate_3, vat_rate_4 FROM app_settings WHERE id = 1"
+    ),
+  ]);
+  const splitProps = {
+    bankAccountId: active.id,
+    accounts,
+    salesInvoices,
+    purchaseInvoices,
+    employees,
+    vatRates: [rateRow?.vat_rate_1, rateRow?.vat_rate_2, rateRow?.vat_rate_3, rateRow?.vat_rate_4].filter((v) => v != null).map(Number),
+    presets: { loanPrincipal, interestExpense, bankCharges, withholding, socialSecurity },
+    closedThroughYear,
+    defaultDate: formDate,
+  };
+  const register = groupRegister(transactions);
 
   return (
     <div className="flex flex-col gap-6">
@@ -121,6 +151,13 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
         defaultDate={formDate}
       />
 
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-line bg-surface px-4 py-3">
+        <span className="text-sm text-neutral-600">
+          One line on the statement that belongs in several places, such as a loan instalment (principal, interest, fees) or a payment to the State?
+        </span>
+        <SplitDialog {...splitProps} label="Split transaction" className="whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark" />
+      </div>
+
       <BankingEntryForm
         bankAccountId={active.id}
         accounts={accounts}
@@ -154,7 +191,62 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
               <td className="px-4 py-2 text-right font-semibold">{fmt(broughtForward)}</td>
               <td />
             </tr>
-            {transactions.map((t) => {
+            {register.map((item) => {
+              if (item.type === "split") {
+                running += item.net;
+                const first = item.rows[0];
+                return (
+                  <Fragment key={item.splitId}>
+                    <tr className="bg-background/60 hover:bg-background">
+                      <td className="px-3 py-2">
+                        <ReconcileToggle id={first.id} checked={item.reconciled} />
+                      </td>
+                      <td className="px-4 py-2">{formatDate(item.date)}</td>
+                      <td className="px-4 py-2 font-medium">{item.description || "Split transaction"}</td>
+                      <td className="px-4 py-2 text-neutral-600">
+                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">Split into {item.rows.length} parts</span>
+                      </td>
+                      <td className="px-4 py-2 text-right text-debit">{item.net > 0 ? fmt(item.net) : ""}</td>
+                      <td className="px-4 py-2 text-right text-credit">{item.net < 0 ? fmt(-item.net) : ""}</td>
+                      <td className="px-4 py-2 text-right font-medium">{fmt(running)}</td>
+                      <td className="px-4 py-2 text-right">
+                        <div className="flex items-center justify-end gap-3">
+                          <SplitDialog
+                            {...splitProps}
+                            initial={{ splitId: item.splitId, input: splitInputFromRows(active.id, item.rows) }}
+                            label="Edit split"
+                            className="text-xs text-primary hover:underline"
+                          />
+                          <form action={deleteBankTransactionAction.bind(null, first.id, active.key)}>
+                            <button type="submit" className="text-xs text-neutral-500 hover:text-red-700">
+                              Delete split
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                    {item.rows.map((p) => {
+                      const part = p.in_amount + p.in_vat - p.out_amount - p.out_vat;
+                      return (
+                        <tr key={p.id} className="text-xs text-neutral-600">
+                          <td />
+                          <td />
+                          <td className="py-1 pl-10 pr-4">{partNote(p)}</td>
+                          <td className="px-4 py-1">
+                            {p.link_label}
+                            {p.employee_name && <span className="ml-1 rounded bg-background px-1.5 py-0.5">{p.employee_name}</span>}
+                            {(p.in_vat > 0 || p.out_vat > 0) && <span className="ml-1 text-neutral-400">incl. VAT {fmt(p.in_vat + p.out_vat)}</span>}
+                          </td>
+                          <td className="px-4 py-1 text-right">{part > 0 ? fmt(part) : ""}</td>
+                          <td className="px-4 py-1 text-right">{part < 0 ? fmt(-part) : ""}</td>
+                          <td colSpan={2} />
+                        </tr>
+                      );
+                    })}
+                  </Fragment>
+                );
+              }
+              const t = item.row;
               running += t.in_amount + t.in_vat - t.out_amount - t.out_vat;
               return (
                 <tr key={t.id} className="hover:bg-background">

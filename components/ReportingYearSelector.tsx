@@ -17,7 +17,7 @@ export default function ReportingYearSelector({
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="flex flex-col gap-1 px-4 py-3">
+    <div className="flex items-center gap-2">
       <label className="text-[11px] font-semibold uppercase tracking-wide text-white/50">Reporting year</label>
       <select
         value={effectiveYear}
@@ -28,10 +28,11 @@ export default function ReportingYearSelector({
             setReportingYearAction(year, pathname);
           });
         }}
-        className="rounded-md border border-white/25 bg-primary-dark px-2 py-1.5 text-sm text-white disabled:opacity-60"
+        className="rounded-md border border-white/25 bg-primary px-2 py-1 text-sm text-white disabled:opacity-60"
       >
         {years.map((y) => (
-          <option key={y} value={y} className="text-foreground">
+          // The open list takes its own colours, not the dark select's: white with dark text so every year can be read.
+          <option key={y} value={y} className="bg-white text-neutral-900">
             {y}
             {closedThroughYear != null && y <= closedThroughYear ? " (closed)" : ""}
           </option>

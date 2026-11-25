@@ -33,6 +33,7 @@ export type AppSettings = {
   client_label: string;
   project_label: string;
   account_no_interest_expense: number | null;
+  vat_return_period: "monthly" | "quarterly";
 };
 
 export async function getAppSettings(): Promise<AppSettings> {
@@ -40,7 +41,7 @@ export async function getAppSettings(): Promise<AppSettings> {
   const row = await queryOne<AppSettings>(`
     SELECT company_name, vat_number, address, zip, city, country, bank_name, iban, bic, telephone, email, website,
            currency, date_format, fiscal_year_start_month, reporting_year, payment_term_days,
-           vat_rate_1, vat_rate_2, vat_rate_3, vat_rate_4, client_label, project_label, account_no_interest_expense
+           vat_rate_1, vat_rate_2, vat_rate_3, vat_rate_4, client_label, project_label, account_no_interest_expense, vat_return_period
     FROM app_settings WHERE id = 1
   `);
   if (!row) throw new Error("Settings row missing.");
@@ -66,7 +67,7 @@ export async function updateAppSettings(input: AppSettings): Promise<void> {
        fiscal_year_start_month = $11, reporting_year = $12,
        vat_rate_1 = $13, vat_rate_2 = $14, vat_rate_3 = $15, vat_rate_4 = $16,
        address = $17, zip = $18, city = $19, country = $20,
-       payment_term_days = $21, client_label = $22, project_label = $23, account_no_interest_expense = $24
+       payment_term_days = $21, client_label = $22, project_label = $23, account_no_interest_expense = $24, vat_return_period = $25
      WHERE id = 1`,
     [
       input.company_name,
@@ -93,6 +94,7 @@ export async function updateAppSettings(input: AppSettings): Promise<void> {
       input.client_label || "Clients",
       input.project_label || "Projects",
       input.account_no_interest_expense,
+      input.vat_return_period === "monthly" ? "monthly" : "quarterly",
     ]
   );
   await writeAudit(admin, "settings.update");

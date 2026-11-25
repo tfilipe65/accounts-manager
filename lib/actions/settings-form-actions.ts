@@ -51,6 +51,7 @@ export async function updateSettingsFormAction(_prev: FormState, fd: FormData) {
     client_label: String(fd.get("client_label") || "").trim() || "Clients",
     project_label: String(fd.get("project_label") || "").trim() || "Projects",
     account_no_interest_expense: fd.get("account_no_interest_expense") ? Number(fd.get("account_no_interest_expense")) : null,
+    vat_return_period: fd.get("vat_return_period") === "monthly" ? "monthly" : "quarterly",
   };
   if (!input.company_name) return { error: "Company name is required." };
   try {

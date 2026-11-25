@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createAccount, updateAccount, deleteAccount, type AccountInput } from "@/lib/actions/account-actions";
 
 function toInput(fd: FormData): AccountInput {
@@ -39,6 +40,21 @@ export async function updateAccountFormAction(originalAccountNo: number, _prev: 
     return { error: e instanceof Error ? e.message : "Could not save the account." };
   }
   redirect("/chart-of-accounts");
+}
+
+/** Create (original = null) or update an account and stay on the page; used by the floating window. */
+export async function saveAccountAction(originalAccountNo: number | null, _prev: { error?: string; success?: boolean } | undefined, fd: FormData) {
+  const input = toInput(fd);
+  const error = validate(input);
+  if (error) return { error };
+  try {
+    if (originalAccountNo == null) await createAccount(input);
+    else await updateAccount(originalAccountNo, input);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not save the account." };
+  }
+  revalidatePath("/chart-of-accounts");
+  return { success: true };
 }
 
 export async function deleteAccountAction(accountNo: number) {

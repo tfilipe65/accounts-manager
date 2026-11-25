@@ -27,6 +27,7 @@ function toInput(fd: FormData): EmployeeInput {
     monthly_salary: salary === "" ? null : Number(salary),
     status: String(fd.get("status") || "Active") === "Inactive" ? "Inactive" : "Active",
     notes: str(fd, "notes"),
+    cost_type: String(fd.get("cost_type") || "office") === "direct" ? "direct" : "office",
   };
 }
 

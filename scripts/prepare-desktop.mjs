@@ -2,7 +2,7 @@
 // into desktop-bundle/ (git-ignored):
 //   node.exe                 the Node runtime the app server runs on
 //   server/                  Next standalone output (server.js, .next, node_modules ...)
-//   db/seed.sql, db/profiles/ first-run data of a new company (built by scripts/build-seed.mjs)
+//   db/seed.sql, db/charts/, db/profiles/ first-run data of a new company (build-chart.mjs, build-seed.mjs)
 //   db/migrations/           the schema, applied to a company's database when it is opened
 // Run by `npm run desktop:build`; tauri.conf.json bundles desktop-bundle/ as resources.
 import { spawnSync } from "child_process";
@@ -17,10 +17,9 @@ const run = (cmd, args, env = {}) => {
   if (r.status !== 0) throw new Error(`${cmd} ${args.join(" ")} failed`);
 };
 
-if (!existsSync(path.join(root, "db", "seed.sql"))) {
-  console.log("db/seed.sql is missing: building it from the workbook files first.");
-  run("node", ["scripts/build-seed.mjs"]);
-}
+// The chart of accounts comes from scripts/chart-data.mjs; always rebuild it so the installer carries the current one.
+run("node", ["scripts/build-chart.mjs"]);
+if (!existsSync(path.join(root, "db", "profiles"))) run("node", ["scripts/build-seed.mjs"]);
 
 // Clear the previous bundle first, so a build never traces or packages the last one.
 rmSync(out, { recursive: true, force: true });
@@ -35,6 +34,7 @@ if (existsSync(path.join(root, "public"))) cpSync(path.join(root, "public"), pat
 mkdirSync(path.join(out, "db"), { recursive: true });
 cpSync(path.join(root, "db", "migrations"), path.join(out, "db", "migrations"), { recursive: true });
 copyFileSync(path.join(root, "db", "seed.sql"), path.join(out, "db", "seed.sql"));
+cpSync(path.join(root, "db", "charts"), path.join(out, "db", "charts"), { recursive: true });
 cpSync(path.join(root, "db", "profiles"), path.join(out, "db", "profiles"), { recursive: true });
 copyFileSync(process.execPath, path.join(out, process.platform === "win32" ? "node.exe" : "node"));
 console.log("desktop-bundle ready:", out);

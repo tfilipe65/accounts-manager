@@ -22,6 +22,7 @@ export const SECTIONS: { key: string; href: string; label: string; group: MenuGr
   { key: "expense", href: "/expense", label: "Expenses", group: "Transactions" },
   { key: "banking", href: "/banking", label: "Banks & Cash", group: "Transactions" },
   { key: "journal", href: "/journal", label: "Journal Entries", group: "Transactions" },
+  { key: "year-end-stock", href: "/year-end-stock", label: "Year-End Stock", group: "Transactions" },
   { key: "opening-balance", href: "/opening-balance", label: "Opening Balances", group: "Transactions" },
   // Data analysis
   { key: "dashboard", href: "/", label: "Dashboard", group: "Data analysis" },

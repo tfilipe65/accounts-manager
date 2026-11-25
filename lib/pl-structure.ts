@@ -1,25 +1,32 @@
 // The one Profit & Loss structure every page uses (P&L, Income Statement, Dashboard), so the same
 // year can never show two different "Sales", "Costs" or "Result".
 //
-//   Revenue                        subgroup 200
+// Found by the role of each subgroup (lib/roles.ts), not by number:
+//   Revenue                        role revenue
 //   - Cost of sales                group 2
 //   = Gross profit
-//   - Operating expenses           group 3, except subgroups 320 and 340
+//   - Operating expenses           group 3, except other_expense
 //   = Operating result
-//   + Other income & gains         subgroup 210
-//   - Other expenses & losses      subgroup 320 (interest paid is in here)
+//   + Other income & gains         roles other_income and interest_income
+//   - Other expenses & losses      roles other_expense and interest_expense
 //   = Income before tax
-//   - Income tax                   subgroup 340
+//   - Income tax                   role income_tax
 //   = Net income
 //
 // Plain functions only (no server actions), so server and client code can both import them.
 
-export const SUBGROUP = { REVENUE: 200, OTHER_INCOME: 210, OTHER_EXPENSES: 320, INCOME_TAX: 340 } as const;
+const ROLES = {
+  revenue: ["revenue"],
+  otherIncome: ["other_income", "interest_income"],
+  otherExpenses: ["other_expense", "interest_expense"],
+  incomeTax: ["income_tax"],
+} as const;
+const hasRole = (l: { role: string | null }, roles: readonly string[]) => l.role != null && roles.includes(l.role);
 
 export type Series = number[]; // twelve months, January first
 
 /** One subgroup's monthly net as (debit - credit), straight from the ledger. */
-export type MonthlyLine = { subgroup_no: number; subgroup_name: string; group_no: number; net: Series };
+export type MonthlyLine = { subgroup_no: number; subgroup_name: string; group_no: number; role: string | null; net: Series };
 
 export type PLLine = { subgroup_no: number; name: string; months: Series; total: number };
 
@@ -51,17 +58,18 @@ export const neg = (s: Series): Series => s.map((v) => -v);
 export const quarter = (s: Series, q: number): number => s.slice((q - 1) * 3, q * 3).reduce((a, b) => a + b, 0);
 
 export function buildStatement(year: number, lines: MonthlyLine[]): PLStatement {
-  const income = (no: number) => neg(lines.filter((l) => l.subgroup_no === no).reduce((acc, l) => add(acc, l.net), zeros()));
+  const income = (roles: readonly string[]) => neg(lines.filter((l) => hasRole(l, roles)).reduce((acc, l) => add(acc, l.net), zeros()));
   const costOf = (pick: (l: MonthlyLine) => boolean) => lines.filter(pick).reduce((acc, l) => add(acc, l.net), zeros());
   const toLine = (l: MonthlyLine): PLLine => ({ subgroup_no: l.subgroup_no, name: l.subgroup_name, months: l.net, total: sum(l.net) });
-  const isOpex = (l: MonthlyLine) => l.group_no === 3 && l.subgroup_no !== SUBGROUP.OTHER_EXPENSES && l.subgroup_no !== SUBGROUP.INCOME_TAX;
+  const isOpex = (l: MonthlyLine) => l.group_no === 3 && !hasRole(l, ROLES.otherExpenses) && !hasRole(l, ROLES.incomeTax);
+  const isOtherExpense = (l: MonthlyLine) => hasRole(l, ROLES.otherExpenses);
 
-  const revenue = income(SUBGROUP.REVENUE);
-  const otherIncome = income(SUBGROUP.OTHER_INCOME);
+  const revenue = income(ROLES.revenue);
+  const otherIncome = income(ROLES.otherIncome);
   const costOfSales = costOf((l) => l.group_no === 2);
   const operatingExpenses = costOf(isOpex);
-  const otherExpenses = costOf((l) => l.subgroup_no === SUBGROUP.OTHER_EXPENSES);
-  const incomeTax = costOf((l) => l.subgroup_no === SUBGROUP.INCOME_TAX);
+  const otherExpenses = costOf(isOtherExpense);
+  const incomeTax = costOf((l) => hasRole(l, ROLES.incomeTax));
 
   const grossProfit = sub(revenue, costOfSales);
   const operatingResult = sub(grossProfit, operatingExpenses);
@@ -76,7 +84,7 @@ export function buildStatement(year: number, lines: MonthlyLine[]): PLStatement 
     operatingExpenses,
     operatingResult,
     otherIncome,
-    otherExpenseLines: lines.filter((l) => l.subgroup_no === SUBGROUP.OTHER_EXPENSES).map(toLine).filter((l) => Math.abs(l.total) > 0.005),
+    otherExpenseLines: lines.filter(isOtherExpense).map(toLine).filter((l) => Math.abs(l.total) > 0.005),
     otherExpenses,
     incomeBeforeTax,
     incomeTax,

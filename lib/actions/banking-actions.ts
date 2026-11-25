@@ -6,12 +6,15 @@
 // Each row is either a payment against a sales/purchase invoice (matched by id) or a direct
 // entry against a ledger account (bank charges, wages, transfers, etc.) -- never more than one,
 // enforced by the bank_transactions_one_link CHECK constraint. A direct entry can also name the
-// employee it was for. The two legs of a transfer between our own accounts share a transfer_id.
+// employee it was for. The two legs of a transfer between our own accounts share a transfer_id, and the
+// parts of a split transaction (lib/actions/split-actions.ts) share a split_id: together they are one
+// line on the bank statement.
 
 import { revalidatePath } from "next/cache";
 import { query, queryOne, withTransaction } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
+import { requireAccountByRole } from "@/lib/roles";
 
 export type BankAccountSummary = {
   id: number;
@@ -60,7 +63,7 @@ export async function listBankAccounts(asOfDate?: string, includeInactive = fals
     LEFT JOIN (
       SELECT bank_account_id,
              SUM(in_amount + in_vat - out_amount - out_vat) AS moved,
-             COUNT(*) FILTER (WHERE NOT reconciled) AS unreconciled
+             COUNT(DISTINCT COALESCE(split_id, id::text)) FILTER (WHERE NOT reconciled) AS unreconciled
       FROM bank_transactions WHERE $1::date IS NULL OR payment_date <= $1::date GROUP BY bank_account_id
     ) bt ON bt.bank_account_id = ba.id
     WHERE $2::boolean OR ba.active
@@ -94,6 +97,12 @@ export type BankTransactionRow = {
   link_label: string | null; // e.g. "Sales invoice INV-001", "2000 General Sales", "Transfer"
   employee_name: string | null;
   transfer_id: string | null;
+  /** Parts of one split transaction share this. */
+  split_id: string | null;
+  account_no: number | null;
+  sales_invoice_id: number | null;
+  purchase_invoice_id: number | null;
+  employee_id: number | null;
   reconciled: boolean;
   vat_perc: number | null;
   in_amount: number;
@@ -116,6 +125,10 @@ export async function listBankTransactions(bankAccountId: number, year?: number)
     account_name: string | null;
     employee_name: string | null;
     transfer_id: string | null;
+    split_id: string | null;
+    sales_invoice_id: number | null;
+    purchase_invoice_id: number | null;
+    employee_id: number | null;
     reconciled: boolean;
     vat_perc: string | null;
     in_amount: string;
@@ -123,7 +136,7 @@ export async function listBankTransactions(bankAccountId: number, year?: number)
     out_amount: string;
     out_vat: string;
   }>(
-    `SELECT bt.id, bt.payment_date, bt.description,
+    `SELECT bt.id, bt.payment_date, bt.description, bt.split_id, bt.sales_invoice_id, bt.purchase_invoice_id, bt.employee_id,
             si.invoice_number AS sales_invoice_number,
             pi.invoice_number AS purchase_invoice_number,
             bt.account_no, a.name AS account_name, e.name AS employee_name, bt.transfer_id, bt.reconciled,
@@ -152,6 +165,11 @@ export async function listBankTransactions(bankAccountId: number, year?: number)
             : null,
     employee_name: r.employee_name,
     transfer_id: r.transfer_id,
+    split_id: r.split_id,
+    account_no: r.account_no,
+    sales_invoice_id: r.sales_invoice_id,
+    purchase_invoice_id: r.purchase_invoice_id,
+    employee_id: r.employee_id,
     reconciled: r.reconciled,
     vat_perc: r.vat_perc != null ? Number(r.vat_perc) : null,
     in_amount: Number(r.in_amount),
@@ -271,11 +289,12 @@ export async function getBankTransaction(id: number): Promise<(BankTransactionIn
 
 export async function updateBankTransaction(id: number, input: BankTransactionInput): Promise<void> {
   const session = await requireSession();
-  const existing = await queryOne<{ payment_date: string; transfer_id: string | null }>(
-    "SELECT payment_date, transfer_id FROM bank_transactions WHERE id = $1",
+  const existing = await queryOne<{ payment_date: string; transfer_id: string | null; split_id: string | null }>(
+    "SELECT payment_date, transfer_id, split_id FROM bank_transactions WHERE id = $1",
     [id]
   );
   if (existing?.transfer_id) throw new Error("A transfer has two sides. Delete it and enter it again to change it.");
+  if (existing?.split_id) throw new Error("This line is one part of a split transaction. Edit the split instead.");
   if (existing) await assertYearOpen(existing.payment_date, session);
   await assertYearOpen(input.payment_date, session);
   const link = linkFields(input);
@@ -305,13 +324,14 @@ export async function updateBankTransaction(id: number, input: BankTransactionIn
 
 export async function deleteBankTransaction(id: number): Promise<void> {
   const session = await requireSession();
-  const existing = await queryOne<{ payment_date: string; transfer_id: string | null }>(
-    "SELECT payment_date, transfer_id FROM bank_transactions WHERE id = $1",
+  const existing = await queryOne<{ payment_date: string; transfer_id: string | null; split_id: string | null }>(
+    "SELECT payment_date, transfer_id, split_id FROM bank_transactions WHERE id = $1",
     [id]
   );
   if (existing) await assertYearOpen(existing.payment_date, session);
-  // Both sides of a transfer go together.
+  // Both sides of a transfer, and all the parts of a split, go together.
   if (existing?.transfer_id) await query("DELETE FROM bank_transactions WHERE transfer_id = $1", [existing.transfer_id]);
+  else if (existing?.split_id) await query("DELETE FROM bank_transactions WHERE split_id = $1", [existing.split_id]);
   else await query("DELETE FROM bank_transactions WHERE id = $1", [id]);
   revalidateBanking();
 }
@@ -319,7 +339,11 @@ export async function deleteBankTransaction(id: number): Promise<void> {
 /** Tick / untick "matched against the bank statement". */
 export async function setBankTransactionReconciled(id: number, reconciled: boolean): Promise<void> {
   await requireSession();
-  await query("UPDATE bank_transactions SET reconciled = $2 WHERE id = $1", [id, reconciled]);
+  // The parts of a split are one line on the statement: they are ticked together.
+  await query(
+    "UPDATE bank_transactions SET reconciled = $2 WHERE id = $1 OR split_id = (SELECT split_id FROM bank_transactions WHERE id = $1)",
+    [id, reconciled]
+  );
   revalidatePath("/banking");
 }
 
@@ -344,11 +368,7 @@ export type TransferInput = {
 
 /** The ledger account both sides of a transfer post to (nets to zero). */
 async function transferAccountNo(): Promise<number> {
-  const row =
-    (await queryOne<{ account_no: number }>("SELECT account_no FROM accounts WHERE account_no = 1170")) ??
-    (await queryOne<{ account_no: number }>("SELECT account_no FROM accounts WHERE name ILIKE 'Transfers%' ORDER BY account_no LIMIT 1"));
-  if (!row) throw new Error("The chart of accounts has no 'Transfers Between A/C's' account. Add one (account 1170) first.");
-  return row.account_no;
+  return requireAccountByRole("transfers_clearing", "Transfers between own accounts");
 }
 
 /** Move money between two of our own accounts: an "out" on one and an "in" on the other, tied together. */
@@ -404,7 +424,7 @@ export async function getReconciliationFigures(bankAccountId: number): Promise<R
     `SELECT COALESCE((SELECT SUM(debit - credit) FROM opening_balances ob JOIN bank_accounts ba ON ba.account_no = ob.account_no WHERE ba.id = $1), 0) AS opening,
             COALESCE(SUM(in_amount + in_vat - out_amount - out_vat), 0) AS moved,
             COALESCE(SUM(in_amount + in_vat - out_amount - out_vat) FILTER (WHERE reconciled), 0) AS reconciled,
-            COUNT(*) FILTER (WHERE NOT reconciled) AS unreconciled
+            COUNT(DISTINCT COALESCE(split_id, id::text)) FILTER (WHERE NOT reconciled) AS unreconciled
      FROM bank_transactions WHERE bank_account_id = $1`,
     [bankAccountId]
   );

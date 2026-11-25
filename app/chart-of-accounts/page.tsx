@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { query } from "@/lib/db";
+import { listSubgroupOptions } from "@/lib/actions/account-actions";
+import AccountDialogButton from "@/components/AccountDialog";
 import { deleteAccountAction } from "@/lib/actions/account-form-actions";
 
 type AccountRow = {
@@ -27,7 +28,7 @@ async function getAccounts(): Promise<AccountRow[]> {
 }
 
 export default async function ChartOfAccountsPage() {
-  const accounts = await getAccounts();
+  const [accounts, subgroups] = await Promise.all([getAccounts(), listSubgroupOptions()]);
 
   const byGroup = new Map<string, { group: AccountRow; bySubgroup: Map<number, AccountRow[]> }>();
   for (const a of accounts) {
@@ -44,9 +45,11 @@ export default async function ChartOfAccountsPage() {
         <h1 className="text-2xl font-semibold text-primary">Chart of Accounts</h1>
         <div className="flex items-center gap-4">
           <span className="text-sm text-neutral-600">{accounts.length} accounts</span>
-          <Link href="/chart-of-accounts/new" className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">
-            + New account
-          </Link>
+          <AccountDialogButton
+            subgroups={subgroups}
+            label="+ New account"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+          />
         </div>
       </div>
 
@@ -83,9 +86,12 @@ export default async function ChartOfAccountsPage() {
                           </td>
                           <td className="w-28 py-1 text-right">
                             <div className="flex items-center justify-end gap-3">
-                              <Link href={`/chart-of-accounts/${a.account_no}`} className="text-xs text-primary hover:underline">
-                                Edit
-                              </Link>
+                              <AccountDialogButton
+                                subgroups={subgroups}
+                                account={{ account_no: a.account_no, name: a.name, subgroup_no: a.subgroup_no, is_reserved: a.is_reserved }}
+                                label="Edit"
+                                className="text-xs text-primary hover:underline"
+                              />
                               <form action={deleteAccountAction.bind(null, a.account_no)}>
                                 <button type="submit" className="text-xs text-neutral-500 hover:text-red-700">
                                   Delete

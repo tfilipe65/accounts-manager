@@ -7,15 +7,16 @@
 //
 // The schema is the files in db/migrations; they are applied to a company's database when it is
 // first opened (and recorded in _migrations). A brand-new company database is filled once from
-// db/seed.sql (the chart of accounts and defaults) plus db/profiles/<company>.sql when that exists;
-// both are built by scripts/build-seed.mjs.
+// db/seed.sql (groups, subgroups and defaults), the chart of its business template (db/charts/<T>.sql)
+// and db/profiles/<company>.sql when that exists. scripts/build-chart.mjs builds the first two,
+// scripts/build-seed.mjs the profiles.
 
 import type { PGlite } from "@electric-sql/pglite";
 import fs from "fs";
 import path from "path";
 import { resourcesDir } from "./data-dir";
 import { getCurrentCompany } from "./current-company";
-import { companyDbDir, type Company } from "./companies";
+import { companyDbDir, companyTemplate, type Company } from "./companies";
 import { autoBackup } from "./backup";
 
 // A result row: any set of named columns (the same loose shape the old Postgres driver used).
@@ -52,12 +53,17 @@ async function applyMigrationsAndSeed(db: PGlite, company: Company): Promise<voi
   if (!applied.has("__seed__")) {
     const seedFile = path.join(resourcesDir(), "db", "seed.sql");
     if (fs.existsSync(seedFile)) {
+      const template = companyTemplate(company);
+      const chartFile = path.join(resourcesDir(), "db", "charts", `${template}.sql`);
+      if (!fs.existsSync(chartFile)) throw new Error(`The chart of accounts for template ${template} is missing (db/charts).`);
       const profileFile = path.join(resourcesDir(), "db", "profiles", `${company.slug}.sql`);
       const profile = fs.existsSync(profileFile) ? fs.readFileSync(profileFile, "utf8") : "";
       const name = company.name.replace(/'/g, "''");
       // One exec: the chart of accounts, this company's name, its profile -- all or nothing.
       await db.exec(
         fs.readFileSync(seedFile, "utf8") +
+          "\n" +
+          fs.readFileSync(chartFile, "utf8") +
           `\nUPDATE app_settings SET company_name = '${name}' WHERE id = 1;\n` +
           profile +
           `\nINSERT INTO _migrations (name) VALUES ('__seed__');`

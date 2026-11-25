@@ -19,7 +19,8 @@
 //   4. bank_transactions           direct entries ALSO post the opposite side to the
 //                                  named account_no: debit = out (money left the bank
 //                                  for this account, e.g. an expense), credit = in
-//                                  (money came in from this account, e.g. revenue).
+//                                  (money came in from this account, e.g. revenue). That is the NET
+//                                  amount: the VAT on a direct entry goes to the VAT accounts (9, 10).
 //   5. sales_invoice_lines         revenue recognised: credits the line's own account_no
 //   6. purchase_invoice_lines      expense recognised: debits the line's own account_no
 //   7. AR (app_settings.account_no_ar)              debited by invoice gross, credited by payments linked to it
@@ -54,6 +55,7 @@ export type TrialBalanceRow = {
   statement: "P&L" | "Balance Sheet";
   subgroup_no: number;
   subgroup_name: string;
+  subgroup_role: string | null;
   normal_balance: "debit" | "credit";
   debit: number;
   credit: number;
@@ -93,12 +95,13 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
     statement: "P&L" | "Balance Sheet";
     subgroup_no: number;
     subgroup_name: string;
+    subgroup_role: string | null;
     normal_balance: "debit" | "credit";
     net: string;
   }>(
     `
     SELECT a.account_no, a.name AS account_name, g.group_no, g.name AS group_name, g.statement,
-           sg.subgroup_no, sg.name AS subgroup_name, sg.normal_balance,
+           sg.subgroup_no, sg.name AS subgroup_name, sg.role AS subgroup_role, sg.normal_balance,
       (
         COALESCE(ob.net, 0)
         + COALESCE(je.net, 0)
@@ -108,8 +111,8 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
         + COALESCE(pil.net, 0)
         + CASE WHEN a.account_no = $1 THEN COALESCE(ar.gross, 0) - COALESCE(ar_paid.paid, 0) ELSE 0 END
         - CASE WHEN a.account_no = $2 THEN COALESCE(ap.gross, 0) - COALESCE(ap_paid.paid, 0) ELSE 0 END
-        - CASE WHEN a.account_no = $3 THEN COALESCE(sales_vat.vat, 0) ELSE 0 END
-        + CASE WHEN a.account_no = $4 THEN COALESCE(purch_vat.vat, 0) ELSE 0 END
+        - CASE WHEN a.account_no = $3 THEN COALESCE(sales_vat.vat, 0) + COALESCE(direct_vat.vat_in, 0) ELSE 0 END
+        + CASE WHEN a.account_no = $4 THEN COALESCE(purch_vat.vat, 0) + COALESCE(direct_vat.vat_out, 0) ELSE 0 END
       ) AS net
     FROM accounts a
     JOIN account_subgroups sg ON sg.subgroup_no = a.subgroup_no
@@ -129,7 +132,7 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
       GROUP BY ba.account_no
     ) bank_ledger ON bank_ledger.account_no = a.account_no
     LEFT JOIN (
-      SELECT account_no, SUM(out_amount + out_vat - in_amount - in_vat) AS net
+      SELECT account_no, SUM(out_amount - in_amount) AS net
       FROM bank_transactions WHERE account_no IS NOT NULL AND ($5::date IS NULL OR payment_date <= $5::date) GROUP BY account_no
     ) bt_direct ON bt_direct.account_no = a.account_no
     LEFT JOIN (
@@ -170,6 +173,10 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
       FROM purchase_invoice_lines pil JOIN purchase_invoices pi ON pi.id = pil.purchase_invoice_id
       WHERE ($5::date IS NULL OR pi.date <= $5::date) AND ($6::date IS NULL OR pi.date >= $6::date)
     ) purch_vat ON true
+    LEFT JOIN (
+      SELECT SUM(in_vat) AS vat_in, SUM(out_vat) AS vat_out
+      FROM bank_transactions WHERE account_no IS NOT NULL AND ($5::date IS NULL OR payment_date <= $5::date)
+    ) direct_vat ON true
     ORDER BY a.account_no
     `,
     [
@@ -200,6 +207,7 @@ export async function getTrialBalance(asOfDate?: string): Promise<{ rows: TrialB
       statement: r.statement,
       subgroup_no: r.subgroup_no,
       subgroup_name: r.subgroup_name,
+      subgroup_role: r.subgroup_role,
       normal_balance: r.normal_balance,
       debit,
       credit,

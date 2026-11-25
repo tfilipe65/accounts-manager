@@ -1,29 +1,38 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import type { Account, SubgroupOption } from "@/lib/actions/account-actions";
 
-type FormState = { error?: string } | undefined;
+type FormState = { error?: string; success?: boolean } | undefined;
 
 export default function AccountForm({
   subgroups,
   action,
   initial,
+  onSaved,
+  autoFocus,
 }: {
   subgroups: SubgroupOption[];
   action: (prev: FormState, fd: FormData) => Promise<FormState>;
   initial?: Account;
+  /** Called once the account has been saved (a floating window closes itself here). */
+  onSaved?: () => void;
+  autoFocus?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
+
+  useEffect(() => {
+    if (state?.success) onSaved?.();
+  }, [state, onSaved]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         <Field label="Account #">
-          <input type="number" name="account_no" defaultValue={initial?.account_no} required className="input" />
+          <input type="number" name="account_no" defaultValue={initial?.account_no} required autoFocus={autoFocus && !initial} className="input" />
         </Field>
         <Field label="Name" className="md:col-span-2">
-          <input name="name" defaultValue={initial?.name} required className="input" />
+          <input name="name" defaultValue={initial?.name} required autoFocus={autoFocus && !!initial} className="input" />
         </Field>
         <Field label="Subgroup" className="md:col-span-3">
           <select name="subgroup_no" defaultValue={initial?.subgroup_no ?? ""} required className="input">

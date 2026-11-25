@@ -39,17 +39,15 @@ export type BalanceSheet = {
   inventory: number;
 };
 
-const INVENTORY_SUBGROUP = 90;
-const CASH_SUBGROUP = 10;
-const RECEIVABLES_SUBGROUP = 30;
-
 /** Stock is a current asset whatever group an older chart filed it under. */
 function sectionOf(r: TrialBalanceRow): number {
-  return r.subgroup_no === INVENTORY_SUBGROUP ? 4 : r.group_no;
+  return r.subgroup_role === "inventory" ? 4 : r.group_no;
 }
 
+/** Assets are shown as debit less credit, so accumulated depreciation (a credit) reduces them; liabilities and equity the other way. */
 function signed(r: TrialBalanceRow): number {
-  return r.normal_balance === "debit" ? r.debit - r.credit : r.credit - r.debit;
+  const asset = sectionOf(r) === 4 || sectionOf(r) === 5;
+  return asset ? r.debit - r.credit : r.credit - r.debit;
 }
 
 function totals(rows: TrialBalanceRow[], pick: (r: TrialBalanceRow) => boolean): { lines: BSLine[]; total: number } {
@@ -87,7 +85,7 @@ export async function getBalanceSheet(year: number): Promise<BalanceSheet> {
   const totalAssets = ca.total + nca.total;
   const totalEquity = eq.total + retainedPriorYears + resultOfYear;
   const totalLiabilitiesAndEquity = liab.total + ltd.total + totalEquity;
-  const balanceOf = (subgroup: number) => rows.filter((r) => r.subgroup_no === subgroup).reduce((s, r) => s + signed(r), 0);
+  const balanceOf = (role: string) => rows.filter((r) => r.subgroup_role === role).reduce((s, r) => s + signed(r), 0);
 
   return {
     year,
@@ -107,8 +105,8 @@ export async function getBalanceSheet(year: number): Promise<BalanceSheet> {
     totalEquity,
     totalLiabilitiesAndEquity,
     difference: totalAssets - totalLiabilitiesAndEquity,
-    cash: balanceOf(CASH_SUBGROUP),
-    receivables: balanceOf(RECEIVABLES_SUBGROUP),
-    inventory: balanceOf(INVENTORY_SUBGROUP),
+    cash: balanceOf("cash"),
+    receivables: balanceOf("receivables"),
+    inventory: balanceOf("inventory"),
   };
 }

@@ -1,0 +1,91 @@
+﻿Old number;Old name;New number;Why
+100;Business Check Acct.;1210;Bank account 1
+110;Business IVA Acct.;1220;Bank account 2
+122;Cash Account;1230;It is a bank account, not cash
+130;Petty Cash Acct.;1110;
+300;Accounts Receivable;2110;
+301;Other Current Assets;2781;
+720;Plant & Machinery;4330;
+740;Equipment;4350;
+760;Motor Vehicles;4340;
+780;Other Non-Currents Assets;4110;
+790;Inventory;3210;Stock is a current asset
+1000;Accounts Payable;2210;
+1110;Interest Payable;2723;Accrued cost
+1120;Sales Tax Payable;2433;VAT charged
+1130;Purchases Tax Payable;2432;VAT recoverable
+1150;Payroll Tax - IRS;2421;
+1160;Income Tax - IRC;2414;
+1170;Transfers Between A/C's;1290;Moves to cash and bank: it is a clearing account, not a liability
+1180;Credits & Loans;2511 / 2514;Split into due within and after a year
+1200;Capital;5110;
+1210;Owners Contributions;5310;
+1230;Owners Draw;2631;
+1400;Retained Earnings;5610;
+1410;Other Reserves;5590;
+1420;Current Year P/L;(dropped);"The app works out the year's result itself; a manual account invited double counting"
+2000;General Sales;7211 / 7120 / 7221 / 7231;By business: construction / carpentry / decorations / property management
+2010;Credits/Discounts Allowed;7190;
+2020;Investment Income;7910;"Was under revenue; it is financial income"
+2030;Gains from sale of Assets;7885;
+2040;Other Income;7889;
+2050;Tax Refunds;(dropped);"A refund reduces the tax account it came from; booking it as income overstates profit. Use 2437."
+2060;Insurance Claims;7881;
+2070;Interest Earned;7910;
+2100;Material Purchases;6110;Carpentry: 6111 to 6113
+2110;Field Staff - Wages;6321;Direct labour
+2120;Subcontractors;6211;
+2130;Professional Services;6212;
+2140;Equipment & Consumables;6213 / 6215;Hire versus consumables
+2150;Credits Received;6190;Contra account
+2160;Waste Disposal;6214;
+2170;Other Job Costs;6216;
+2200;Advertising;6222;
+2210;Marketing & Promotions;6222;Merged
+2220;Gifs and Samples;6234;
+2230;Bad Debts;6830;
+2240;Education & Training;6382;
+2250;Commissions Paid;6225;
+2270;Licenses & Permits;6813;
+2280;Office Supplies;6233;
+2290;External Services;6268;
+2300;Postage & Deliveries;6268;Merged
+2310;Printing & Reproduction;6233;Merged
+2320;Salaries (Admin);6322;
+2330;Subscriptions;62682;
+2340;Other Admin Expenses;6268;Merged
+2350;Food & Beverages (Office);6266;
+2360;Payroll Expenses/Benefits;6371 / 6382;
+2370;Loan Repayments;2511;"Repaying principal reduces the loan; only the interest (6911) is a cost"
+2500;Fuel and Petrol;6242;
+2510;Auto Inspections - MOT;6227;Merged
+2520;Auto Maintenance & Repairs;6227;
+2530;Tolls & Parking;6252;
+2540;IUC - Imp. Unico Circulação;6811;
+2600;Automotive Insurance;62631;
+2610;Builders Insurance;62632;Merged with liability and business insurance
+2620;Health Insurance;6371;
+2630;Public Liability;62632;Merged
+2640;Business Insurance;62632;Merged
+2650;Workers Comp. Insurance;6361 / 6362;By direct or office staff
+2700;Accounting Fees;6224;
+2710;Legal Fees;6265;
+2720;Other Professionals;6224;Merged
+2810;Meals & Restaurants;6266;Merged
+2820;Travel Expenses;6251;
+2830;Health & Safety;6381 / 6382;
+2900;Electricity;6241;
+2910;Telephone & Internet;6262;
+2930;Water;6243;
+2940;Hardware;6231;"Small items expensed; larger purchases are fixed assets (4350)"
+2950;Software;62682;Merged
+2960;Webservices;62682;Merged
+2970;Fundo de Compensação;6351 / 6352;Employer charge
+2990;IGFSS - Seg. Social;2451 (+ 6351 / 6352);"Owed to the State; only the employer share is a cost"
+3000;IVA - Paid / Received;2436;
+3010;Retenção na Fonte;2421;Withheld from pay, owed to the State: a liability, not a cost
+3020;Income Tax Expense;8121;
+3030;Interest Expense;6911;
+3040;Bank Fees;62681;
+3050;Finance Charges;6981;
+3060;Assets Depreciation;6422 to 6441;By class of asset

@@ -53,6 +53,12 @@ export default function EmployeeForm({ action, initial }: { action: (prev: FormS
         <Field label="Monthly salary">
           <input type="number" step="0.01" name="monthly_salary" defaultValue={initial?.monthly_salary ?? ""} className="input" />
         </Field>
+        <Field label="Pay is charged to">
+          <select name="cost_type" defaultValue={initial?.cost_type ?? "office"} className="input">
+            <option value="direct">Cost of sales (site and workshop staff)</option>
+            <option value="office">Operating expenses (office and management)</option>
+          </select>
+        </Field>
         <Field label="Status">
           <select name="status" defaultValue={initial?.status ?? "Active"} className="input">
             <option value="Active">Active</option>

@@ -69,10 +69,12 @@ function formatMetric(m: Metric): string {
   }
 }
 
-const STATUS_STYLE: Record<Exclude<MetricStatus, null>, { chip: string; text: string }> = {
-  good: { chip: "bg-green-100 text-green-800", text: "Healthy" },
-  watch: { chip: "bg-amber-100 text-amber-800", text: "Watch" },
-  bad: { chip: "bg-red-100 text-red-800", text: "Needs attention" },
+// Favourable results are blue, anything not favourable is red (a "watch" is a mild red: it is not yet bad
+// but it is not good either).
+const STATUS_STYLE: Record<Exclude<MetricStatus, null>, { chip: string; text: string; value: string }> = {
+  good: { chip: "bg-blue-100 text-blue-800", text: "Healthy", value: "text-[#1d5fbf]" },
+  watch: { chip: "bg-red-50 text-red-700", text: "Watch", value: "text-credit" },
+  bad: { chip: "bg-red-100 text-red-800", text: "Needs attention", value: "text-credit" },
 };
 
 function MetricCard({ m }: { m: Metric }) {
@@ -84,13 +86,25 @@ function MetricCard({ m }: { m: Metric }) {
           <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">{m.label}</span>
           {status && <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${status.chip}`}>{status.text}</span>}
         </div>
-        <span className="text-xl font-semibold text-primary">{formatMetric(m)}</span>
-        <span className="text-[11px] text-neutral-500 group-open:hidden">{m.value == null ? m.unavailable : "What does this mean?"}</span>
+        <span className={`text-xl font-semibold ${status ? status.value : "text-primary"}`}>{formatMetric(m)}</span>
+        <span className="text-[11px] text-neutral-500 group-open:hidden">
+          {m.value == null ? m.unavailable : m.advice.length > 0 && (m.status === "watch" || m.status === "bad") ? "What does this mean, and how to improve it" : "What does this mean?"}
+        </span>
       </summary>
       <div className="flex flex-col gap-2 border-t border-line p-3 text-xs">
         <p className="rounded bg-background px-2 py-1 font-mono text-[11px] text-neutral-700">{m.formula}</p>
         <p className="text-neutral-700">{m.explanation}</p>
         {m.value == null && m.unavailable && <p className="text-neutral-500">{m.unavailable}</p>}
+        {m.value != null && (m.status === "watch" || m.status === "bad") && m.advice.length > 0 && (
+          <div className={`rounded border px-2 py-2 ${m.status === "bad" ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"}`}>
+            <p className={`mb-1 font-semibold ${m.status === "bad" ? "text-red-800" : "text-amber-800"}`}>How to improve it</p>
+            <ul className="list-disc space-y-1 pl-4 text-neutral-700">
+              {m.advice.map((a) => (
+                <li key={a}>{a}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </details>
   );

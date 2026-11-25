@@ -1,7 +1,7 @@
 import { listCompanies } from "@/lib/companies";
 import { getMaster, hasMasterAdmin } from "@/lib/master-admin";
 import { openCompanyAction, masterLogoutAction } from "@/lib/actions/company-actions";
-import { AddCompanyForm, MasterLoginForm, SetupMasterForm } from "./MasterForms";
+import { AddCompanyForm, DemoDataForms, MasterLoginForm, SetupMasterForm } from "./MasterForms";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +48,7 @@ export default async function CompaniesPage() {
               </form>
             </div>
             <AddCompanyForm />
+            <DemoDataForms />
           </div>
         ) : masterExists ? (
           <div className="flex max-w-sm flex-col gap-3">

@@ -59,7 +59,8 @@ export async function masterLogoutAction() {
 export async function addCompanyAction(_prev: FormState, formData: FormData): Promise<FormState> {
   if (!(await getMaster())) return { error: "Only the administrator can add companies." };
   try {
-    addCompany(String(formData.get("name") || ""), String(formData.get("description") || ""));
+    const template = String(formData.get("template") || "C");
+    addCompany(String(formData.get("name") || ""), String(formData.get("description") || ""), (["C", "W", "I", "P", "K"].includes(template) ? template : "C") as "C" | "W" | "I" | "P" | "K");
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Could not add the company." };
   }

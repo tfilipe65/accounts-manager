@@ -95,7 +95,7 @@ async function withCounts(rows: AgeingRow[]): Promise<BucketTotal[]> {
   return totals.map((t) => ({ ...t, count: rows.filter((r) => r.bucket === t.bucket).length }));
 }
 
-// The years the picker offers: every year from five back to two ahead of the current year, widened to
+// The years the picker offers: every year from five back to five ahead of the current year, widened to
 // cover any year that has data or that Settings points at, with no gaps.
 export async function getAvailableReportingYears(): Promise<number[]> {
   await requireSession();
@@ -110,7 +110,7 @@ export async function getAvailableReportingYears(): Promise<number[]> {
   const current = new Date().getFullYear();
   const known = [...rows.map((r) => r.year), settings?.reporting_year ?? current, current];
   const first = Math.min(current - 5, ...known);
-  const last = Math.max(current + 2, ...known);
+  const last = Math.max(current + 5, ...known);
   return Array.from({ length: last - first + 1 }, (_, i) => first + i);
 }
 
@@ -308,6 +308,8 @@ export async function getDashboard(yearOverride?: number): Promise<DashboardData
     netIncome: sum(s.netIncome),
     interestPaid,
     salesInvoicedInclVat: keySales.gross,
+    purchasesInvoicedInclVat: keyPurchases.gross,
+    payables: summarize(payables.rows).amount,
     currentAssets: balanceSheet.totalCurrentAssets,
     currentLiabilities: balanceSheet.totalLiabilities,
     inventory: balanceSheet.inventory,

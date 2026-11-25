@@ -24,6 +24,8 @@ export type EmployeeInput = {
   end_date: string | null;
   monthly_salary: number | null;
   status: "Active" | "Inactive";
+  /** direct: site and workshop staff (a cost of sales); office: office and management (an operating expense). */
+  cost_type: "direct" | "office";
   notes: string | null;
 };
 
@@ -77,7 +79,7 @@ export async function getEmployee(id: number): Promise<Employee | null> {
   await requireSession();
   const r = await queryOne<Omit<Employee, "monthly_salary"> & { monthly_salary: string | null }>(
     `SELECT id, name, position, vat_number, social_security_number, address, zip, city, country, telephone, email, iban,
-            start_date, end_date, monthly_salary, status, notes
+            start_date, end_date, monthly_salary, status, cost_type, notes
      FROM employees WHERE id = $1`,
     [id]
   );
@@ -122,7 +124,7 @@ export async function listEmployeePayments(employeeId: number): Promise<Employee
 }
 
 const COLUMNS = `name, position, vat_number, social_security_number, address, zip, city, country, telephone, email, iban,
-  start_date, end_date, monthly_salary, status, notes`;
+  start_date, end_date, monthly_salary, status, notes, cost_type`;
 
 function values(input: EmployeeInput): unknown[] {
   return [
@@ -142,12 +144,13 @@ function values(input: EmployeeInput): unknown[] {
     input.monthly_salary,
     input.status,
     input.notes,
+    input.cost_type,
   ];
 }
 
 export async function createEmployee(input: EmployeeInput): Promise<void> {
   await requireSession();
-  await query(`INSERT INTO employees (${COLUMNS}) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`, values(input));
+  await query(`INSERT INTO employees (${COLUMNS}) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`, values(input));
   revalidatePath("/employees");
 }
 
@@ -155,7 +158,7 @@ export async function updateEmployee(id: number, input: EmployeeInput): Promise<
   await requireSession();
   await query(
     `UPDATE employees SET name=$2, position=$3, vat_number=$4, social_security_number=$5, address=$6, zip=$7, city=$8, country=$9,
-       telephone=$10, email=$11, iban=$12, start_date=$13, end_date=$14, monthly_salary=$15, status=$16, notes=$17 WHERE id=$1`,
+       telephone=$10, email=$11, iban=$12, start_date=$13, end_date=$14, monthly_salary=$15, status=$16, notes=$17, cost_type=$18 WHERE id=$1`,
     [id, ...values(input)]
   );
   revalidatePath("/employees");

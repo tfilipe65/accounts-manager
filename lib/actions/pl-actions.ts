@@ -7,7 +7,8 @@
 //
 // The query mirrors getTrialBalance()'s per-account pattern but restricted to P&L accounts and one
 // year: journal entries, direct bank entries (a bank fee, income paid straight into the bank with no
-// invoice raised), and the lines of sales and purchase invoices. Proforma invoices are quotes, not
+// invoice raised; only the net amount, the VAT goes to the VAT accounts), and the lines of sales and
+// purchase invoices. Proforma invoices are quotes, not
 // sales, so they never count.
 
 import { query } from "@/lib/db";
@@ -16,15 +17,15 @@ import { buildStatement, sum, zeros, type MonthlyLine, type PLLine, type PLState
 
 export async function getStatement(year: number): Promise<PLStatement> {
   await requireSession();
-  const rows = await query<{ subgroup_no: number; subgroup_name: string; group_no: number; month: number; net: string }>(
+  const rows = await query<{ subgroup_no: number; subgroup_name: string; group_no: number; role: string | null; month: number; net: string }>(
     `
-    SELECT sg.subgroup_no, sg.name AS subgroup_name, sg.group_no, x.month, SUM(x.net) AS net
+    SELECT sg.subgroup_no, sg.name AS subgroup_name, sg.group_no, sg.role, x.month, SUM(x.net) AS net
     FROM (
       SELECT EXTRACT(MONTH FROM je.date)::int AS month, a.subgroup_no, (je.debit - je.credit) AS net
       FROM journal_entries je JOIN accounts a ON a.account_no = je.account_no
       WHERE EXTRACT(YEAR FROM je.date) = $1
       UNION ALL
-      SELECT EXTRACT(MONTH FROM bt.payment_date)::int, a.subgroup_no, (bt.out_amount + bt.out_vat - bt.in_amount - bt.in_vat)
+      SELECT EXTRACT(MONTH FROM bt.payment_date)::int, a.subgroup_no, (bt.out_amount - bt.in_amount)
       FROM bank_transactions bt JOIN accounts a ON a.account_no = bt.account_no
       WHERE bt.account_no IS NOT NULL AND EXTRACT(YEAR FROM bt.payment_date) = $1
       UNION ALL
@@ -41,8 +42,8 @@ export async function getStatement(year: number): Promise<PLStatement> {
       WHERE EXTRACT(YEAR FROM pi.date) = $1
     ) x
     JOIN account_subgroups sg ON sg.subgroup_no = x.subgroup_no
-    WHERE sg.group_no IN (1, 2, 3)
-    GROUP BY sg.subgroup_no, sg.name, sg.group_no, x.month
+    WHERE sg.group_no IN (1, 2, 3, 9)
+    GROUP BY sg.subgroup_no, sg.name, sg.group_no, sg.role, x.month
     `,
     [year]
   );
@@ -51,7 +52,7 @@ export async function getStatement(year: number): Promise<PLStatement> {
   for (const r of rows) {
     let line = bySubgroup.get(r.subgroup_no);
     if (!line) {
-      line = { subgroup_no: r.subgroup_no, subgroup_name: r.subgroup_name, group_no: r.group_no, net: zeros() };
+      line = { subgroup_no: r.subgroup_no, subgroup_name: r.subgroup_name, group_no: r.group_no, role: r.role, net: zeros() };
       bySubgroup.set(r.subgroup_no, line);
     }
     line.net[r.month - 1] += Number(r.net);

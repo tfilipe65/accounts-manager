@@ -9,6 +9,7 @@ import { query, queryOne, withTransaction } from "@/lib/db";
 import { requireAdminForAction } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
 import { writeAudit } from "@/lib/audit";
+import { cashSubgroupNo } from "@/lib/roles";
 
 export type BankAccountInput = {
   name: string;
@@ -32,7 +33,8 @@ export async function listUnlinkedCashAccounts(): Promise<{ account_no: number; 
   await requireAdminForAction();
   return query<{ account_no: number; name: string }>(
     `SELECT a.account_no, a.name FROM accounts a
-     WHERE a.subgroup_no = 10 AND NOT EXISTS (SELECT 1 FROM bank_accounts ba WHERE ba.account_no = a.account_no)
+     WHERE a.subgroup_no IN (SELECT subgroup_no FROM account_subgroups WHERE role = 'cash')
+       AND a.role IS DISTINCT FROM 'transfers_clearing' AND NOT EXISTS (SELECT 1 FROM bank_accounts ba WHERE ba.account_no = a.account_no)
      ORDER BY a.account_no`
   );
 }
@@ -56,11 +58,11 @@ export async function createBankAccount(input: NewBankAccountInput): Promise<num
       if (!exists.rows.length) throw new Error(`Chart account ${accountNo} does not exist.`);
     } else {
       const free = await tx.query<{ n: number }>(
-        "SELECT n FROM generate_series(101, 999) n WHERE NOT EXISTS (SELECT 1 FROM accounts WHERE account_no = n) ORDER BY n LIMIT 1"
+        "SELECT n FROM generate_series(1230, 1289) n WHERE NOT EXISTS (SELECT 1 FROM accounts WHERE account_no = n) ORDER BY n LIMIT 1"
       );
-      if (!free.rows[0]) throw new Error("No free account number left between 101 and 999.");
+      if (!free.rows[0]) throw new Error("No free account number left between 1230 and 1289.");
       accountNo = free.rows[0].n;
-      await tx.query("INSERT INTO accounts (account_no, name, subgroup_no, is_reserved) VALUES ($1, $2, 10, true)", [accountNo, name]);
+      await tx.query("INSERT INTO accounts (account_no, name, subgroup_no, is_reserved) VALUES ($1, $2, $3, true)", [accountNo, name, await cashSubgroupNo(tx)]);
     }
     await tx.query("UPDATE accounts SET is_reserved = true WHERE account_no = $1", [accountNo]);
 

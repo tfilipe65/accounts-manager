@@ -194,7 +194,7 @@ export async function getChecks(year: number): Promise<ChecksResult> {
       "These bank entries are booked to a payroll account but do not say which employee they were for.",
       `SELECT bt.payment_date || ' ' || COALESCE(bt.description, '') || ' (' || a.name || ')' AS label
        FROM bank_transactions bt JOIN accounts a ON a.account_no = bt.account_no
-       WHERE a.subgroup_no = 310 AND bt.employee_id IS NULL AND bt.transfer_id IS NULL ORDER BY bt.payment_date DESC LIMIT 200`
+       WHERE (a.role IN ('wages_direct', 'wages_office') OR a.name ILIKE '%wage%' OR a.name ILIKE '%salar%') AND bt.employee_id IS NULL AND bt.transfer_id IS NULL ORDER BY bt.payment_date DESC LIMIT 200`
     ),
   ]);
 

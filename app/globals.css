@@ -53,3 +53,58 @@ body {
     outline-offset: -1px;
   }
 }
+
+/* The first block of every page (its title and buttons) stays put at the top of the scrolling area.
+   The block takes the page background so content slides underneath it. */
+.app-main > div > :first-child {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--background);
+  padding: 1.5rem 0 0.5rem;
+  box-shadow: 0 1px 0 var(--line);
+}
+
+@media print {
+  .app-main > div > :first-child {
+    position: static;
+    box-shadow: none;
+    padding: 0;
+  }
+}
+
+/* ---- welcome splash (components/Splash.tsx; same look as desktop/index.html) ---- */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: radial-gradient(ellipse at 50% 38%, #1f5a7a 0%, #123a50 45%, #0a2535 100%);
+  transition: opacity 0.5s ease;
+}
+.splash-out { opacity: 0; pointer-events: none; }
+html[data-splash-seen] .splash { display: none; }
+.splash-inner { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.splash-logo { width: 112px; height: 112px; filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.35)); animation: sp-pop 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.splash-line { stroke-dasharray: 260; stroke-dashoffset: 260; animation: sp-draw 0.9s ease-out forwards; }
+.splash-l2 { animation-delay: 0.25s; }
+.splash-l3 { animation-delay: 0.5s; }
+.splash-tick { opacity: 0; animation: sp-fade 0.4s ease-out 1s forwards; }
+.splash-title { margin: 26px 0 0; font-size: 34px; font-weight: 300; letter-spacing: 0.14em; text-transform: uppercase; animation: sp-rise 0.8s ease-out 0.3s both; }
+.splash-title b { font-weight: 600; color: #e8b923; }
+.splash-rule { width: 56px; height: 3px; border-radius: 2px; margin: 18px 0 16px; background: #d4a017; animation: sp-grow 0.7s ease-out 0.6s both; }
+.splash-tag { font-size: 13px; letter-spacing: 0.32em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); animation: sp-rise 0.8s ease-out 0.7s both; }
+.splash-bar { position: relative; width: 240px; height: 3px; margin-top: 44px; border-radius: 2px; overflow: hidden; background: rgba(255, 255, 255, 0.12); animation: sp-fade 0.6s ease-out 0.9s both; }
+.splash-bar::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; border-radius: 2px; background: linear-gradient(90deg, transparent, #e8b923, transparent); animation: sp-sweep 1.4s ease-in-out infinite; }
+@keyframes sp-pop { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: none; } }
+@keyframes sp-draw { to { stroke-dashoffset: 0; } }
+@keyframes sp-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sp-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes sp-grow { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: none; } }
+@keyframes sp-sweep { from { left: -40%; } to { left: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .splash * { animation-duration: 0.01s !important; animation-delay: 0s !important; }
+}

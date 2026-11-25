@@ -4,17 +4,49 @@
     <meta charset="utf-8" />
     <title>Accounts Manager</title>
     <style>
-      html, body { height: 100%; margin: 0; }
-      body { display: flex; align-items: center; justify-content: center; background: #0f3245; color: #fff; font-family: "Segoe UI", system-ui, sans-serif; }
-      main { text-align: center; }
-      h1 { font-size: 28px; font-weight: 600; margin: 0 0 8px; }
-      p { margin: 0; color: rgba(255, 255, 255, 0.7); }
+      html, body { height: 100%; margin: 0; overflow: hidden; }
+      body {
+        display: flex; align-items: center; justify-content: center; color: #fff;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: radial-gradient(ellipse at 50% 38%, #1f5a7a 0%, #123a50 45%, #0a2535 100%);
+      }
+      main { display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .logo { width: 112px; height: 112px; filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.35)); animation: pop 0.8s cubic-bezier(.2, .9, .3, 1.2) both; }
+      .line { stroke-dasharray: 260; stroke-dashoffset: 260; animation: draw 0.9s ease-out forwards; }
+      .l2 { animation-delay: 0.25s; } .l3 { animation-delay: 0.5s; }
+      .tick { opacity: 0; animation: fade 0.4s ease-out 1s forwards; }
+      h1 { margin: 26px 0 0; font-size: 34px; font-weight: 300; letter-spacing: 0.14em; text-transform: uppercase; animation: rise 0.8s ease-out 0.3s both; }
+      h1 b { font-weight: 600; color: #e8b923; }
+      .rule { width: 56px; height: 3px; border-radius: 2px; margin: 18px 0 16px; background: #d4a017; animation: grow 0.7s ease-out 0.6s both; }
+      .tag { margin: 0; font-size: 13px; letter-spacing: 0.32em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); animation: rise 0.8s ease-out 0.7s both; }
+      .bar { position: relative; width: 240px; height: 3px; margin-top: 44px; border-radius: 2px; overflow: hidden; background: rgba(255, 255, 255, 0.12); animation: fade 0.6s ease-out 0.9s both; }
+      .bar::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; border-radius: 2px; background: linear-gradient(90deg, transparent, #e8b923, transparent); animation: sweep 1.4s ease-in-out infinite; }
+      .status { margin: 14px 0 0; font-size: 12px; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.5); animation: fade 0.6s ease-out 1s both; }
+      @keyframes pop { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: none; } }
+      @keyframes draw { to { stroke-dashoffset: 0; } }
+      @keyframes fade { to { opacity: 1; } from { opacity: 0; } }
+      @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+      @keyframes grow { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: none; } }
+      @keyframes sweep { from { left: -40%; } to { left: 100%; } }
+      @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01s !important; animation-delay: 0s !important; } }
     </style>
   </head>
   <body>
     <main>
-      <h1>Accounts Manager</h1>
-      <p>Starting&hellip;</p>
+      <svg class="logo" viewBox="0 0 512 512" aria-hidden="true">
+        <rect width="512" height="512" rx="96" fill="#1b4b66" />
+        <rect x="96" y="112" width="320" height="288" rx="28" fill="#0f3245" />
+        <path class="line" d="M136 176h240" stroke="#d4a017" stroke-width="28" stroke-linecap="round" fill="none" />
+        <path class="line l2" d="M136 256h240" stroke="#d4a017" stroke-width="28" stroke-linecap="round" fill="none" />
+        <path class="line l3" d="M136 336h160" stroke="#d4a017" stroke-width="28" stroke-linecap="round" fill="none" />
+        <circle class="tick" cx="352" cy="336" r="40" fill="#d4a017" />
+        <path class="tick" d="M334 336l14 14 26-30" stroke="#0f3245" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+      </svg>
+      <h1>Accounts <b>Manager</b></h1>
+      <div class="rule"></div>
+      <div class="tag">Algarve Group</div>
+      <div class="bar"></div>
+      <p class="status">Starting&hellip;</p>
     </main>
   </body>
 </html>

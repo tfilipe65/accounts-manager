@@ -1,6 +1,6 @@
 [package]
 name = "accounts-manager"
-version = "0.3.0"
+version = "0.4.0"
 description = "Accounts Manager: bookkeeping for Teia Firme Lda"
 authors = ["Algarve Builders"]
 license = ""

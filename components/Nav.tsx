@@ -25,39 +25,47 @@ export default async function Nav({ user, company, allowed, labels }: { user: Se
     getClosedThroughYear(),
   ]);
   return (
-    <header className="fixed inset-y-0 left-0 z-40 flex print:hidden w-56 flex-col overflow-y-auto bg-primary text-white shadow-[14px_0_34px_-6px_rgba(0,0,0,0.42)]">
-      <div className="px-5 py-5">
-        <Link href="/" className="text-lg font-semibold leading-tight hover:text-white/80">
+    <>
+      {/* Always visible: which app, which company, which year, who. */}
+      <div className="fixed inset-x-0 top-0 z-50 flex h-12 items-center gap-4 whitespace-nowrap bg-primary-dark px-4 text-white shadow-md print:hidden">
+        <Link href="/" className="text-xl font-semibold hover:text-white/80">
           Accounts Manager
         </Link>
-        <span className="ml-2 text-xs text-white/50">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
+        <span className="-ml-2 text-sm text-white/50">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
         {company && (
-          <div className="mt-2 flex items-center gap-2 border-t border-white/15 pt-2 text-sm font-medium text-white">
+          <div className="flex items-center gap-2 border-l border-white/20 pl-4 text-xl font-semibold">
             {company.name}
             {company.test && <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold uppercase text-black">Test</span>}
           </div>
         )}
+        <div className="ml-auto flex items-center gap-5">
+          <ReportingYearSelector years={years} effectiveYear={effectiveYear} closedThroughYear={closedThroughYear} />
+          <span className="hidden text-base text-white/80 md:inline">
+            {user.name} <span className="text-white/50">({user.role === "ADMIN" ? "Admin" : "User"})</span>
+          </span>
+        </div>
       </div>
-      <ReportingYearSelector years={years} effectiveYear={effectiveYear} closedThroughYear={closedThroughYear} />
-      <NavMenu groups={groups} />
-      <div className="flex flex-col gap-2 border-t border-white/15 px-4 py-4 text-sm text-white/80">
-        <span>
-          {user.name} <span className="text-white/50">({user.role === "ADMIN" ? "Admin" : "User"})</span>
-        </span>
-        {user.id > 0 && (
-          <Link href="/account" className="rounded-md border border-white/30 px-3 py-1.5 text-center hover:bg-white/10">
-            My account
-          </Link>
-        )}
-                  <Link href="/companies" className="rounded-md border border-white/30 px-3 py-1.5 text-center hover:bg-white/10">
+
+      <header className="fixed bottom-0 left-0 top-12 z-40 flex w-56 flex-col bg-primary text-white shadow-[14px_0_34px_-6px_rgba(0,0,0,0.42)] print:hidden">
+        <div className="flex-1 overflow-y-auto pt-3">
+          <NavMenu groups={groups} />
+        </div>
+        <div className="flex flex-col gap-2 border-t border-white/15 px-4 py-3 text-sm text-white/80">
+          {user.id > 0 && (
+            <Link href="/account" className="rounded-md border border-white/30 px-3 py-1.5 text-center hover:bg-white/10">
+              My account
+            </Link>
+          )}
+          <Link href="/companies" className="rounded-md border border-white/30 px-3 py-1.5 text-center hover:bg-white/10">
             Switch company
           </Link>
-        <form action={logoutAction}>
-          <button type="submit" className="w-full rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10">
-            Log out
-          </button>
-        </form>
-      </div>
-    </header>
+          <form action={logoutAction}>
+            <button type="submit" className="w-full rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10">
+              Log out
+            </button>
+          </form>
+        </div>
+      </header>
+    </>
   );
 }
