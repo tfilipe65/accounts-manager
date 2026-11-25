@@ -110,7 +110,18 @@ export default function IncomeForm({
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-line">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[60rem] table-fixed text-sm">
+          <colgroup>
+            <col style={{ width: "12rem" }} />
+            <col />
+            <col style={{ width: "4.5rem" }} />
+            <col style={{ width: "6.5rem" }} />
+            <col style={{ width: "4.5rem" }} />
+            <col style={{ width: "4.5rem" }} />
+            <col style={{ width: "16rem" }} />
+            <col style={{ width: "6rem" }} />
+            <col style={{ width: "5rem" }} />
+          </colgroup>
           <thead>
             <tr className="border-b border-line bg-background text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
               <th className="px-2 py-2">Product/Service</th>
