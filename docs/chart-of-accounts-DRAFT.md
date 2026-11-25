@@ -12,13 +12,13 @@ The old chart (90 accounts, from the Teia workbook) had wrong classifications (w
 2. **Our own numbering, nothing official behind it.** This is an internal bookkeeping tool, so the numbers follow our groups. An account number has four digits: the first is the group (1 Income, 2 Cost of sales, 3 Operating expenses, 4 Current assets, 5 Non-current assets, 6 Liabilities, 7 Long-term debt, 8 Equity, 9 Financing and tax), the second is the subgroup within it (11 Revenue, 12 Other income, 13 Interest earned, and so on), and the last two number the account. A heading's number is therefore the start of every account under it.
 3. **Three levels stay:** section (a line of the statements) › subgroup › account. Subgroups carry a **role**, and so do a handful of single accounts (below), so the app stops depending on numbers. Renumbering later would then be harmless.
 4. **Costs by nature, direct costs separated.** Cost of sales holds materials, subcontractors, direct labour and, for property management, the cleaning, laundry and repairs bought for managed properties. Everything else is an operating expense. The P&L shows gross profit and an operating result as it does now.
-5. **Liabilities that are not costs stay out of the P&L.** Withheld tax (6202), social security owed (6206), VAT (6203, 6204), loan principal (6501, 7101) and client money (6402) are balance-sheet accounts.
+5. **Liabilities that are not costs stay out of the P&L.** Withheld tax (6204), social security owed (6205), VAT (6201, 6202), loan principal (6501, 7101) and client money (6402) are balance-sheet accounts.
 6. **No manual "current year result" account.** The app calculates it.
 
 ## What this draft contains
 
-- 155 accounts in total: Construction 133, Carpentry 133, Decorations 120, Property mgmt 117, Client account 19.
-- 30 subgroups in 9 sections.
+- 108 accounts in total: Construction 88, Carpentry 90, Decorations 81, Property mgmt 78, Client account 19.
+- 29 subgroups in 9 sections.
 - Every one of the 90 current accounts is mapped to a new one (or dropped with a reason): `chart-old-to-new-DRAFT.csv`.
 - The same chart for Excel, with a column per template: `chart-of-accounts-DRAFT.csv`.
 
@@ -44,22 +44,16 @@ Legend: ● the account is in that business's template.
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 4201 | Clients (accounts receivable) | ● | ● | ● | ● | ● |  |
-| 4202 | Doubtful clients | ● | ● | ● | ● |  |  |
-| 4203 | Clients: guarantee retentions held back | ● |  |  |  |  | Builders: part of each stage payment held until the guarantee period ends. |
+| 4202 | Clients: guarantee retentions held back | ● |  |  |  |  | Builders: part of each stage payment held until the guarantee period ends. |
 
 **Other current assets and VAT recoverable** (debit; role `other_current_assets`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 4301 | Advances to suppliers | ● | ● | ● | ● |  |  |
-| 4302 | Advances to staff | ● | ● | ● | ● |  |  |
-| 4303 | IRC paid on account | ● | ● | ● | ● |  |  |
-| 4304 | VAT recoverable (input VAT) | ● | ● | ● | ● | ● |  |
-| 4305 | VAT to be refunded | ● | ● | ● | ● |  |  |
-| 4306 | Accrued income | ● | ● | ● | ● |  |  |
-| 4307 | Other debtors | ● | ● | ● | ● |  |  |
-| 4308 | Deposits and guarantees paid | ● | ● | ● | ● |  |  |
-| 4309 | Prepaid expenses | ● | ● | ● | ● |  | For example insurance paid for the whole year. |
+| 4301 | Advances, deposits and other debtors | ● | ● | ● | ● |  | Advances to suppliers or staff, deposits paid, tax paid on account, anything owed to us that is not a client. |
+| 4302 | VAT recoverable (input VAT) | ● | ● | ● | ● | ● |  |
+| 4303 | VAT to be refunded | ● | ● | ● | ● |  |  |
+| 4304 | Prepaid expenses | ● | ● | ● | ● |  | For example insurance paid for the whole year. |
 
 **Stock** (debit; role `inventory`)
 
@@ -76,26 +70,13 @@ Legend: ● the account is in that business's template.
 | 5101 | Buildings and improvements | ● | ● | ● |  |  |  |
 | 5102 | Plant, machinery and tools | ● | ● |  |  |  |  |
 | 5103 | Motor vehicles | ● | ● | ● | ● |  |  |
-| 5104 | Office and IT equipment | ● | ● | ● | ● |  |  |
-| 5105 | Other tangible assets | ● | ● | ● | ● |  |  |
-| 5106 | Software and intangible assets | ● | ● | ● | ● |  |  |
+| 5104 | Office, IT and other equipment (including software) | ● | ● | ● | ● |  |  |
 
 **Accumulated depreciation** (credit; role `accumulated_depreciation`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 5201 | Accumulated depreciation: buildings *(contra)* | ● | ● | ● |  |  |  |
-| 5202 | Accumulated depreciation: plant and machinery *(contra)* | ● | ● |  |  |  |  |
-| 5203 | Accumulated depreciation: vehicles *(contra)* | ● | ● | ● | ● |  |  |
-| 5204 | Accumulated depreciation: office and IT *(contra)* | ● | ● | ● | ● |  |  |
-| 5205 | Accumulated depreciation: other *(contra)* | ● | ● | ● | ● |  |  |
-| 5206 | Accumulated amortisation: intangibles *(contra)* | ● | ● | ● | ● |  |  |
-
-**Other non-current assets** (debit; role `other_noncurrent`)
-
-| No. | Name | C | W | I | P | K | Note |
-|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 5301 | Long-term investments and deposits | ● | ● | ● | ● |  |  |
+| 5201 | Accumulated depreciation (all fixed assets) *(contra)* | ● | ● | ● | ● |  | One account for the total written off so far. The fixed assets above stay at cost. |
 
 ### Liabilities (Balance sheet)
 
@@ -105,27 +86,25 @@ Legend: ● the account is in that business's template.
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 6101 | Suppliers (accounts payable) | ● | ● | ● | ● | ● |  |
 | 6102 | Suppliers: guarantee retentions withheld | ● |  |  |  |  | Builders: retained from subcontractors until their guarantee ends. |
-| 6103 | Suppliers of fixed assets | ● | ● | ● | ● |  |  |
 
 **VAT and State** (credit; role `state_liabilities`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6201 | IRC: estimated tax payable | ● | ● | ● | ● |  |  |
-| 6202 | Withheld income tax payable (IRS and IRC withholding) | ● | ● | ● | ● |  | Tax withheld from salaries and from independent professionals. Owed to the State, never a cost. |
-| 6203 | VAT charged (output VAT) | ● | ● | ● | ● | ● |  |
-| 6204 | VAT payable: settlement account | ● | ● | ● | ● | ● | Replaces the old 'IVA paid / received' account. Payments to the State clear it. |
-| 6205 | Other taxes payable (IMI, stamp duty, municipal) | ● | ● | ● | ● |  |  |
-| 6206 | Social security payable | ● | ● | ● | ● |  | Employee 11% and employer share, owed to the State. |
+| 6201 | VAT charged (output VAT) | ● | ● | ● | ● | ● |  |
+| 6202 | VAT payable: settlement account | ● | ● | ● | ● | ● | Payments to the State clear it. |
+| 6203 | Corporate income tax payable (IRC) | ● | ● | ● | ● |  |  |
+| 6204 | Withheld income tax payable (IRS and IRC withholding) | ● | ● | ● | ● |  | Tax withheld from salaries and from independent professionals. Owed to the State, never a cost. |
+| 6205 | Social security payable | ● | ● | ● | ● |  | Employee 11% and employer share, owed to the State. |
+| 6206 | Other taxes payable (IMI, stamp duty, municipal) | ● | ● | ● | ● |  |  |
 
 **Staff and accruals** (credit; role `staff_liabilities`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 6301 | Salaries payable | ● | ● | ● | ● |  |  |
-| 6302 | Accrued holiday and Christmas pay | ● | ● | ● | ● |  | The two extra months of pay built up through the year. |
-| 6303 | Other accrued costs | ● | ● | ● | ● |  |  |
-| 6304 | Deferred income | ● | ● | ● | ● |  |  |
+| 6302 | Accrued holiday and Christmas pay | ● | ● | ● | ● |  | The two extra months of pay built up through the year (duodécimos). |
+| 6303 | Other accruals and income received in advance | ● | ● | ● | ● |  | Costs incurred but not yet invoiced (for example interest), and income received before it is earned. |
 
 **Customer money and deposits** (credit; role `customer_funds`)
 
@@ -140,10 +119,9 @@ Legend: ● the account is in that business's template.
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 6501 | Bank loans: due within a year | ● | ● | ● | ● |  |  |
-| 6502 | Bank overdraft | ● | ● | ● | ● |  |  |
+| 6502 | Overdraft, credit cards and other finance | ● | ● | ● | ● |  |  |
 | 6503 | Leasing | ● | ● | ● | ● |  |  |
-| 6504 | Credit cards and other financing | ● | ● | ● | ● |  |  |
-| 6505 | Shareholder loans (suprimentos) | ● | ● | ● | ● |  |  |
+| 6504 | Shareholder loans (suprimentos) | ● | ● | ● | ● |  |  |
 
 ### Long-term debt (Balance sheet)
 
@@ -151,7 +129,7 @@ Legend: ● the account is in that business's template.
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 7101 | Bank loans: due after a year | ● | ● | ● | ● |  | Own split of 251 so the balance sheet can show current and non-current. |
+| 7101 | Bank loans: due after a year | ● | ● | ● | ● |  | Own split of the loan so the balance sheet can show current and non-current. |
 
 ### Equity (Balance sheet)
 
@@ -159,17 +137,15 @@ Legend: ● the account is in that business's template.
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 8101 | Partner drawings (advances on profits) *(contra)* | ● | ● | ● | ● |  | Money taken out by the owners; reduces equity. |
-| 8102 | Share capital | ● | ● | ● | ● | ● |  |
-| 8103 | Additional capital contributions | ● | ● | ● | ● |  |  |
+| 8101 | Share capital and owners' contributions | ● | ● | ● | ● | ● |  |
+| 8102 | Partner drawings (advances on profits) *(contra)* | ● | ● | ● | ● |  | Money taken out by the owners; reduces equity. |
 
 **Reserves and retained earnings** (credit; role `retained_earnings`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 8201 | Legal reserve | ● | ● | ● | ● |  |  |
-| 8202 | Other reserves | ● | ● | ● | ● |  |  |
-| 8203 | Retained earnings | ● | ● | ● | ● | ● | The current year's result is calculated by the app and is not an account here. |
+| 8201 | Reserves | ● | ● | ● | ● |  |  |
+| 8202 | Retained earnings | ● | ● | ● | ● | ● | The current year's result is calculated by the app and is not an account here. |
 
 ### Income (Profit & loss)
 
@@ -179,32 +155,24 @@ Legend: ● the account is in that business's template.
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 1101 | Sales of goods and materials | ● | ● | ● |  |  |  |
 | 1102 | Sales of made-to-order joinery (kitchens, wardrobes, doors) |  | ● |  |  |  |  |
-| 1103 | Discounts and returns allowed *(contra)* | ● | ● | ● | ● | ● | Credit notes can post here. |
-| 1104 | Construction works | ● |  |  |  |  |  |
-| 1105 | Labour and site supervision | ● |  |  |  |  |  |
-| 1106 | Design and project management | ● |  |  |  |  |  |
-| 1107 | Installation and fitting |  | ● | ● |  |  |  |
-| 1108 | Repairs and restoration |  | ● |  |  |  |  |
-| 1109 | Design and consultancy fees |  |  | ● |  |  |  |
-| 1110 | Styling and staging |  |  | ● |  |  |  |
-| 1111 | Management commissions |  |  |  | ● |  |  |
-| 1112 | Guest services (check-in, linen, concierge) |  |  |  | ● |  |  |
-| 1113 | Maintenance coordination fees |  |  |  | ● |  |  |
-| 1114 | Rental income from own properties |  |  |  | ● |  |  |
-| 1115 | Inspections and reports |  |  |  | ● |  |  |
-| 1116 | Account administration fees |  |  |  |  | ● |  |
+| 1103 | Construction works (including labour and site supervision) | ● |  |  |  |  |  |
+| 1104 | Design and project management | ● |  |  |  |  |  |
+| 1105 | Installation and fitting |  | ● | ● |  |  |  |
+| 1106 | Repairs and restoration |  | ● |  |  |  |  |
+| 1107 | Design and consultancy fees |  |  | ● |  |  |  |
+| 1108 | Styling and staging |  |  | ● |  |  |  |
+| 1109 | Management commissions |  |  |  | ● |  |  |
+| 1110 | Guest services, maintenance coordination and inspections |  |  |  | ● |  |  |
+| 1111 | Rental income from own properties |  |  |  | ● |  |  |
+| 1112 | Account administration fees |  |  |  |  | ● |  |
+| 1113 | Discounts and returns allowed *(contra)* | ● | ● | ● | ● | ● | Credit notes can post here. |
 
 **Other income and gains** (credit; role `other_income`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 1201 | Operating grants | ● | ● | ● | ● |  |  |
-| 1202 | Recharged costs and supplementary income | ● | ● | ● | ● |  |  |
-| 1203 | Early-payment discounts received | ● | ● | ● | ● |  |  |
-| 1204 | Recovered bad debts | ● | ● | ● | ● |  |  |
-| 1205 | Insurance claims received | ● | ● | ● | ● |  |  |
-| 1206 | Gains on disposal of assets | ● | ● | ● | ● |  |  |
-| 1207 | Other income and gains | ● | ● | ● | ● | ● |  |
+| 1201 | Recharged costs to clients | ● | ● | ● | ● |  |  |
+| 1202 | Other income and gains (grants, insurance claims, asset sales, bad debts recovered) | ● | ● | ● | ● | ● |  |
 
 **Interest earned** (credit; role `interest_income`)
 
@@ -224,7 +192,7 @@ Legend: ● the account is in that business's template.
 | 2104 | Finishes (varnish, paint, glue) |  | ● |  |  |  |  |
 | 2105 | Furnishings and soft goods for resale |  |  | ● |  |  |  |
 | 2106 | Change in stock (year-end count) | ● | ● |  |  |  | Posted by Year-End Stock: the closing count on 31 Dec, reversed on 1 Jan. |
-| 2107 | Purchase returns and discounts *(contra)* | ● | ● | ● |  |  |  |
+| 2107 | Purchase returns and discounts *(contra)* | ● | ● | ● |  |  | Goods sent back to a supplier, or a discount the supplier gives after the invoice. Reduces the cost of materials. |
 
 **Subcontractors and direct services** (debit; role `cost_direct_services`)
 
@@ -233,13 +201,12 @@ Legend: ● the account is in that business's template.
 | 2201 | Subcontractors (trades) | ● | ● | ● |  |  |  |
 | 2202 | Specialist and design services | ● | ● | ● |  |  |  |
 | 2203 | Equipment and plant hire for jobs | ● | ● |  |  |  |  |
-| 2204 | Skip hire and waste removal | ● |  |  |  |  |  |
-| 2205 | Site consumables and small tools | ● | ● |  |  |  |  |
-| 2206 | Other direct job costs | ● | ● | ● |  |  |  |
-| 2207 | Cleaning and laundry for managed properties |  |  |  | ● |  |  |
-| 2208 | Pool and garden maintenance |  |  |  | ● |  |  |
-| 2209 | Repairs and maintenance of managed properties |  |  |  | ● |  |  |
-| 2210 | Booking-platform commissions |  |  |  | ● |  |  |
+| 2204 | Small tools and consumables | ● | ● | ● | ● |  |  |
+| 2205 | Other direct job costs (skips, waste, deliveries) | ● | ● | ● |  |  |  |
+| 2206 | Cleaning and laundry for managed properties |  |  |  | ● |  |  |
+| 2207 | Pool and garden maintenance |  |  |  | ● |  |  |
+| 2208 | Repairs and maintenance of managed properties |  |  |  | ● |  |  |
+| 2209 | Booking-platform commissions |  |  |  | ● |  |  |
 
 **Direct labour** (debit; role `cost_direct_labour`)
 
@@ -247,8 +214,7 @@ Legend: ● the account is in that business's template.
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 2301 | Wages: site and workshop staff | ● | ● |  |  |  |  |
 | 2302 | Employer social security: direct staff | ● | ● |  |  |  |  |
-| 2303 | Work-accident insurance: direct staff | ● | ● |  |  |  |  |
-| 2304 | Health and safety, training: direct staff | ● | ● |  |  |  |  |
+| 2303 | Insurance and training: direct staff | ● | ● |  |  |  |  |
 
 ### Operating expenses (Profit & loss)
 
@@ -258,68 +224,54 @@ Legend: ● the account is in that business's template.
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 3101 | Management remuneration | ● | ● | ● | ● |  |  |
 | 3102 | Wages: office staff | ● | ● | ● | ● |  |  |
-| 3103 | Employer social security: office staff | ● | ● | ● | ● |  |  |
-| 3104 | Employer social security: management | ● | ● | ● | ● |  |  |
-| 3105 | Work-accident insurance: office staff | ● | ● | ● | ● |  |  |
-| 3106 | Staff health insurance and welfare | ● | ● | ● | ● |  |  |
-| 3107 | Training and other staff costs | ● | ● | ● | ● |  |  |
+| 3103 | Employer social security: office staff and management | ● | ● | ● | ● |  |  |
+| 3104 | Other staff costs (insurance, welfare, training) | ● | ● | ● | ● |  |  |
 
 **Premises and utilities** (debit; role `opex_premises`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 3201 | Repairs and maintenance of premises | ● | ● | ● | ● |  |  |
-| 3202 | Electricity | ● | ● | ● | ● |  |  |
-| 3203 | Water | ● | ● | ● | ● |  |  |
-| 3204 | Rent of premises | ● | ● | ● | ● |  |  |
-| 3205 | Telephone and internet | ● | ● | ● | ● |  |  |
-| 3206 | Cleaning and hygiene of premises | ● | ● | ● | ● |  |  |
+| 3201 | Rent of premises | ● | ● | ● | ● |  |  |
+| 3202 | Electricity and water | ● | ● | ● | ● |  |  |
+| 3203 | Telephone and internet | ● | ● | ● | ● |  |  |
+| 3204 | Repairs and maintenance of premises | ● | ● | ● | ● |  |  |
+| 3205 | Cleaning and hygiene of premises | ● | ● | ● | ● |  |  |
 
 **Vehicles and travel** (debit; role `opex_vehicles`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 3301 | Vehicle repairs, servicing and inspections | ● | ● | ● | ● |  |  |
-| 3302 | Fuel | ● | ● | ● | ● |  |  |
-| 3303 | Travel and accommodation | ● | ● | ● | ● |  |  |
-| 3304 | Tolls and parking | ● | ● | ● | ● |  |  |
-| 3305 | Insurance: vehicles | ● | ● | ● | ● |  |  |
+| 3301 | Fuel | ● | ● | ● | ● |  |  |
+| 3302 | Vehicle repairs, servicing and inspections | ● | ● | ● | ● |  |  |
+| 3303 | Tolls, parking and travel | ● | ● | ● | ● |  |  |
+| 3304 | Insurance: vehicles | ● | ● | ● | ● |  |  |
 
 **Professional and administrative** (debit; role `opex_admin`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 3401 | Advertising and marketing | ● | ● | ● | ● |  |  |
-| 3402 | Accounting and professional fees | ● | ● | ● | ● | ● |  |
-| 3403 | Commissions paid to agents | ● | ● | ● | ● |  |  |
-| 3404 | Small tools and equipment (expensed) | ● | ● | ● | ● |  |  |
-| 3405 | Office supplies and printing | ● | ● | ● | ● |  |  |
-| 3406 | Gifts and samples | ● | ● | ● | ● |  |  |
-| 3407 | Legal and notary fees | ● | ● | ● | ● |  |  |
-| 3408 | Meals and entertainment | ● | ● | ● | ● |  |  |
+| 3401 | Accounting, legal and professional fees | ● | ● | ● | ● | ● |  |
+| 3402 | Office supplies and printing | ● | ● | ● | ● |  |  |
+| 3403 | Software, subscriptions and web services | ● | ● | ● | ● |  |  |
+| 3404 | Insurance: business, liability and contract works | ● | ● | ● | ● |  |  |
+| 3405 | Advertising and marketing | ● | ● | ● | ● |  |  |
+| 3406 | Commissions paid to agents | ● | ● | ● | ● |  |  |
+| 3407 | Meals, entertainment and gifts | ● | ● | ● | ● |  |  |
+| 3408 | Bank charges and commissions | ● | ● | ● | ● | ● |  |
 | 3409 | Other external services | ● | ● | ● | ● | ● |  |
-| 3410 | Insurance: business, liability and contract works | ● | ● | ● | ● |  |  |
-| 3411 | Bank charges and commissions | ● | ● | ● | ● | ● |  |
-| 3412 | Software, subscriptions and web services | ● | ● | ● | ● |  |  |
 
 **Taxes and licences** (debit; role `opex_taxes`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 3501 | Vehicle and property taxes (IUC, IMI) | ● | ● | ● | ● |  |  |
-| 3502 | Stamp duty and indirect taxes | ● | ● | ● | ● |  |  |
-| 3503 | Fees, licences and permits | ● | ● | ● | ● |  |  |
+| 3502 | Stamp duty, fees, licences and permits | ● | ● | ● | ● |  |  |
 
 **Depreciation** (debit; role `depreciation`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 3601 | Depreciation: buildings and improvements | ● | ● | ● |  |  |  |
-| 3602 | Depreciation: plant and machinery | ● | ● |  |  |  |  |
-| 3603 | Depreciation: vehicles | ● | ● | ● | ● |  |  |
-| 3604 | Depreciation: office and IT equipment | ● | ● | ● | ● |  |  |
-| 3605 | Depreciation: other tangible assets | ● | ● | ● | ● |  |  |
-| 3606 | Amortisation: software and intangibles | ● | ● | ● | ● |  |  |
+| 3601 | Depreciation (all fixed assets) | ● | ● | ● | ● |  | One account for the year's depreciation of every fixed asset. |
 
 **Other expenses and losses** (debit; role `other_expense`)
 
@@ -327,11 +279,8 @@ Legend: ● the account is in that business's template.
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 3701 | Bad debts written off | ● | ● | ● | ● |  |  |
 | 3702 | Stock losses | ● | ● | ● |  |  |  |
-| 3703 | Prior-period corrections | ● | ● | ● | ● |  |  |
-| 3704 | Donations | ● | ● | ● | ● |  |  |
-| 3705 | Memberships (associations) | ● | ● | ● | ● |  |  |
-| 3706 | Losses on disposal of assets | ● | ● | ● | ● |  |  |
-| 3707 | Other expenses and losses | ● | ● | ● | ● | ● |  |
+| 3703 | Donations and memberships | ● | ● | ● | ● |  |  |
+| 3704 | Other expenses and losses (including losses on asset sales) | ● | ● | ● | ● | ● |  |
 
 ### Financing and tax (Profit & loss)
 
@@ -340,14 +289,13 @@ Legend: ● the account is in that business's template.
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
 | 9101 | Interest on bank loans | ● | ● | ● | ● |  |  |
-| 9102 | Interest on overdraft, leasing and cards | ● | ● | ● | ● |  |  |
-| 9103 | Loan arrangement fees and other financing costs | ● | ● | ● | ● |  |  |
+| 9102 | Other interest and finance costs (overdraft, leasing, cards, loan fees) | ● | ● | ● | ● |  |  |
 
 **Income tax** (debit; role `income_tax`)
 
 | No. | Name | C | W | I | P | K | Note |
 |---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 9201 | IRC: estimated tax for the year | ● | ● | ● | ● |  |  |
+| 9201 | Corporate income tax (IRC) for the year | ● | ● | ● | ● |  |  |
 
 
 ## Accounts the app will use by role
@@ -357,19 +305,19 @@ Legend: ● the account is in that business's template.
 | `petty_cash` | 4101 | Default petty cash |
 | `transfers_clearing` | 4106 | Both sides of a transfer between own accounts |
 | `accounts_receivable` | 4201 | Debited by invoices, credited by payments received |
-| `vat_input` | 4304 | VAT paid on purchases |
+| `vat_input` | 4302 | VAT paid on purchases |
 | `accounts_payable` | 6101 | Credited by purchase invoices, debited by payments made |
-| `vat_output` | 6203 | VAT charged on sales |
-| `vat_settlement` | 6204 | IVA paid to or refunded by the State |
-| `withholding_payable` | 6202 | Tax withheld from pay, until paid to the State |
-| `social_security_payable` | 6206 | Social security, until paid |
+| `vat_output` | 6201 | VAT charged on sales |
+| `vat_settlement` | 6202 | IVA paid to or refunded by the State |
+| `withholding_payable` | 6204 | Tax withheld from pay, until paid to the State |
+| `social_security_payable` | 6205 | Social security, until paid |
 | `net_pay_payable` | 6301 | Net pay owed to staff, until paid |
 | `holiday_accrual` | 6302 | Monthly build-up of holiday and Christmas pay |
 | `client_money` | 6402 | Money held for owners (Property management, Client account) |
 | `loan_principal` | 6501 | Loan repayments reduce this account (the Loan instalment split) |
-| `share_capital` | 8102 | Where an opening balance for bank accounts is set against |
-| `retained_earnings` | 8203 | Profit kept from earlier years |
-| `default_sales` | 1102, 1104, 1109, 1111, 1116 | Default account on a new sales invoice (one per business) |
+| `share_capital` | 8101 | Where an opening balance for bank accounts is set against |
+| `retained_earnings` | 8202 | Profit kept from earlier years |
+| `default_sales` | 1102, 1103, 1107, 1109, 1112 | Default account on a new sales invoice (one per business) |
 | `interest_income` | 1301 | Interest earned |
 | `default_materials` | 2101 | Default account on a new purchase invoice |
 | `stock_change` | 2106 |  |
@@ -377,7 +325,7 @@ Legend: ● the account is in that business's template.
 | `employer_social_security_direct` | 2302 | Employer social security on direct staff |
 | `wages_office` | 3102 | Gross pay of office staff |
 | `employer_social_security_office` | 3103 | Employer social security on office staff |
-| `bank_charges` | 3411 | Bank fees (the Loan instalment split) |
+| `bank_charges` | 3408 | Bank fees (the Loan instalment split) |
 | `interest_expense` | 9101 | Interest cover on the dashboard |
 | `income_tax` | 9201 | Tax on profits |
 
@@ -390,18 +338,18 @@ One payroll entry per person per month, instead of single-account bank lines:
 | Gross pay | 2301 or 3102 | |
 | Employer social security (about 23.75%) | 2302 or 3103 | |
 | Net pay to the employee | | 6301 |
-| Tax withheld (IRS) | | 6202 |
-| Social security: employee share and employer share | | 6206 |
+| Tax withheld (IRS) | | 6204 |
+| Social security: employee share and employer share | | 6205 |
 | Holiday and Christmas pay as duodecimos (a twelfth of each paid with the monthly salary) | 2301 or 3102, part of the gross | none needed |
 | Paying the net pay | 6301 | bank |
-| Paying the State | 6202, 6206 | bank |
+| Paying the State | 6204, 6205 | bank |
 
 ## Questions for you and your accountant
 
 1. ANSWERED (Tony, 2026-11-25): no SAF-T reporting; the app is for management use. The chart uses our own numbering.
 2. ANSWERED: autonomous taxation is handled by the external accountants, so there is no account for it (8123 removed).
 3. ANSWERED: sub-account numbers as drafted.
-4. ANSWERED: retentions yes (4203, 6102 stay in the Construction template); no work in progress removed.
+4. ANSWERED: retentions yes (4202, 6102 stay in the Construction template); no work in progress removed.
 5. ANSWERED: client money exists only in Casas Algarve and the Client Account company; Teia, Woodgrain and Algarve Interior do not use it (6402 stays in templates P and K only).
 6. ANSWERED: stock for Teia and Woodgrain only (4401 stays in C and W, removed from I, P, K).
 7. ANSWERED: monthly for some companies and quarterly for others (a setting per company); non-deductible VAT is left to the external accountants.

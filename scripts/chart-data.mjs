@@ -27,7 +27,6 @@ export const SUBGROUPS = [
   { key: "stock", section: "CA", name: "Stock", normal: "debit", role: "inventory" },
   { key: "fa", section: "NCA", name: "Fixed assets (cost)", normal: "debit", role: "fixed_assets" },
   { key: "accdep", section: "NCA", name: "Accumulated depreciation", normal: "credit", role: "accumulated_depreciation" },
-  { key: "onca", section: "NCA", name: "Other non-current assets", normal: "debit", role: "other_noncurrent" },
   { key: "pay", section: "CL", name: "Suppliers", normal: "credit", role: "payables" },
   { key: "state", section: "CL", name: "VAT and State", normal: "credit", role: "state_liabilities" },
   { key: "staff", section: "CL", name: "Staff and accruals", normal: "credit", role: "staff_liabilities" },
@@ -61,22 +60,16 @@ const A_SRC = [
   [1110, "Petty cash", "Caixa", "cash", "11", "exact", "CWIP", "petty_cash"],
   [1210, "Bank account 1: current account", "Depósitos à ordem: conta corrente", "cash", "12", "exact", ALL, "", "Further bank accounts added in the app take the next free number in this subgroup."],
   [1220, "Bank account 2: IVA and tax reserve", "Depósitos à ordem: conta IVA/impostos", "cash", "12", "exact", "CWIP"],
-  [1240, "Payment platforms to collect (card terminals, booking payouts)", "Valores a receber de plataformas de pagamento", "cash", "12", "confirm", "P"],
   [1230, "Bank account 3", "Depósitos à ordem: conta 3", "cash", "12", "exact", "CWIP"],
+  [1240, "Payment platforms to collect (card terminals, booking payouts)", "Valores a receber de plataformas de pagamento", "cash", "12", "confirm", "P"],
   [1290, "Transfers between own accounts (clearing)", "Transferências internas", "cash", "12", "sub", ALL, "transfers_clearing", "Always nets to zero; shown so a missing side of a transfer is visible."],
   // ---- clients ----
   [2110, "Clients (accounts receivable)", "Clientes c/c", "recv", "211", "exact", ALL, "accounts_receivable"],
-  [2118, "Doubtful clients", "Clientes de cobrança duvidosa", "recv", "218", "exact", "CWIP"],
   [2119, "Clients: guarantee retentions held back", "Clientes: retenções de garantia", "recv", "211", "sub", "C", "", "Builders: part of each stage payment held until the guarantee period ends."],
   // ---- other current assets ----
-  [2250, "Advances to suppliers", "Fornecedores: adiantamentos", "oca", "225", "exact", "CWIP"],
-  [2321, "Advances to staff", "Adiantamentos ao pessoal", "oca", "232", "exact", "CWIP"],
-  [2411, "IRC paid on account", "IRC: pagamentos por conta", "oca", "2411", "confirm", "CWIP"],
+  [2250, "Advances, deposits and other debtors", "Adiantamentos, cauções e outros devedores", "oca", "225/232/278", "exact", "CWIP", "", "Advances to suppliers or staff, deposits paid, tax paid on account, anything owed to us that is not a client."],
   [2432, "VAT recoverable (input VAT)", "IVA dedutível", "oca", "2432", "exact", ALL, "vat_input"],
   [2437, "VAT to be refunded", "IVA a recuperar", "oca", "2437", "exact", "CWIP"],
-  [2721, "Accrued income", "Devedores por acréscimos de rendimentos", "oca", "2721", "exact", "CWIP"],
-  [2781, "Other debtors", "Outros devedores", "oca", "278", "exact", "CWIP"],
-  [2784, "Deposits and guarantees paid", "Cauções prestadas", "oca", "278", "sub", "CWIP"],
   [2811, "Prepaid expenses", "Gastos a reconhecer", "oca", "281", "exact", "CWIP", "", "For example insurance paid for the whole year."],
   // ---- stock ----
   [3210, "Goods and materials in stock", "Mercadorias e matérias-primas", "stock", "32/33", "exact", "CW"],
@@ -84,75 +77,54 @@ const A_SRC = [
   [4320, "Buildings and improvements", "Edifícios e outras construções", "fa", "432", "exact", "CWI"],
   [4330, "Plant, machinery and tools", "Equipamento básico", "fa", "433", "exact", "CW"],
   [4340, "Motor vehicles", "Equipamento de transporte", "fa", "434", "exact", "CWIP"],
-  [4350, "Office and IT equipment", "Equipamento administrativo", "fa", "435", "exact", "CWIP"],
-  [4370, "Other tangible assets", "Outros activos fixos tangíveis", "fa", "437", "exact", "CWIP"],
-  [4410, "Software and intangible assets", "Activos intangíveis", "fa", "44", "exact", "CWIP"],
-  [4822, "Accumulated depreciation: buildings", "Depreciações acumuladas: edifícios", "accdep", "4822", "exact", "CWI", "", "", true],
-  [4823, "Accumulated depreciation: plant and machinery", "Depreciações acumuladas: equipamento básico", "accdep", "4823", "exact", "CW", "", "", true],
-  [4824, "Accumulated depreciation: vehicles", "Depreciações acumuladas: equipamento de transporte", "accdep", "4824", "exact", "CWIP", "", "", true],
-  [4825, "Accumulated depreciation: office and IT", "Depreciações acumuladas: equipamento administrativo", "accdep", "4825", "exact", "CWIP", "", "", true],
-  [4827, "Accumulated depreciation: other", "Depreciações acumuladas: outros", "accdep", "4827", "exact", "CWIP", "", "", true],
-  [4841, "Accumulated amortisation: intangibles", "Amortizações acumuladas: activos intangíveis", "accdep", "484", "exact", "CWIP", "", "", true],
-  [4110, "Long-term investments and deposits", "Investimentos financeiros", "onca", "41", "exact", "CWIP"],
+  [4350, "Office, IT and other equipment (including software)", "Equipamento administrativo e outros", "fa", "435/437/44", "exact", "CWIP"],
+  [4822, "Accumulated depreciation (all fixed assets)", "Depreciações acumuladas", "accdep", "482/484", "exact", "CWIP", "", "One account for the total written off so far. The fixed assets above stay at cost.", true],
   // ---- suppliers ----
   [2210, "Suppliers (accounts payable)", "Fornecedores c/c", "pay", "221", "exact", ALL, "accounts_payable"],
   [2212, "Suppliers: guarantee retentions withheld", "Fornecedores: retenções de garantia", "pay", "221", "sub", "C", "", "Builders: retained from subcontractors until their guarantee ends."],
-  [2710, "Suppliers of fixed assets", "Fornecedores de investimentos", "pay", "271", "exact", "CWIP"],
   // ---- VAT and State ----
   [2433, "VAT charged (output VAT)", "IVA liquidado", "state", "2433", "exact", ALL, "vat_output"],
-  [2436, "VAT payable: settlement account", "IVA a pagar", "state", "2436", "exact", ALL, "vat_settlement", "Replaces the old 'IVA paid / received' account. Payments to the State clear it."],
-  [2414, "IRC: estimated tax payable", "IRC: imposto estimado", "state", "2414", "confirm", "CWIP"],
+  [2436, "VAT payable: settlement account", "IVA a pagar", "state", "2436", "exact", ALL, "vat_settlement", "Payments to the State clear it."],
+  [2414, "Corporate income tax payable (IRC)", "IRC: imposto a pagar", "state", "2414", "confirm", "CWIP"],
   [2421, "Withheld income tax payable (IRS and IRC withholding)", "Retenção de impostos sobre rendimentos", "state", "2421/2422", "confirm", "CWIP", "withholding_payable", "Tax withheld from salaries and from independent professionals. Owed to the State, never a cost."],
   [2451, "Social security payable", "Contribuições para a Segurança Social", "state", "245", "exact", "CWIP", "social_security_payable", "Employee 11% and employer share, owed to the State."],
   [2441, "Other taxes payable (IMI, stamp duty, municipal)", "Outros impostos", "state", "244", "exact", "CWIP"],
   // ---- staff and accruals ----
   [2311, "Salaries payable", "Remunerações a pagar", "staff", "231", "exact", "CWIP", "net_pay_payable"],
-  [2722, "Accrued holiday and Christmas pay", "Credores por acréscimos de gastos: férias e subsídios", "staff", "2722", "exact", "CWIP", "holiday_accrual", "The two extra months of pay built up through the year."],
-  [2723, "Other accrued costs", "Credores por acréscimos de gastos: outros", "staff", "2722", "sub", "CWIP"],
-  [2821, "Deferred income", "Rendimentos a reconhecer", "staff", "282", "exact", "CWIP"],
+  [2722, "Accrued holiday and Christmas pay", "Credores por acréscimos de gastos: férias e subsídios", "staff", "2722", "exact", "CWIP", "holiday_accrual", "The two extra months of pay built up through the year (duodécimos)."],
+  [2723, "Other accruals and income received in advance", "Acréscimos de gastos e rendimentos a reconhecer", "staff", "2722/282", "sub", "CWIP", "", "Costs incurred but not yet invoiced (for example interest), and income received before it is earned."],
   // ---- customer money ----
   [2761, "Customer advances and deposits", "Adiantamentos de clientes", "cfunds", "276", "exact", "CWI"],
   [2788, "Client money held for owners", "Outros credores: dinheiro de clientes", "cfunds", "278", "sub", "PK", "client_money", "Property management: rent collected and held for owners."],
   [2789, "Guest and tenant deposits held", "Cauções recebidas", "cfunds", "278", "sub", "PK"],
   // ---- borrowings ----
   [2511, "Bank loans: due within a year", "Empréstimos bancários", "std", "2511", "exact", "CWIP", "loan_principal"],
-  [2512, "Bank overdraft", "Descobertos bancários", "std", "2512", "exact", "CWIP"],
+  [2512, "Overdraft, credit cards and other finance", "Descobertos, cartões e outros financiamentos", "std", "2512/2519", "exact", "CWIP"],
   [2513, "Leasing", "Locações financeiras", "std", "2513", "exact", "CWIP"],
-  [2519, "Credit cards and other financing", "Outros financiamentos", "std", "2519", "exact", "CWIP"],
   [2681, "Shareholder loans (suprimentos)", "Sócios: suprimentos", "std", "268", "sub", "CWIP"],
-  [2514, "Bank loans: due after a year", "Empréstimos bancários: não corrente", "ltd", "2511", "sub", "CWIP", "", "Own split of 251 so the balance sheet can show current and non-current."],
+  [2514, "Bank loans: due after a year", "Empréstimos bancários: não corrente", "ltd", "2511", "sub", "CWIP", "", "Own split of the loan so the balance sheet can show current and non-current."],
   // ---- equity ----
-  [5110, "Share capital", "Capital social", "cap", "51", "exact", "CWIPK", "share_capital"],
-  [5310, "Additional capital contributions", "Prestações suplementares", "cap", "53", "exact", "CWIP"],
+  [5110, "Share capital and owners' contributions", "Capital social e prestações suplementares", "cap", "51/53", "exact", "CWIPK", "share_capital"],
   [2631, "Partner drawings (advances on profits)", "Adiantamentos por conta de lucros", "cap", "263", "exact", "CWIP", "", "Money taken out by the owners; reduces equity.", true],
-  [5510, "Legal reserve", "Reservas legais", "ret", "551", "exact", "CWIP"],
-  [5590, "Other reserves", "Outras reservas", "ret", "559", "exact", "CWIP"],
+  [5590, "Reserves", "Reservas", "ret", "551/559", "exact", "CWIP"],
   [5610, "Retained earnings", "Resultados transitados", "ret", "56", "exact", "CWIPK", "retained_earnings", "The current year's result is calculated by the app and is not an account here."],
   // ---- revenue ----
   [7110, "Sales of goods and materials", "Vendas de mercadorias", "rev", "711", "exact", "CWI"],
   [7120, "Sales of made-to-order joinery (kitchens, wardrobes, doors)", "Vendas de produtos acabados", "rev", "712", "exact", "W", "default_sales"],
-  [7190, "Discounts and returns allowed", "Descontos e abatimentos concedidos", "rev", "71", "confirm", ALL, "", "Credit notes can post here.", true],
-  [7211, "Construction works", "Prestações de serviços: obras", "rev", "721", "sub", "C", "default_sales"],
-  [7212, "Labour and site supervision", "Prestações de serviços: mão-de-obra e fiscalização", "rev", "721", "sub", "C"],
+  [7211, "Construction works (including labour and site supervision)", "Prestações de serviços: obras", "rev", "721", "sub", "C", "default_sales"],
   [7213, "Design and project management", "Prestações de serviços: projecto e gestão", "rev", "721", "sub", "C"],
   [7214, "Installation and fitting", "Prestações de serviços: montagem", "rev", "721", "sub", "WI"],
   [7215, "Repairs and restoration", "Prestações de serviços: reparações", "rev", "721", "sub", "W"],
   [7221, "Design and consultancy fees", "Prestações de serviços: design e consultoria", "rev", "722", "sub", "I", "default_sales"],
   [7222, "Styling and staging", "Prestações de serviços: decoração e staging", "rev", "722", "sub", "I"],
   [7231, "Management commissions", "Prestações de serviços: comissões de gestão", "rev", "723", "sub", "P", "default_sales"],
-  [7232, "Guest services (check-in, linen, concierge)", "Prestações de serviços: serviços a hóspedes", "rev", "723", "sub", "P"],
-  [7233, "Maintenance coordination fees", "Prestações de serviços: coordenação de manutenção", "rev", "723", "sub", "P"],
+  [7232, "Guest services, maintenance coordination and inspections", "Prestações de serviços: hóspedes, manutenção e inspecções", "rev", "723", "sub", "P"],
   [7234, "Rental income from own properties", "Prestações de serviços: rendas", "rev", "723", "sub", "P"],
-  [7235, "Inspections and reports", "Prestações de serviços: inspecções e relatórios", "rev", "723", "sub", "P"],
   [7241, "Account administration fees", "Prestações de serviços: administração de conta", "rev", "724", "sub", "K", "default_sales"],
+  [7190, "Discounts and returns allowed", "Descontos e abatimentos concedidos", "rev", "71", "confirm", ALL, "", "Credit notes can post here.", true],
   // ---- other income ----
-  [7510, "Operating grants", "Subsídios à exploração", "oinc", "75", "exact", "CWIP"],
-  [7810, "Recharged costs and supplementary income", "Rendimentos suplementares", "oinc", "781", "exact", "CWIP"],
-  [7820, "Early-payment discounts received", "Descontos de pronto pagamento obtidos", "oinc", "782", "exact", "CWIP"],
-  [7830, "Recovered bad debts", "Recuperação de dívidas a receber", "oinc", "783", "exact", "CWIP"],
-  [7881, "Insurance claims received", "Outros rendimentos: indemnizações de seguros", "oinc", "788", "sub", "CWIP"],
-  [7885, "Gains on disposal of assets", "Outros rendimentos: ganhos em alienações", "oinc", "788", "sub", "CWIP"],
-  [7889, "Other income and gains", "Outros rendimentos e ganhos", "oinc", "788", "exact", ALL],
+  [7810, "Recharged costs to clients", "Rendimentos suplementares", "oinc", "781", "exact", "CWIP"],
+  [7889, "Other income and gains (grants, insurance claims, asset sales, bad debts recovered)", "Outros rendimentos e ganhos", "oinc", "75/782/783/788", "exact", ALL],
   [7910, "Interest earned", "Juros obtidos", "iinc", "791", "exact", "CWIPK", "interest_income"],
   // ---- cost of sales: materials ----
   [6110, "Materials and goods used", "Matérias e mercadorias consumidas", "mat", "61", "exact", "CWI", "default_materials"],
@@ -161,14 +133,13 @@ const A_SRC = [
   [6113, "Finishes (varnish, paint, glue)", "Acabamentos", "mat", "61", "sub", "W"],
   [6121, "Furnishings and soft goods for resale", "Mobiliário e têxteis para venda", "mat", "61", "sub", "I"],
   [6150, "Change in stock (year-end count)", "Variação nos inventários", "mat", "61", "exact", "CW", "stock_change", "Posted by Year-End Stock: the closing count on 31 Dec, reversed on 1 Jan."],
-  [6190, "Purchase returns and discounts", "Devoluções e descontos obtidos", "mat", "61", "sub", "CWI", "", "", true],
+  [6190, "Purchase returns and discounts", "Devoluções e descontos obtidos", "mat", "61", "sub", "CWI", "", "Goods sent back to a supplier, or a discount the supplier gives after the invoice. Reduces the cost of materials.", true],
   // ---- cost of sales: services ----
   [6211, "Subcontractors (trades)", "Subcontratos", "dsvc", "621", "exact", "CWI"],
   [6212, "Specialist and design services", "Trabalhos especializados", "dsvc", "6221", "exact", "CWI"],
   [6213, "Equipment and plant hire for jobs", "Rendas e alugueres de equipamento", "dsvc", "6261", "exact", "CW"],
-  [6214, "Skip hire and waste removal", "Recolha de resíduos", "dsvc", "6268", "exact", "C"],
-  [6215, "Site consumables and small tools", "Ferramentas e utensílios de desgaste rápido", "dsvc", "6231", "exact", "CW"],
-  [6216, "Other direct job costs", "Outros gastos directos", "dsvc", "6268", "exact", "CWI"],
+  [6215, "Small tools and consumables", "Ferramentas e utensílios de desgaste rápido", "dsvc", "6231", "exact", "CWIP"],
+  [6216, "Other direct job costs (skips, waste, deliveries)", "Outros gastos directos", "dsvc", "6268", "exact", "CWI"],
   [6217, "Cleaning and laundry for managed properties", "Limpeza e lavandaria", "dsvc", "6267", "exact", "P"],
   [6218, "Pool and garden maintenance", "Conservação: piscina e jardim", "dsvc", "6226", "exact", "P"],
   [6219, "Repairs and maintenance of managed properties", "Conservação e reparação", "dsvc", "6226", "exact", "P"],
@@ -176,67 +147,64 @@ const A_SRC = [
   // ---- direct labour ----
   [6321, "Wages: site and workshop staff", "Remunerações do pessoal: produção", "dlab", "632", "sub", "CW", "wages_direct"],
   [6351, "Employer social security: direct staff", "Encargos sobre remunerações: produção", "dlab", "635", "sub", "CW", "employer_social_security_direct"],
-  [6361, "Work-accident insurance: direct staff", "Seguro de acidentes de trabalho: produção", "dlab", "636", "sub", "CW"],
-  [6381, "Health and safety, training: direct staff", "Segurança, higiene e formação: produção", "dlab", "638", "sub", "CW"],
+  [6361, "Insurance and training: direct staff", "Seguros, segurança e formação: produção", "dlab", "636/638", "sub", "CW"],
   // ---- office staff ----
   [6311, "Management remuneration", "Remunerações dos órgãos sociais", "ostaff", "631", "exact", "CWIP"],
   [6322, "Wages: office staff", "Remunerações do pessoal: administrativo", "ostaff", "632", "sub", "CWIP", "wages_office"],
-  [6352, "Employer social security: office staff", "Encargos sobre remunerações: administrativo", "ostaff", "635", "sub", "CWIP", "employer_social_security_office"],
-  [6353, "Employer social security: management", "Encargos sobre remunerações: gerência", "ostaff", "635", "sub", "CWIP"],
-  [6362, "Work-accident insurance: office staff", "Seguro de acidentes de trabalho: administrativo", "ostaff", "636", "sub", "CWIP"],
-  [6371, "Staff health insurance and welfare", "Gastos de acção social", "ostaff", "637", "exact", "CWIP"],
-  [6382, "Training and other staff costs", "Outros gastos com o pessoal", "ostaff", "638", "exact", "CWIP"],
+  [6352, "Employer social security: office staff and management", "Encargos sobre remunerações: administrativo e gerência", "ostaff", "635", "sub", "CWIP", "employer_social_security_office"],
+  [6371, "Other staff costs (insurance, welfare, training)", "Outros gastos com o pessoal", "ostaff", "636/637/638", "exact", "CWIP"],
   // ---- premises ----
   [6261, "Rent of premises", "Rendas e alugueres", "prem", "6261", "exact", "CWIP"],
-  [6241, "Electricity", "Electricidade", "prem", "6241", "exact", "CWIP"],
-  [6243, "Water", "Água", "prem", "6243", "exact", "CWIP"],
+  [6241, "Electricity and water", "Electricidade e água", "prem", "6241/6243", "exact", "CWIP"],
   [6262, "Telephone and internet", "Comunicação", "prem", "6262", "exact", "CWIP"],
   [6226, "Repairs and maintenance of premises", "Conservação e reparação", "prem", "6226", "exact", "CWIP"],
   [6267, "Cleaning and hygiene of premises", "Limpeza, higiene e conforto", "prem", "6267", "exact", "CWIP"],
   // ---- vehicles and travel ----
   [6242, "Fuel", "Combustíveis", "veh", "6242", "exact", "CWIP"],
   [6227, "Vehicle repairs, servicing and inspections", "Conservação e reparação: viaturas", "veh", "6226", "sub", "CWIP"],
-  [6252, "Tolls and parking", "Portagens e estacionamento", "veh", "6252", "confirm", "CWIP"],
+  [6252, "Tolls, parking and travel", "Portagens, estacionamento e deslocações", "veh", "6252/6251", "confirm", "CWIP"],
   [62631, "Insurance: vehicles", "Seguros: viaturas", "veh", "6263", "sub", "CWIP"],
-  [6251, "Travel and accommodation", "Deslocações e estadas", "veh", "6251", "exact", "CWIP"],
   // ---- professional and administrative ----
-  [6224, "Accounting and professional fees", "Honorários", "adm", "6224", "exact", ALL],
-  [6265, "Legal and notary fees", "Contencioso e notariado", "adm", "6265", "exact", "CWIP"],
+  [6224, "Accounting, legal and professional fees", "Honorários, contencioso e notariado", "adm", "6224/6265", "exact", ALL],
   [6233, "Office supplies and printing", "Material de escritório", "adm", "6233", "exact", "CWIP"],
-  [6231, "Small tools and equipment (expensed)", "Ferramentas e utensílios de desgaste rápido", "adm", "6231", "exact", "CWIP"],
   [62682, "Software, subscriptions and web services", "Serviços: software e subscrições", "adm", "6268", "sub", "CWIP"],
   [62632, "Insurance: business, liability and contract works", "Seguros: responsabilidade civil e obras", "adm", "6263", "sub", "CWIP"],
   [6222, "Advertising and marketing", "Publicidade e propaganda", "adm", "6222", "exact", "CWIP"],
   [6225, "Commissions paid to agents", "Comissões", "adm", "6225", "exact", "CWIP"],
-  [6266, "Meals and entertainment", "Despesas de representação", "adm", "6266", "exact", "CWIP"],
-  [6234, "Gifts and samples", "Artigos para oferta", "adm", "6234", "exact", "CWIP"],
+  [6266, "Meals, entertainment and gifts", "Despesas de representação e ofertas", "adm", "6266/6234", "exact", "CWIP"],
   [62681, "Bank charges and commissions", "Serviços bancários", "adm", "6268", "confirm", "CWIPK", "bank_charges"],
   [6268, "Other external services", "Outros serviços", "adm", "6268", "exact", "CWIPK"],
   // ---- taxes and licences ----
   [6811, "Vehicle and property taxes (IUC, IMI)", "Impostos directos", "tax", "6811", "exact", "CWIP"],
-  [6812, "Stamp duty and indirect taxes", "Impostos indirectos", "tax", "6812", "exact", "CWIP"],
-  [6813, "Fees, licences and permits", "Taxas", "tax", "6813", "exact", "CWIP"],
+  [6812, "Stamp duty, fees, licences and permits", "Impostos indirectos, taxas e licenças", "tax", "6812/6813", "exact", "CWIP"],
   // ---- depreciation ----
-  [6422, "Depreciation: buildings and improvements", "Depreciação: edifícios", "dep", "6422", "exact", "CWI"],
-  [6423, "Depreciation: plant and machinery", "Depreciação: equipamento básico", "dep", "6423", "exact", "CW"],
-  [6424, "Depreciation: vehicles", "Depreciação: equipamento de transporte", "dep", "6424", "exact", "CWIP"],
-  [6425, "Depreciation: office and IT equipment", "Depreciação: equipamento administrativo", "dep", "6425", "exact", "CWIP"],
-  [6427, "Depreciation: other tangible assets", "Depreciação: outros", "dep", "6427", "exact", "CWIP"],
-  [6441, "Amortisation: software and intangibles", "Amortização: activos intangíveis", "dep", "644", "exact", "CWIP"],
+  [6422, "Depreciation (all fixed assets)", "Depreciações e amortizações", "dep", "642/644", "exact", "CWIP", "", "One account for the year's depreciation of every fixed asset."],
   // ---- other expenses ----
   [6830, "Bad debts written off", "Dívidas incobráveis", "oexp", "683", "exact", "CWIP"],
   [6840, "Stock losses", "Perdas em inventários", "oexp", "684", "exact", "CWI"],
-  [6881, "Prior-period corrections", "Correcções relativas a períodos anteriores", "oexp", "6881", "exact", "CWIP"],
-  [6882, "Donations", "Donativos", "oexp", "6882", "exact", "CWIP"],
-  [6883, "Memberships (associations)", "Quotizações", "oexp", "6883", "exact", "CWIP"],
-  [6887, "Losses on disposal of assets", "Perdas em alienações", "oexp", "688", "sub", "CWIP"],
-  [6888, "Other expenses and losses", "Outros gastos e perdas", "oexp", "6888", "exact", "CWIPK"],
+  [6882, "Donations and memberships", "Donativos e quotizações", "oexp", "6882/6883", "exact", "CWIP"],
+  [6888, "Other expenses and losses (including losses on asset sales)", "Outros gastos e perdas", "oexp", "6881/6887/6888", "exact", "CWIPK"],
   // ---- financing and tax ----
   [6911, "Interest on bank loans", "Juros suportados: empréstimos", "fin", "691", "exact", "CWIP", "interest_expense"],
-  [6912, "Interest on overdraft, leasing and cards", "Juros suportados: descobertos e locações", "fin", "691", "exact", "CWIP"],
-  [6981, "Loan arrangement fees and other financing costs", "Outros gastos de financiamento", "fin", "698", "exact", "CWIP"],
-  [8121, "IRC: estimated tax for the year", "Imposto estimado para o período", "itax", "8121", "exact", "CWIP", "income_tax"],
+  [6912, "Other interest and finance costs (overdraft, leasing, cards, loan fees)", "Juros suportados e outros gastos de financiamento", "fin", "691/698", "exact", "CWIP"],
+  [8121, "Corporate income tax (IRC) for the year", "Imposto estimado para o período", "itax", "8121", "exact", "CWIP", "income_tax"],
 ];
+
+// Accounts of the first draft that were folded into another one when the chart was simplified.
+// removed draft number -> the draft number that now carries it. NEW_NO below answers for both, so old references
+// (the workbook port, the old-to-new table) still land on a real account.
+const MERGED = {
+  2118: 2110, 2321: 2250, 2411: 2250, 2721: 2250, 2781: 2250, 2784: 2250,
+  4370: 4350, 4410: 4350, 4110: 4350,
+  4823: 4822, 4824: 4822, 4825: 4822, 4827: 4822, 4841: 4822,
+  2710: 2210, 2821: 2723, 2519: 2512, 5310: 5110, 5510: 5590,
+  7212: 7211, 7233: 7232, 7235: 7232,
+  7510: 7889, 7820: 7889, 7830: 7889, 7881: 7889, 7885: 7889,
+  6214: 6216, 6231: 6215, 6381: 6361, 6353: 6352, 6362: 6371, 6382: 6371,
+  6243: 6241, 6251: 6252, 6265: 6224, 6234: 6266, 6813: 6812,
+  6423: 6422, 6424: 6422, 6425: 6422, 6427: 6422, 6441: 6422,
+  6881: 6888, 6887: 6888, 6883: 6882, 6981: 6912,
+};
 
 // Where every account of the CURRENT chart goes. [old no, old name, new number(s), why]
 const OLD_SRC = [
@@ -385,9 +353,15 @@ export const SUBGROUP_NO_NEW = (() => {
 export const NEW_NO = (() => {
   const map = {};
   for (const sg of SUBGROUPS) {
-    const rows = A_SRC.filter((a) => a[3] === sg.key).sort((x, y) => x[0] - y[0]);
+    const rows = A_SRC.filter((a) => a[3] === sg.key); // numbered in the order written above
     if (rows.length > 99) throw new Error(`subgroup ${sg.key} has more than 99 accounts`);
     rows.forEach((a, i) => (map[a[0]] = SUBGROUP_NO_NEW[sg.key] * 100 + i + 1));
+  }
+  // A folded-in account answers with the number of the account that now carries it, provided that account is in every
+  // template the old one was in.
+  for (const [from, to] of Object.entries(MERGED)) {
+    if (map[to] === undefined) throw new Error(`merged account ${from} points at ${to}, which is not in the chart`);
+    map[from] = map[to];
   }
   return map;
 })();

@@ -17,7 +17,6 @@ INSERT INTO account_subgroups (subgroup_no, name, group_no, normal_balance, role
 (44, 'Stock', 4, 'debit', 'inventory'),
 (51, 'Fixed assets (cost)', 5, 'debit', 'fixed_assets'),
 (52, 'Accumulated depreciation', 5, 'credit', 'accumulated_depreciation'),
-(53, 'Other non-current assets', 5, 'debit', 'other_noncurrent'),
 (61, 'Suppliers', 6, 'credit', 'payables'),
 (62, 'VAT and State', 6, 'credit', 'state_liabilities'),
 (63, 'Staff and accruals', 6, 'credit', 'staff_liabilities'),

@@ -28,6 +28,8 @@ const FROM = opt("--from", null);
 const TO = opt("--to", null);
 const TEMPLATE = opt("--template", "C");
 const PROFILE = opt("--profile", "test");
+// --from-155: the OLD database is on the 155-account chart (before it was simplified), not on the workbook's numbers.
+const FROM_155 = args.includes("--from-155");
 if (!FROM || !TO) throw new Error("Usage: node scripts/port-test-company.mjs --from <old db> --to <new db>");
 if (fs.existsSync(TO)) throw new Error(`${TO} already exists. Choose a new folder.`);
 fs.mkdirSync(path.dirname(path.resolve(TO)), { recursive: true });
@@ -49,8 +51,16 @@ const MAP = {
   2900: 6241, 2910: 6262, 2930: 6243, 2940: 6231, 2950: 62682, 2960: 62682, 2970: 6351, 2990: 6351,
   3000: 2436, 3010: 6321, 3020: 8121, 3030: 6911, 3040: 62681, 3050: 6981, 3060: 6422,
 };
+const DRAFT_OF_155 = FROM_155
+  ? Object.fromEntries(Object.entries(JSON.parse(fs.readFileSync(path.join(root, "scripts", "chart-155-numbers.json"), "utf8")).draftToNumber).map(([d, n]) => [n, d]))
+  : null;
 const mapAccount = (n) => {
   if (n == null) return n;
+  if (FROM_155) {
+    const d = DRAFT_OF_155[Number(n)];
+    if (d === undefined || NEW_NO[d] === undefined) throw new Error(`Account ${n} has no place in the current chart`);
+    return NEW_NO[d];
+  }
   const m = MAP[Number(n)];
   if (m === undefined) throw new Error(`No new account for old account ${n}`);
   if (NEW_NO[m] === undefined) throw new Error(`Draft account ${m} is not in the chart`);
@@ -89,7 +99,7 @@ for (const b of oldBanks) {
 }
 const newBankId = new Map((await nq("SELECT id, key FROM bank_accounts")).map((r) => [r.key, r.id]));
 const bankIdMap = new Map(oldBanks.map((b) => [b.id, newBankId.get(b.key)]));
-await db.query("UPDATE bank_accounts SET name = $2 WHERE key = $1", ["BANK3", "Cash Account"]);
+if (!FROM_155) await db.query("UPDATE bank_accounts SET name = $2 WHERE key = $1", ["BANK3", "Cash Account"]);
 
 // ---------- copy ----------
 async function copy(table, { mapCols = [], bank = false } = {}) {
@@ -116,7 +126,7 @@ await db.exec("BEGIN");
 try {
   // The company's own logins come across too (people must not have to create them again).
   counts.users = await copy("users");
-  for (const t of ["customers", "suppliers", "projects", "products_services"]) counts[t] = await copy(t, { mapCols: ["account_no"] });
+  for (const t of ["customers", "suppliers", "projects", "products_services", "employees"]) counts[t] = await copy(t, { mapCols: ["account_no"] });
   counts.sales_invoices = await copy("sales_invoices");
   counts.sales_invoice_lines = await copy("sales_invoice_lines", { mapCols: ["account_no"] });
   counts.purchase_invoices = await copy("purchase_invoices");

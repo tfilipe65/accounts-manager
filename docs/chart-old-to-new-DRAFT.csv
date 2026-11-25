@@ -4,88 +4,88 @@
 122;Cash Account;4104;It is a bank account, not cash
 130;Petty Cash Acct.;4101;
 300;Accounts Receivable;4201;
-301;Other Current Assets;4307;
+301;Other Current Assets;4301;
 720;Plant & Machinery;5102;
 740;Equipment;5104;
 760;Motor Vehicles;5103;
-780;Other Non-Currents Assets;5301;
+780;Other Non-Currents Assets;5104;
 790;Inventory;4401;Stock is a current asset
 1000;Accounts Payable;6101;
 1110;Interest Payable;6303;Accrued cost
-1120;Sales Tax Payable;6203;VAT charged
-1130;Purchases Tax Payable;4304;VAT recoverable
-1150;Payroll Tax - IRS;6202;
-1160;Income Tax - IRC;6201;
+1120;Sales Tax Payable;6201;VAT charged
+1130;Purchases Tax Payable;4302;VAT recoverable
+1150;Payroll Tax - IRS;6204;
+1160;Income Tax - IRC;6203;
 1170;Transfers Between A/C's;4106;Moves to cash and bank: it is a clearing account, not a liability
 1180;Credits & Loans;6501 / 7101;Split into due within and after a year
-1200;Capital;8102;
-1210;Owners Contributions;8103;
-1230;Owners Draw;8101;
-1400;Retained Earnings;8203;
-1410;Other Reserves;8202;
+1200;Capital;8101;
+1210;Owners Contributions;8101;
+1230;Owners Draw;8102;
+1400;Retained Earnings;8202;
+1410;Other Reserves;8201;
 1420;Current Year P/L;(dropped);"The app works out the year's result itself; a manual account invited double counting"
-2000;General Sales;1104 / 1102 / 1109 / 1111;By business: construction / carpentry / decorations / property management
-2010;Credits/Discounts Allowed;1103;
+2000;General Sales;1103 / 1102 / 1107 / 1109;By business: construction / carpentry / decorations / property management
+2010;Credits/Discounts Allowed;1113;
 2020;Investment Income;1301;"Was under revenue; it is financial income"
-2030;Gains from sale of Assets;1206;
-2040;Other Income;1207;
-2050;Tax Refunds;(dropped);"A refund reduces the tax account it came from; booking it as income overstates profit. Use 4305."
-2060;Insurance Claims;1205;
+2030;Gains from sale of Assets;1202;
+2040;Other Income;1202;
+2050;Tax Refunds;(dropped);"A refund reduces the tax account it came from; booking it as income overstates profit. Use 4303."
+2060;Insurance Claims;1202;
 2070;Interest Earned;1301;
 2100;Material Purchases;2101;Carpentry: 2102 to 2104
 2110;Field Staff - Wages;2301;Direct labour
 2120;Subcontractors;2201;
 2130;Professional Services;2202;
-2140;Equipment & Consumables;2203 / 2205;Hire versus consumables
+2140;Equipment & Consumables;2203 / 2204;Hire versus consumables
 2150;Credits Received;2107;Contra account
-2160;Waste Disposal;2204;
-2170;Other Job Costs;2206;
-2200;Advertising;3401;
-2210;Marketing & Promotions;3401;Merged
-2220;Gifs and Samples;3406;
+2160;Waste Disposal;2205;
+2170;Other Job Costs;2205;
+2200;Advertising;3405;
+2210;Marketing & Promotions;3405;Merged
+2220;Gifs and Samples;3407;
 2230;Bad Debts;3701;
-2240;Education & Training;3107;
-2250;Commissions Paid;3403;
-2270;Licenses & Permits;3503;
-2280;Office Supplies;3405;
+2240;Education & Training;3104;
+2250;Commissions Paid;3406;
+2270;Licenses & Permits;3502;
+2280;Office Supplies;3402;
 2290;External Services;3409;
 2300;Postage & Deliveries;3409;Merged
-2310;Printing & Reproduction;3405;Merged
+2310;Printing & Reproduction;3402;Merged
 2320;Salaries (Admin);3102;
-2330;Subscriptions;3412;
+2330;Subscriptions;3403;
 2340;Other Admin Expenses;3409;Merged
-2350;Food & Beverages (Office);3408;
-2360;Payroll Expenses/Benefits;3106 / 3107;
+2350;Food & Beverages (Office);3407;
+2360;Payroll Expenses/Benefits;3104 / 3104;
 2370;Loan Repayments;6501;"Repaying principal reduces the loan; only the interest (9101) is a cost"
-2500;Fuel and Petrol;3302;
-2510;Auto Inspections - MOT;3301;Merged
-2520;Auto Maintenance & Repairs;3301;
-2530;Tolls & Parking;3304;
+2500;Fuel and Petrol;3301;
+2510;Auto Inspections - MOT;3302;Merged
+2520;Auto Maintenance & Repairs;3302;
+2530;Tolls & Parking;3303;
 2540;IUC - Imp. Unico Circulação;3501;
-2600;Automotive Insurance;3305;
-2610;Builders Insurance;3410;Merged with liability and business insurance
-2620;Health Insurance;3106;
-2630;Public Liability;3410;Merged
-2640;Business Insurance;3410;Merged
-2650;Workers Comp. Insurance;2303 / 3105;By direct or office staff
-2700;Accounting Fees;3402;
-2710;Legal Fees;3407;
-2720;Other Professionals;3402;Merged
-2810;Meals & Restaurants;3408;Merged
+2600;Automotive Insurance;3304;
+2610;Builders Insurance;3404;Merged with liability and business insurance
+2620;Health Insurance;3104;
+2630;Public Liability;3404;Merged
+2640;Business Insurance;3404;Merged
+2650;Workers Comp. Insurance;2303 / 3104;By direct or office staff
+2700;Accounting Fees;3401;
+2710;Legal Fees;3401;
+2720;Other Professionals;3401;Merged
+2810;Meals & Restaurants;3407;Merged
 2820;Travel Expenses;3303;
-2830;Health & Safety;2304 / 3107;
+2830;Health & Safety;2303 / 3104;
 2900;Electricity;3202;
-2910;Telephone & Internet;3205;
-2930;Water;3203;
-2940;Hardware;3404;"Small items expensed; larger purchases are fixed assets (5104)"
-2950;Software;3412;Merged
-2960;Webservices;3412;Merged
+2910;Telephone & Internet;3203;
+2930;Water;3202;
+2940;Hardware;2204;"Small items expensed; larger purchases are fixed assets (5104)"
+2950;Software;3403;Merged
+2960;Webservices;3403;Merged
 2970;Fundo de Compensação;2302 / 3103;Employer charge
-2990;IGFSS - Seg. Social;6206 (+ 2302 / 3103);"Owed to the State; only the employer share is a cost"
-3000;IVA - Paid / Received;6204;
-3010;Retenção na Fonte;6202;Withheld from pay, owed to the State: a liability, not a cost
+2990;IGFSS - Seg. Social;6205 (+ 2302 / 3103);"Owed to the State; only the employer share is a cost"
+3000;IVA - Paid / Received;6202;
+3010;Retenção na Fonte;6204;Withheld from pay, owed to the State: a liability, not a cost
 3020;Income Tax Expense;9201;
 3030;Interest Expense;9101;
-3040;Bank Fees;3411;
-3050;Finance Charges;9103;
-3060;Assets Depreciation;3601 to 3606;By class of asset
+3040;Bank Fees;3408;
+3050;Finance Charges;9102;
+3060;Assets Depreciation;3601 to 3601;By class of asset
