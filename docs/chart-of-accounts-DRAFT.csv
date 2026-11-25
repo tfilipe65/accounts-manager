@@ -1,156 +1,156 @@
-﻿Number;Name;Nome (PT);Statement;Section;Subgroup;Normal balance;SNC code;SNC match;Construction;Carpentry;Decorations;Property mgmt;Client account;App role;Note
-1110;Petty cash;Caixa;Balance sheet;Current assets;Cash and bank;debit;11;exact;X;X;X;X;;petty_cash;
-1210;Bank account 1: current account;Depósitos à ordem: conta corrente;Balance sheet;Current assets;Cash and bank;debit;12;exact;X;X;X;X;X;;"Account 3 is 1230; further bank accounts added in the app take the next free number up to 1289."
-1220;Bank account 2: IVA and tax reserve;Depósitos à ordem: conta IVA/impostos;Balance sheet;Current assets;Cash and bank;debit;12;exact;X;X;X;X;;;
-1240;Payment platforms to collect (card terminals, booking payouts);Valores a receber de plataformas de pagamento;Balance sheet;Current assets;Cash and bank;debit;12;confirm;;;;X;;;
-1230;Bank account 3;Depósitos à ordem: conta 3;Balance sheet;Current assets;Cash and bank;debit;12;exact;X;X;X;X;;;
-1290;Transfers between own accounts (clearing);Transferências internas;Balance sheet;Current assets;Cash and bank;debit;12;sub;X;X;X;X;X;transfers_clearing;"Always nets to zero; shown so a missing side of a transfer is visible."
-2110;Clients (accounts receivable);Clientes c/c;Balance sheet;Current assets;Clients;debit;211;exact;X;X;X;X;X;accounts_receivable;
-2118;Doubtful clients;Clientes de cobrança duvidosa;Balance sheet;Current assets;Clients;debit;218;exact;X;X;X;X;;;
-2119;Clients: guarantee retentions held back;Clientes: retenções de garantia;Balance sheet;Current assets;Clients;debit;211;sub;X;;;;;;Builders: part of each stage payment held until the guarantee period ends.
-2250;Advances to suppliers;Fornecedores: adiantamentos;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;225;exact;X;X;X;X;;;
-2321;Advances to staff;Adiantamentos ao pessoal;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;232;exact;X;X;X;X;;;
-2411;IRC paid on account;IRC: pagamentos por conta;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;2411;confirm;X;X;X;X;;;Sub-account number to be confirmed.
-2432;VAT recoverable (input VAT);IVA dedutível;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;2432;exact;X;X;X;X;X;vat_input;
-2437;VAT to be refunded;IVA a recuperar;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;2437;exact;X;X;X;X;;;
-2721;Accrued income;Devedores por acréscimos de rendimentos;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;2721;exact;X;X;X;X;;;
-2781;Other debtors;Outros devedores;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;278;exact;X;X;X;X;;;
-2784;Deposits and guarantees paid;Cauções prestadas;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;278;sub;X;X;X;X;;;
-2811;Prepaid expenses;Gastos a reconhecer;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;281;exact;X;X;X;X;;;For example insurance paid for the whole year.
-3210;Goods and materials in stock;Mercadorias e matérias-primas;Balance sheet;Current assets;Stock;debit;32/33;exact;X;X;;;;;
-4320;Buildings and improvements;Edifícios e outras construções;Balance sheet;Non-current assets;Fixed assets (cost);debit;432;exact;X;X;X;;;;
-4330;Plant, machinery and tools;Equipamento básico;Balance sheet;Non-current assets;Fixed assets (cost);debit;433;exact;X;X;;;;;
-4340;Motor vehicles;Equipamento de transporte;Balance sheet;Non-current assets;Fixed assets (cost);debit;434;exact;X;X;X;X;;;
-4350;Office and IT equipment;Equipamento administrativo;Balance sheet;Non-current assets;Fixed assets (cost);debit;435;exact;X;X;X;X;;;
-4370;Other tangible assets;Outros activos fixos tangíveis;Balance sheet;Non-current assets;Fixed assets (cost);debit;437;exact;X;X;X;X;;;
-4410;Software and intangible assets;Activos intangíveis;Balance sheet;Non-current assets;Fixed assets (cost);debit;44;exact;X;X;X;X;;;
-4822;Accumulated depreciation: buildings;Depreciações acumuladas: edifícios;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);4822;exact;X;X;X;;;;
-4823;Accumulated depreciation: plant and machinery;Depreciações acumuladas: equipamento básico;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);4823;exact;X;X;;;;;
-4824;Accumulated depreciation: vehicles;Depreciações acumuladas: equipamento de transporte;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);4824;exact;X;X;X;X;;;
-4825;Accumulated depreciation: office and IT;Depreciações acumuladas: equipamento administrativo;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);4825;exact;X;X;X;X;;;
-4827;Accumulated depreciation: other;Depreciações acumuladas: outros;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);4827;exact;X;X;X;X;;;
-4841;Accumulated amortisation: intangibles;Amortizações acumuladas: activos intangíveis;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);484;exact;X;X;X;X;;;
-4110;Long-term investments and deposits;Investimentos financeiros;Balance sheet;Non-current assets;Other non-current assets;debit;41;exact;X;X;X;X;;;
-2210;Suppliers (accounts payable);Fornecedores c/c;Balance sheet;Liabilities;Suppliers;credit;221;exact;X;X;X;X;X;accounts_payable;
-2212;Suppliers: guarantee retentions withheld;Fornecedores: retenções de garantia;Balance sheet;Liabilities;Suppliers;credit;221;sub;X;;;;;;Builders: retained from subcontractors until their guarantee ends.
-2710;Suppliers of fixed assets;Fornecedores de investimentos;Balance sheet;Liabilities;Suppliers;credit;271;exact;X;X;X;X;;;
-2433;VAT charged (output VAT);IVA liquidado;Balance sheet;Liabilities;VAT and State;credit;2433;exact;X;X;X;X;X;vat_output;
-2436;VAT payable: settlement account;IVA a pagar;Balance sheet;Liabilities;VAT and State;credit;2436;exact;X;X;X;X;X;vat_settlement;Replaces the old 'IVA paid / received' account. Payments to the State clear it.
-2414;IRC: estimated tax payable;IRC: imposto estimado;Balance sheet;Liabilities;VAT and State;credit;2414;confirm;X;X;X;X;;;Sub-account number to be confirmed.
-2421;Withheld income tax payable (IRS and IRC withholding);Retenção de impostos sobre rendimentos;Balance sheet;Liabilities;VAT and State;credit;2421/2422;confirm;X;X;X;X;;withholding_payable;Tax withheld from salaries and from independent professionals. Owed to the State, never a cost.
-2451;Social security payable;Contribuições para a Segurança Social;Balance sheet;Liabilities;VAT and State;credit;245;exact;X;X;X;X;;social_security_payable;Employee 11% and employer share, owed to the State.
-2441;Other taxes payable (IMI, stamp duty, municipal);Outros impostos;Balance sheet;Liabilities;VAT and State;credit;244;exact;X;X;X;X;;;
-2311;Salaries payable;Remunerações a pagar;Balance sheet;Liabilities;Staff and accruals;credit;231;exact;X;X;X;X;;net_pay_payable;
-2722;Accrued holiday and Christmas pay;Credores por acréscimos de gastos: férias e subsídios;Balance sheet;Liabilities;Staff and accruals;credit;2722;exact;X;X;X;X;;holiday_accrual;The two extra months of pay built up through the year.
-2723;Other accrued costs;Credores por acréscimos de gastos: outros;Balance sheet;Liabilities;Staff and accruals;credit;2722;sub;X;X;X;X;;;
-2821;Deferred income;Rendimentos a reconhecer;Balance sheet;Liabilities;Staff and accruals;credit;282;exact;X;X;X;X;;;
-2761;Customer advances and deposits;Adiantamentos de clientes;Balance sheet;Liabilities;Customer money and deposits;credit;276;exact;X;X;X;;;;
-2788;Client money held for owners;Outros credores: dinheiro de clientes;Balance sheet;Liabilities;Customer money and deposits;credit;278;sub;;;;X;X;client_money;Property management: rent collected and held for owners.
-2789;Guest and tenant deposits held;Cauções recebidas;Balance sheet;Liabilities;Customer money and deposits;credit;278;sub;;;;X;X;;
-2511;Bank loans: due within a year;Empréstimos bancários;Balance sheet;Liabilities;Borrowings due within a year;credit;2511;exact;X;X;X;X;;loan_principal;
-2512;Bank overdraft;Descobertos bancários;Balance sheet;Liabilities;Borrowings due within a year;credit;2512;exact;X;X;X;X;;;
-2513;Leasing;Locações financeiras;Balance sheet;Liabilities;Borrowings due within a year;credit;2513;exact;X;X;X;X;;;
-2519;Credit cards and other financing;Outros financiamentos;Balance sheet;Liabilities;Borrowings due within a year;credit;2519;exact;X;X;X;X;;;
-2681;Shareholder loans (suprimentos);Sócios: suprimentos;Balance sheet;Liabilities;Borrowings due within a year;credit;268;sub;X;X;X;X;;;
-2514;Bank loans: due after a year;Empréstimos bancários: não corrente;Balance sheet;Long-term debt;Borrowings due after a year;credit;2511;sub;X;X;X;X;;;Own split of 251 so the balance sheet can show current and non-current.
-5110;Share capital;Capital social;Balance sheet;Equity;Capital;credit;51;exact;X;X;X;X;X;share_capital;
-5310;Additional capital contributions;Prestações suplementares;Balance sheet;Equity;Capital;credit;53;exact;X;X;X;X;;;
-2631;Partner drawings (advances on profits);Adiantamentos por conta de lucros;Balance sheet;Equity;Capital;credit (contra);263;exact;X;X;X;X;;;"Money taken out by the owners; reduces equity."
-5510;Legal reserve;Reservas legais;Balance sheet;Equity;Reserves and retained earnings;credit;551;exact;X;X;X;X;;;
-5590;Other reserves;Outras reservas;Balance sheet;Equity;Reserves and retained earnings;credit;559;exact;X;X;X;X;;;
-5610;Retained earnings;Resultados transitados;Balance sheet;Equity;Reserves and retained earnings;credit;56;exact;X;X;X;X;X;retained_earnings;The current year's result is calculated by the app and is not an account here.
-7110;Sales of goods and materials;Vendas de mercadorias;Profit & loss;Income;Revenue;credit;711;exact;X;X;X;;;;
-7120;Sales of made-to-order joinery (kitchens, wardrobes, doors);Vendas de produtos acabados;Profit & loss;Income;Revenue;credit;712;exact;;X;;;;default_sales;
-7190;Discounts and returns allowed;Descontos e abatimentos concedidos;Profit & loss;Income;Revenue;credit (contra);71;confirm;X;X;X;X;X;;Credit notes can post here.
-7211;Construction works;Prestações de serviços: obras;Profit & loss;Income;Revenue;credit;721;sub;X;;;;;default_sales;
-7212;Labour and site supervision;Prestações de serviços: mão-de-obra e fiscalização;Profit & loss;Income;Revenue;credit;721;sub;X;;;;;;
-7213;Design and project management;Prestações de serviços: projecto e gestão;Profit & loss;Income;Revenue;credit;721;sub;X;;;;;;
-7214;Installation and fitting;Prestações de serviços: montagem;Profit & loss;Income;Revenue;credit;721;sub;;X;X;;;;
-7215;Repairs and restoration;Prestações de serviços: reparações;Profit & loss;Income;Revenue;credit;721;sub;;X;;;;;
-7221;Design and consultancy fees;Prestações de serviços: design e consultoria;Profit & loss;Income;Revenue;credit;722;sub;;;X;;;default_sales;
-7222;Styling and staging;Prestações de serviços: decoração e staging;Profit & loss;Income;Revenue;credit;722;sub;;;X;;;;
-7231;Management commissions;Prestações de serviços: comissões de gestão;Profit & loss;Income;Revenue;credit;723;sub;;;;X;;default_sales;
-7232;Guest services (check-in, linen, concierge);Prestações de serviços: serviços a hóspedes;Profit & loss;Income;Revenue;credit;723;sub;;;;X;;;
-7233;Maintenance coordination fees;Prestações de serviços: coordenação de manutenção;Profit & loss;Income;Revenue;credit;723;sub;;;;X;;;
-7234;Rental income from own properties;Prestações de serviços: rendas;Profit & loss;Income;Revenue;credit;723;sub;;;;X;;;
-7235;Inspections and reports;Prestações de serviços: inspecções e relatórios;Profit & loss;Income;Revenue;credit;723;sub;;;;X;;;
-7241;Account administration fees;Prestações de serviços: administração de conta;Profit & loss;Income;Revenue;credit;724;sub;;;;;X;default_sales;
-7510;Operating grants;Subsídios à exploração;Profit & loss;Income;Other income and gains;credit;75;exact;X;X;X;X;;;
-7810;Recharged costs and supplementary income;Rendimentos suplementares;Profit & loss;Income;Other income and gains;credit;781;exact;X;X;X;X;;;
-7820;Early-payment discounts received;Descontos de pronto pagamento obtidos;Profit & loss;Income;Other income and gains;credit;782;exact;X;X;X;X;;;
-7830;Recovered bad debts;Recuperação de dívidas a receber;Profit & loss;Income;Other income and gains;credit;783;exact;X;X;X;X;;;
-7881;Insurance claims received;Outros rendimentos: indemnizações de seguros;Profit & loss;Income;Other income and gains;credit;788;sub;X;X;X;X;;;
-7885;Gains on disposal of assets;Outros rendimentos: ganhos em alienações;Profit & loss;Income;Other income and gains;credit;788;sub;X;X;X;X;;;
-7889;Other income and gains;Outros rendimentos e ganhos;Profit & loss;Income;Other income and gains;credit;788;exact;X;X;X;X;X;;
-7910;Interest earned;Juros obtidos;Profit & loss;Income;Interest earned;credit;791;exact;X;X;X;X;X;interest_income;
-6110;Materials and goods used;Matérias e mercadorias consumidas;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;61;exact;X;X;X;;;default_materials;
-6111;Timber and boards;Madeiras e derivados;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;61;sub;;X;;;;;
-6112;Hardware and fittings;Ferragens e acessórios;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;61;sub;;X;;;;;
-6113;Finishes (varnish, paint, glue);Acabamentos;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;61;sub;;X;;;;;
-6121;Furnishings and soft goods for resale;Mobiliário e têxteis para venda;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;61;sub;;;X;;;;
-6150;Change in stock (year-end count);Variação nos inventários;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;61;exact;X;X;;;;stock_change;Posted by Year-End Stock: the closing count on 31 Dec, reversed on 1 Jan.
-6190;Purchase returns and discounts;Devoluções e descontos obtidos;Profit & loss;Cost of sales (direct costs);Materials and goods;debit (contra);61;sub;X;X;X;;;;
-6211;Subcontractors (trades);Subcontratos;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;621;exact;X;X;X;;;;
-6212;Specialist and design services;Trabalhos especializados;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;6221;exact;X;X;X;;;;
-6213;Equipment and plant hire for jobs;Rendas e alugueres de equipamento;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;6261;exact;X;X;;;;;
-6214;Skip hire and waste removal;Recolha de resíduos;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;6268;exact;X;;;;;;
-6215;Site consumables and small tools;Ferramentas e utensílios de desgaste rápido;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;6231;exact;X;X;;;;;
-6216;Other direct job costs;Outros gastos directos;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;6268;exact;X;X;X;;;;
-6217;Cleaning and laundry for managed properties;Limpeza e lavandaria;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;6267;exact;;;;X;;;
-6218;Pool and garden maintenance;Conservação: piscina e jardim;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;6226;exact;;;;X;;;
-6219;Repairs and maintenance of managed properties;Conservação e reparação;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;6226;exact;;;;X;;;
-6220;Booking-platform commissions;Comissões de plataformas de reserva;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;6225;exact;;;;X;;;
-6321;Wages: site and workshop staff;Remunerações do pessoal: produção;Profit & loss;Cost of sales (direct costs);Direct labour;debit;632;sub;X;X;;;;wages_direct;
-6351;Employer social security: direct staff;Encargos sobre remunerações: produção;Profit & loss;Cost of sales (direct costs);Direct labour;debit;635;sub;X;X;;;;employer_social_security_direct;
-6361;Work-accident insurance: direct staff;Seguro de acidentes de trabalho: produção;Profit & loss;Cost of sales (direct costs);Direct labour;debit;636;sub;X;X;;;;;
-6381;Health and safety, training: direct staff;Segurança, higiene e formação: produção;Profit & loss;Cost of sales (direct costs);Direct labour;debit;638;sub;X;X;;;;;
-6311;Management remuneration;Remunerações dos órgãos sociais;Profit & loss;Operating expenses;Staff costs: office and management;debit;631;exact;X;X;X;X;;;
-6322;Wages: office staff;Remunerações do pessoal: administrativo;Profit & loss;Operating expenses;Staff costs: office and management;debit;632;sub;X;X;X;X;;wages_office;
-6352;Employer social security: office staff;Encargos sobre remunerações: administrativo;Profit & loss;Operating expenses;Staff costs: office and management;debit;635;sub;X;X;X;X;;employer_social_security_office;
-6353;Employer social security: management;Encargos sobre remunerações: gerência;Profit & loss;Operating expenses;Staff costs: office and management;debit;635;sub;X;X;X;X;;;
-6362;Work-accident insurance: office staff;Seguro de acidentes de trabalho: administrativo;Profit & loss;Operating expenses;Staff costs: office and management;debit;636;sub;X;X;X;X;;;
-6371;Staff health insurance and welfare;Gastos de acção social;Profit & loss;Operating expenses;Staff costs: office and management;debit;637;exact;X;X;X;X;;;
-6382;Training and other staff costs;Outros gastos com o pessoal;Profit & loss;Operating expenses;Staff costs: office and management;debit;638;exact;X;X;X;X;;;
-6261;Rent of premises;Rendas e alugueres;Profit & loss;Operating expenses;Premises and utilities;debit;6261;exact;X;X;X;X;;;
-6241;Electricity;Electricidade;Profit & loss;Operating expenses;Premises and utilities;debit;6241;exact;X;X;X;X;;;
-6243;Water;Água;Profit & loss;Operating expenses;Premises and utilities;debit;6243;exact;X;X;X;X;;;
-6262;Telephone and internet;Comunicação;Profit & loss;Operating expenses;Premises and utilities;debit;6262;exact;X;X;X;X;;;
-6226;Repairs and maintenance of premises;Conservação e reparação;Profit & loss;Operating expenses;Premises and utilities;debit;6226;exact;X;X;X;X;;;
-6267;Cleaning and hygiene of premises;Limpeza, higiene e conforto;Profit & loss;Operating expenses;Premises and utilities;debit;6267;exact;X;X;X;X;;;
-6242;Fuel;Combustíveis;Profit & loss;Operating expenses;Vehicles and travel;debit;6242;exact;X;X;X;X;;;
-6227;Vehicle repairs, servicing and inspections;Conservação e reparação: viaturas;Profit & loss;Operating expenses;Vehicles and travel;debit;6226;sub;X;X;X;X;;;
-6252;Tolls and parking;Portagens e estacionamento;Profit & loss;Operating expenses;Vehicles and travel;debit;6252;confirm;X;X;X;X;;;
-62631;Insurance: vehicles;Seguros: viaturas;Profit & loss;Operating expenses;Vehicles and travel;debit;6263;sub;X;X;X;X;;;
-6251;Travel and accommodation;Deslocações e estadas;Profit & loss;Operating expenses;Vehicles and travel;debit;6251;exact;X;X;X;X;;;
-6224;Accounting and professional fees;Honorários;Profit & loss;Operating expenses;Professional and administrative;debit;6224;exact;X;X;X;X;X;;
-6265;Legal and notary fees;Contencioso e notariado;Profit & loss;Operating expenses;Professional and administrative;debit;6265;exact;X;X;X;X;;;
-6233;Office supplies and printing;Material de escritório;Profit & loss;Operating expenses;Professional and administrative;debit;6233;exact;X;X;X;X;;;
-6231;Small tools and equipment (expensed);Ferramentas e utensílios de desgaste rápido;Profit & loss;Operating expenses;Professional and administrative;debit;6231;exact;X;X;X;X;;;
-62682;Software, subscriptions and web services;Serviços: software e subscrições;Profit & loss;Operating expenses;Professional and administrative;debit;6268;sub;X;X;X;X;;;
-62632;Insurance: business, liability and contract works;Seguros: responsabilidade civil e obras;Profit & loss;Operating expenses;Professional and administrative;debit;6263;sub;X;X;X;X;;;
-6222;Advertising and marketing;Publicidade e propaganda;Profit & loss;Operating expenses;Professional and administrative;debit;6222;exact;X;X;X;X;;;
-6225;Commissions paid to agents;Comissões;Profit & loss;Operating expenses;Professional and administrative;debit;6225;exact;X;X;X;X;;;
-6266;Meals and entertainment;Despesas de representação;Profit & loss;Operating expenses;Professional and administrative;debit;6266;exact;X;X;X;X;;;
-6234;Gifts and samples;Artigos para oferta;Profit & loss;Operating expenses;Professional and administrative;debit;6234;exact;X;X;X;X;;;
-62681;Bank charges and commissions;Serviços bancários;Profit & loss;Operating expenses;Professional and administrative;debit;6268;confirm;X;X;X;X;X;bank_charges;
-6268;Other external services;Outros serviços;Profit & loss;Operating expenses;Professional and administrative;debit;6268;exact;X;X;X;X;X;;
-6811;Vehicle and property taxes (IUC, IMI);Impostos directos;Profit & loss;Operating expenses;Taxes and licences;debit;6811;exact;X;X;X;X;;;
-6812;Stamp duty and indirect taxes;Impostos indirectos;Profit & loss;Operating expenses;Taxes and licences;debit;6812;exact;X;X;X;X;;;
-6813;Fees, licences and permits;Taxas;Profit & loss;Operating expenses;Taxes and licences;debit;6813;exact;X;X;X;X;;;
-6422;Depreciation: buildings and improvements;Depreciação: edifícios;Profit & loss;Operating expenses;Depreciation;debit;6422;exact;X;X;X;;;;
-6423;Depreciation: plant and machinery;Depreciação: equipamento básico;Profit & loss;Operating expenses;Depreciation;debit;6423;exact;X;X;;;;;
-6424;Depreciation: vehicles;Depreciação: equipamento de transporte;Profit & loss;Operating expenses;Depreciation;debit;6424;exact;X;X;X;X;;;
-6425;Depreciation: office and IT equipment;Depreciação: equipamento administrativo;Profit & loss;Operating expenses;Depreciation;debit;6425;exact;X;X;X;X;;;
-6427;Depreciation: other tangible assets;Depreciação: outros;Profit & loss;Operating expenses;Depreciation;debit;6427;exact;X;X;X;X;;;
-6441;Amortisation: software and intangibles;Amortização: activos intangíveis;Profit & loss;Operating expenses;Depreciation;debit;644;exact;X;X;X;X;;;
-6830;Bad debts written off;Dívidas incobráveis;Profit & loss;Operating expenses;Other expenses and losses;debit;683;exact;X;X;X;X;;;
-6840;Stock losses;Perdas em inventários;Profit & loss;Operating expenses;Other expenses and losses;debit;684;exact;X;X;X;;;;
-6881;Prior-period corrections;Correcções relativas a períodos anteriores;Profit & loss;Operating expenses;Other expenses and losses;debit;6881;exact;X;X;X;X;;;
-6882;Donations;Donativos;Profit & loss;Operating expenses;Other expenses and losses;debit;6882;exact;X;X;X;X;;;
-6883;Memberships (associations);Quotizações;Profit & loss;Operating expenses;Other expenses and losses;debit;6883;exact;X;X;X;X;;;
-6887;Losses on disposal of assets;Perdas em alienações;Profit & loss;Operating expenses;Other expenses and losses;debit;688;sub;X;X;X;X;;;
-6888;Other expenses and losses;Outros gastos e perdas;Profit & loss;Operating expenses;Other expenses and losses;debit;6888;exact;X;X;X;X;X;;
-6911;Interest on bank loans;Juros suportados: empréstimos;Profit & loss;Financing and tax;Financing costs;debit;691;exact;X;X;X;X;;interest_expense;
-6912;Interest on overdraft, leasing and cards;Juros suportados: descobertos e locações;Profit & loss;Financing and tax;Financing costs;debit;691;exact;X;X;X;X;;;
-6981;Loan arrangement fees and other financing costs;Outros gastos de financiamento;Profit & loss;Financing and tax;Financing costs;debit;698;exact;X;X;X;X;;;
-8121;IRC: estimated tax for the year;Imposto estimado para o período;Profit & loss;Financing and tax;Income tax;debit;8121;exact;X;X;X;X;;income_tax;
+﻿Number;Name;Nome (PT);Statement;Section;Subgroup;Normal balance;Construction;Carpentry;Decorations;Property mgmt;Client account;App role;Note
+4101;Petty cash;Caixa;Balance sheet;Current assets;Cash and bank;debit;X;X;X;X;;petty_cash;
+4102;Bank account 1: current account;Depósitos à ordem: conta corrente;Balance sheet;Current assets;Cash and bank;debit;X;X;X;X;X;;Further bank accounts added in the app take the next free number in this subgroup.
+4103;Bank account 2: IVA and tax reserve;Depósitos à ordem: conta IVA/impostos;Balance sheet;Current assets;Cash and bank;debit;X;X;X;X;;;
+4105;Payment platforms to collect (card terminals, booking payouts);Valores a receber de plataformas de pagamento;Balance sheet;Current assets;Cash and bank;debit;;;;X;;;
+4104;Bank account 3;Depósitos à ordem: conta 3;Balance sheet;Current assets;Cash and bank;debit;X;X;X;X;;;
+4106;Transfers between own accounts (clearing);Transferências internas;Balance sheet;Current assets;Cash and bank;debit;X;X;X;X;X;transfers_clearing;"Always nets to zero; shown so a missing side of a transfer is visible."
+4201;Clients (accounts receivable);Clientes c/c;Balance sheet;Current assets;Clients;debit;X;X;X;X;X;accounts_receivable;
+4202;Doubtful clients;Clientes de cobrança duvidosa;Balance sheet;Current assets;Clients;debit;X;X;X;X;;;
+4203;Clients: guarantee retentions held back;Clientes: retenções de garantia;Balance sheet;Current assets;Clients;debit;X;;;;;;Builders: part of each stage payment held until the guarantee period ends.
+4301;Advances to suppliers;Fornecedores: adiantamentos;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;X;X;X;X;;;
+4302;Advances to staff;Adiantamentos ao pessoal;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;X;X;X;X;;;
+4303;IRC paid on account;IRC: pagamentos por conta;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;X;X;X;X;;;
+4304;VAT recoverable (input VAT);IVA dedutível;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;X;X;X;X;X;vat_input;
+4305;VAT to be refunded;IVA a recuperar;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;X;X;X;X;;;
+4306;Accrued income;Devedores por acréscimos de rendimentos;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;X;X;X;X;;;
+4307;Other debtors;Outros devedores;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;X;X;X;X;;;
+4308;Deposits and guarantees paid;Cauções prestadas;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;X;X;X;X;;;
+4309;Prepaid expenses;Gastos a reconhecer;Balance sheet;Current assets;Other current assets and VAT recoverable;debit;X;X;X;X;;;For example insurance paid for the whole year.
+4401;Goods and materials in stock;Mercadorias e matérias-primas;Balance sheet;Current assets;Stock;debit;X;X;;;;;
+5101;Buildings and improvements;Edifícios e outras construções;Balance sheet;Non-current assets;Fixed assets (cost);debit;X;X;X;;;;
+5102;Plant, machinery and tools;Equipamento básico;Balance sheet;Non-current assets;Fixed assets (cost);debit;X;X;;;;;
+5103;Motor vehicles;Equipamento de transporte;Balance sheet;Non-current assets;Fixed assets (cost);debit;X;X;X;X;;;
+5104;Office and IT equipment;Equipamento administrativo;Balance sheet;Non-current assets;Fixed assets (cost);debit;X;X;X;X;;;
+5105;Other tangible assets;Outros activos fixos tangíveis;Balance sheet;Non-current assets;Fixed assets (cost);debit;X;X;X;X;;;
+5106;Software and intangible assets;Activos intangíveis;Balance sheet;Non-current assets;Fixed assets (cost);debit;X;X;X;X;;;
+5201;Accumulated depreciation: buildings;Depreciações acumuladas: edifícios;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);X;X;X;;;;
+5202;Accumulated depreciation: plant and machinery;Depreciações acumuladas: equipamento básico;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);X;X;;;;;
+5203;Accumulated depreciation: vehicles;Depreciações acumuladas: equipamento de transporte;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);X;X;X;X;;;
+5204;Accumulated depreciation: office and IT;Depreciações acumuladas: equipamento administrativo;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);X;X;X;X;;;
+5205;Accumulated depreciation: other;Depreciações acumuladas: outros;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);X;X;X;X;;;
+5206;Accumulated amortisation: intangibles;Amortizações acumuladas: activos intangíveis;Balance sheet;Non-current assets;Accumulated depreciation;credit (contra);X;X;X;X;;;
+5301;Long-term investments and deposits;Investimentos financeiros;Balance sheet;Non-current assets;Other non-current assets;debit;X;X;X;X;;;
+6101;Suppliers (accounts payable);Fornecedores c/c;Balance sheet;Liabilities;Suppliers;credit;X;X;X;X;X;accounts_payable;
+6102;Suppliers: guarantee retentions withheld;Fornecedores: retenções de garantia;Balance sheet;Liabilities;Suppliers;credit;X;;;;;;Builders: retained from subcontractors until their guarantee ends.
+6103;Suppliers of fixed assets;Fornecedores de investimentos;Balance sheet;Liabilities;Suppliers;credit;X;X;X;X;;;
+6203;VAT charged (output VAT);IVA liquidado;Balance sheet;Liabilities;VAT and State;credit;X;X;X;X;X;vat_output;
+6204;VAT payable: settlement account;IVA a pagar;Balance sheet;Liabilities;VAT and State;credit;X;X;X;X;X;vat_settlement;Replaces the old 'IVA paid / received' account. Payments to the State clear it.
+6201;IRC: estimated tax payable;IRC: imposto estimado;Balance sheet;Liabilities;VAT and State;credit;X;X;X;X;;;
+6202;Withheld income tax payable (IRS and IRC withholding);Retenção de impostos sobre rendimentos;Balance sheet;Liabilities;VAT and State;credit;X;X;X;X;;withholding_payable;Tax withheld from salaries and from independent professionals. Owed to the State, never a cost.
+6206;Social security payable;Contribuições para a Segurança Social;Balance sheet;Liabilities;VAT and State;credit;X;X;X;X;;social_security_payable;Employee 11% and employer share, owed to the State.
+6205;Other taxes payable (IMI, stamp duty, municipal);Outros impostos;Balance sheet;Liabilities;VAT and State;credit;X;X;X;X;;;
+6301;Salaries payable;Remunerações a pagar;Balance sheet;Liabilities;Staff and accruals;credit;X;X;X;X;;net_pay_payable;
+6302;Accrued holiday and Christmas pay;Credores por acréscimos de gastos: férias e subsídios;Balance sheet;Liabilities;Staff and accruals;credit;X;X;X;X;;holiday_accrual;The two extra months of pay built up through the year.
+6303;Other accrued costs;Credores por acréscimos de gastos: outros;Balance sheet;Liabilities;Staff and accruals;credit;X;X;X;X;;;
+6304;Deferred income;Rendimentos a reconhecer;Balance sheet;Liabilities;Staff and accruals;credit;X;X;X;X;;;
+6401;Customer advances and deposits;Adiantamentos de clientes;Balance sheet;Liabilities;Customer money and deposits;credit;X;X;X;;;;
+6402;Client money held for owners;Outros credores: dinheiro de clientes;Balance sheet;Liabilities;Customer money and deposits;credit;;;;X;X;client_money;Property management: rent collected and held for owners.
+6403;Guest and tenant deposits held;Cauções recebidas;Balance sheet;Liabilities;Customer money and deposits;credit;;;;X;X;;
+6501;Bank loans: due within a year;Empréstimos bancários;Balance sheet;Liabilities;Borrowings due within a year;credit;X;X;X;X;;loan_principal;
+6502;Bank overdraft;Descobertos bancários;Balance sheet;Liabilities;Borrowings due within a year;credit;X;X;X;X;;;
+6503;Leasing;Locações financeiras;Balance sheet;Liabilities;Borrowings due within a year;credit;X;X;X;X;;;
+6504;Credit cards and other financing;Outros financiamentos;Balance sheet;Liabilities;Borrowings due within a year;credit;X;X;X;X;;;
+6505;Shareholder loans (suprimentos);Sócios: suprimentos;Balance sheet;Liabilities;Borrowings due within a year;credit;X;X;X;X;;;
+7101;Bank loans: due after a year;Empréstimos bancários: não corrente;Balance sheet;Long-term debt;Borrowings due after a year;credit;X;X;X;X;;;Own split of 251 so the balance sheet can show current and non-current.
+8102;Share capital;Capital social;Balance sheet;Equity;Capital;credit;X;X;X;X;X;share_capital;
+8103;Additional capital contributions;Prestações suplementares;Balance sheet;Equity;Capital;credit;X;X;X;X;;;
+8101;Partner drawings (advances on profits);Adiantamentos por conta de lucros;Balance sheet;Equity;Capital;credit (contra);X;X;X;X;;;"Money taken out by the owners; reduces equity."
+8201;Legal reserve;Reservas legais;Balance sheet;Equity;Reserves and retained earnings;credit;X;X;X;X;;;
+8202;Other reserves;Outras reservas;Balance sheet;Equity;Reserves and retained earnings;credit;X;X;X;X;;;
+8203;Retained earnings;Resultados transitados;Balance sheet;Equity;Reserves and retained earnings;credit;X;X;X;X;X;retained_earnings;The current year's result is calculated by the app and is not an account here.
+1101;Sales of goods and materials;Vendas de mercadorias;Profit & loss;Income;Revenue;credit;X;X;X;;;;
+1102;Sales of made-to-order joinery (kitchens, wardrobes, doors);Vendas de produtos acabados;Profit & loss;Income;Revenue;credit;;X;;;;default_sales;
+1103;Discounts and returns allowed;Descontos e abatimentos concedidos;Profit & loss;Income;Revenue;credit (contra);X;X;X;X;X;;Credit notes can post here.
+1104;Construction works;Prestações de serviços: obras;Profit & loss;Income;Revenue;credit;X;;;;;default_sales;
+1105;Labour and site supervision;Prestações de serviços: mão-de-obra e fiscalização;Profit & loss;Income;Revenue;credit;X;;;;;;
+1106;Design and project management;Prestações de serviços: projecto e gestão;Profit & loss;Income;Revenue;credit;X;;;;;;
+1107;Installation and fitting;Prestações de serviços: montagem;Profit & loss;Income;Revenue;credit;;X;X;;;;
+1108;Repairs and restoration;Prestações de serviços: reparações;Profit & loss;Income;Revenue;credit;;X;;;;;
+1109;Design and consultancy fees;Prestações de serviços: design e consultoria;Profit & loss;Income;Revenue;credit;;;X;;;default_sales;
+1110;Styling and staging;Prestações de serviços: decoração e staging;Profit & loss;Income;Revenue;credit;;;X;;;;
+1111;Management commissions;Prestações de serviços: comissões de gestão;Profit & loss;Income;Revenue;credit;;;;X;;default_sales;
+1112;Guest services (check-in, linen, concierge);Prestações de serviços: serviços a hóspedes;Profit & loss;Income;Revenue;credit;;;;X;;;
+1113;Maintenance coordination fees;Prestações de serviços: coordenação de manutenção;Profit & loss;Income;Revenue;credit;;;;X;;;
+1114;Rental income from own properties;Prestações de serviços: rendas;Profit & loss;Income;Revenue;credit;;;;X;;;
+1115;Inspections and reports;Prestações de serviços: inspecções e relatórios;Profit & loss;Income;Revenue;credit;;;;X;;;
+1116;Account administration fees;Prestações de serviços: administração de conta;Profit & loss;Income;Revenue;credit;;;;;X;default_sales;
+1201;Operating grants;Subsídios à exploração;Profit & loss;Income;Other income and gains;credit;X;X;X;X;;;
+1202;Recharged costs and supplementary income;Rendimentos suplementares;Profit & loss;Income;Other income and gains;credit;X;X;X;X;;;
+1203;Early-payment discounts received;Descontos de pronto pagamento obtidos;Profit & loss;Income;Other income and gains;credit;X;X;X;X;;;
+1204;Recovered bad debts;Recuperação de dívidas a receber;Profit & loss;Income;Other income and gains;credit;X;X;X;X;;;
+1205;Insurance claims received;Outros rendimentos: indemnizações de seguros;Profit & loss;Income;Other income and gains;credit;X;X;X;X;;;
+1206;Gains on disposal of assets;Outros rendimentos: ganhos em alienações;Profit & loss;Income;Other income and gains;credit;X;X;X;X;;;
+1207;Other income and gains;Outros rendimentos e ganhos;Profit & loss;Income;Other income and gains;credit;X;X;X;X;X;;
+1301;Interest earned;Juros obtidos;Profit & loss;Income;Interest earned;credit;X;X;X;X;X;interest_income;
+2101;Materials and goods used;Matérias e mercadorias consumidas;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;X;X;X;;;default_materials;
+2102;Timber and boards;Madeiras e derivados;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;;X;;;;;
+2103;Hardware and fittings;Ferragens e acessórios;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;;X;;;;;
+2104;Finishes (varnish, paint, glue);Acabamentos;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;;X;;;;;
+2105;Furnishings and soft goods for resale;Mobiliário e têxteis para venda;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;;;X;;;;
+2106;Change in stock (year-end count);Variação nos inventários;Profit & loss;Cost of sales (direct costs);Materials and goods;debit;X;X;;;;stock_change;Posted by Year-End Stock: the closing count on 31 Dec, reversed on 1 Jan.
+2107;Purchase returns and discounts;Devoluções e descontos obtidos;Profit & loss;Cost of sales (direct costs);Materials and goods;debit (contra);X;X;X;;;;
+2201;Subcontractors (trades);Subcontratos;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;X;X;X;;;;
+2202;Specialist and design services;Trabalhos especializados;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;X;X;X;;;;
+2203;Equipment and plant hire for jobs;Rendas e alugueres de equipamento;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;X;X;;;;;
+2204;Skip hire and waste removal;Recolha de resíduos;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;X;;;;;;
+2205;Site consumables and small tools;Ferramentas e utensílios de desgaste rápido;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;X;X;;;;;
+2206;Other direct job costs;Outros gastos directos;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;X;X;X;;;;
+2207;Cleaning and laundry for managed properties;Limpeza e lavandaria;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;;;;X;;;
+2208;Pool and garden maintenance;Conservação: piscina e jardim;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;;;;X;;;
+2209;Repairs and maintenance of managed properties;Conservação e reparação;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;;;;X;;;
+2210;Booking-platform commissions;Comissões de plataformas de reserva;Profit & loss;Cost of sales (direct costs);Subcontractors and direct services;debit;;;;X;;;
+2301;Wages: site and workshop staff;Remunerações do pessoal: produção;Profit & loss;Cost of sales (direct costs);Direct labour;debit;X;X;;;;wages_direct;
+2302;Employer social security: direct staff;Encargos sobre remunerações: produção;Profit & loss;Cost of sales (direct costs);Direct labour;debit;X;X;;;;employer_social_security_direct;
+2303;Work-accident insurance: direct staff;Seguro de acidentes de trabalho: produção;Profit & loss;Cost of sales (direct costs);Direct labour;debit;X;X;;;;;
+2304;Health and safety, training: direct staff;Segurança, higiene e formação: produção;Profit & loss;Cost of sales (direct costs);Direct labour;debit;X;X;;;;;
+3101;Management remuneration;Remunerações dos órgãos sociais;Profit & loss;Operating expenses;Staff costs: office and management;debit;X;X;X;X;;;
+3102;Wages: office staff;Remunerações do pessoal: administrativo;Profit & loss;Operating expenses;Staff costs: office and management;debit;X;X;X;X;;wages_office;
+3103;Employer social security: office staff;Encargos sobre remunerações: administrativo;Profit & loss;Operating expenses;Staff costs: office and management;debit;X;X;X;X;;employer_social_security_office;
+3104;Employer social security: management;Encargos sobre remunerações: gerência;Profit & loss;Operating expenses;Staff costs: office and management;debit;X;X;X;X;;;
+3105;Work-accident insurance: office staff;Seguro de acidentes de trabalho: administrativo;Profit & loss;Operating expenses;Staff costs: office and management;debit;X;X;X;X;;;
+3106;Staff health insurance and welfare;Gastos de acção social;Profit & loss;Operating expenses;Staff costs: office and management;debit;X;X;X;X;;;
+3107;Training and other staff costs;Outros gastos com o pessoal;Profit & loss;Operating expenses;Staff costs: office and management;debit;X;X;X;X;;;
+3204;Rent of premises;Rendas e alugueres;Profit & loss;Operating expenses;Premises and utilities;debit;X;X;X;X;;;
+3202;Electricity;Electricidade;Profit & loss;Operating expenses;Premises and utilities;debit;X;X;X;X;;;
+3203;Water;Água;Profit & loss;Operating expenses;Premises and utilities;debit;X;X;X;X;;;
+3205;Telephone and internet;Comunicação;Profit & loss;Operating expenses;Premises and utilities;debit;X;X;X;X;;;
+3201;Repairs and maintenance of premises;Conservação e reparação;Profit & loss;Operating expenses;Premises and utilities;debit;X;X;X;X;;;
+3206;Cleaning and hygiene of premises;Limpeza, higiene e conforto;Profit & loss;Operating expenses;Premises and utilities;debit;X;X;X;X;;;
+3302;Fuel;Combustíveis;Profit & loss;Operating expenses;Vehicles and travel;debit;X;X;X;X;;;
+3301;Vehicle repairs, servicing and inspections;Conservação e reparação: viaturas;Profit & loss;Operating expenses;Vehicles and travel;debit;X;X;X;X;;;
+3304;Tolls and parking;Portagens e estacionamento;Profit & loss;Operating expenses;Vehicles and travel;debit;X;X;X;X;;;
+3305;Insurance: vehicles;Seguros: viaturas;Profit & loss;Operating expenses;Vehicles and travel;debit;X;X;X;X;;;
+3303;Travel and accommodation;Deslocações e estadas;Profit & loss;Operating expenses;Vehicles and travel;debit;X;X;X;X;;;
+3402;Accounting and professional fees;Honorários;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;X;;
+3407;Legal and notary fees;Contencioso e notariado;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;;;
+3405;Office supplies and printing;Material de escritório;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;;;
+3404;Small tools and equipment (expensed);Ferramentas e utensílios de desgaste rápido;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;;;
+3412;Software, subscriptions and web services;Serviços: software e subscrições;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;;;
+3410;Insurance: business, liability and contract works;Seguros: responsabilidade civil e obras;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;;;
+3401;Advertising and marketing;Publicidade e propaganda;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;;;
+3403;Commissions paid to agents;Comissões;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;;;
+3408;Meals and entertainment;Despesas de representação;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;;;
+3406;Gifts and samples;Artigos para oferta;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;;;
+3411;Bank charges and commissions;Serviços bancários;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;X;bank_charges;
+3409;Other external services;Outros serviços;Profit & loss;Operating expenses;Professional and administrative;debit;X;X;X;X;X;;
+3501;Vehicle and property taxes (IUC, IMI);Impostos directos;Profit & loss;Operating expenses;Taxes and licences;debit;X;X;X;X;;;
+3502;Stamp duty and indirect taxes;Impostos indirectos;Profit & loss;Operating expenses;Taxes and licences;debit;X;X;X;X;;;
+3503;Fees, licences and permits;Taxas;Profit & loss;Operating expenses;Taxes and licences;debit;X;X;X;X;;;
+3601;Depreciation: buildings and improvements;Depreciação: edifícios;Profit & loss;Operating expenses;Depreciation;debit;X;X;X;;;;
+3602;Depreciation: plant and machinery;Depreciação: equipamento básico;Profit & loss;Operating expenses;Depreciation;debit;X;X;;;;;
+3603;Depreciation: vehicles;Depreciação: equipamento de transporte;Profit & loss;Operating expenses;Depreciation;debit;X;X;X;X;;;
+3604;Depreciation: office and IT equipment;Depreciação: equipamento administrativo;Profit & loss;Operating expenses;Depreciation;debit;X;X;X;X;;;
+3605;Depreciation: other tangible assets;Depreciação: outros;Profit & loss;Operating expenses;Depreciation;debit;X;X;X;X;;;
+3606;Amortisation: software and intangibles;Amortização: activos intangíveis;Profit & loss;Operating expenses;Depreciation;debit;X;X;X;X;;;
+3701;Bad debts written off;Dívidas incobráveis;Profit & loss;Operating expenses;Other expenses and losses;debit;X;X;X;X;;;
+3702;Stock losses;Perdas em inventários;Profit & loss;Operating expenses;Other expenses and losses;debit;X;X;X;;;;
+3703;Prior-period corrections;Correcções relativas a períodos anteriores;Profit & loss;Operating expenses;Other expenses and losses;debit;X;X;X;X;;;
+3704;Donations;Donativos;Profit & loss;Operating expenses;Other expenses and losses;debit;X;X;X;X;;;
+3705;Memberships (associations);Quotizações;Profit & loss;Operating expenses;Other expenses and losses;debit;X;X;X;X;;;
+3706;Losses on disposal of assets;Perdas em alienações;Profit & loss;Operating expenses;Other expenses and losses;debit;X;X;X;X;;;
+3707;Other expenses and losses;Outros gastos e perdas;Profit & loss;Operating expenses;Other expenses and losses;debit;X;X;X;X;X;;
+9101;Interest on bank loans;Juros suportados: empréstimos;Profit & loss;Financing and tax;Financing costs;debit;X;X;X;X;;interest_expense;
+9102;Interest on overdraft, leasing and cards;Juros suportados: descobertos e locações;Profit & loss;Financing and tax;Financing costs;debit;X;X;X;X;;;
+9103;Loan arrangement fees and other financing costs;Outros gastos de financiamento;Profit & loss;Financing and tax;Financing costs;debit;X;X;X;X;;;
+9201;IRC: estimated tax for the year;Imposto estimado para o período;Profit & loss;Financing and tax;Income tax;debit;X;X;X;X;;income_tax;

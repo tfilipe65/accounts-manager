@@ -12,7 +12,7 @@ import { fileURLToPath } from "url";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const docs = path.join(here, "..", "docs");
 
-import { TEMPLATES, SECTIONS, SUBGROUPS, A, OLD } from "./chart-data.mjs";
+import { TEMPLATES, SECTIONS, SUBGROUPS, A, OLD, renum } from "./chart-data.mjs";
 
 // ------------------------------------------------------------------ checks
 const sgKeys = new Set(SUBGROUPS.map((s) => s.key));
@@ -47,11 +47,11 @@ fs.mkdirSync(docs, { recursive: true });
 fs.writeFileSync(
   path.join(docs, "chart-of-accounts-DRAFT.csv"),
   csv([
-    ["Number", "Name", "Nome (PT)", "Statement", "Section", "Subgroup", "Normal balance", "SNC code", "SNC match", ...Object.values(TEMPLATES), "App role", "Note"],
+    ["Number", "Name", "Nome (PT)", "Statement", "Section", "Subgroup", "Normal balance", ...Object.values(TEMPLATES), "App role", "Note"],
     ...A.map((a) => {
       const sg = sgByKey[a[3]];
       const sec = secByKey[sg.section];
-      return [a[0], a[1], a[2], sec.statement, sec.name, sg.name, a[9] ? `${sg.normal} (contra)` : sg.normal, a[4], a[5], ...Object.keys(TEMPLATES).map((t) => (a[6].includes(t) ? "X" : "")), a[7] ?? "", a[8] ?? ""];
+      return [a[0], a[1], a[2], sec.statement, sec.name, sg.name, a[9] ? `${sg.normal} (contra)` : sg.normal, ...Object.keys(TEMPLATES).map((t) => (a[6].includes(t) ? "X" : "")), a[7] ?? "", a[8] ?? ""];
     }),
   ])
 );
@@ -62,7 +62,7 @@ const sectionsMd = SECTIONS.map((sec) => {
   const sgs = SUBGROUPS.filter((s) => s.section === sec.key);
   return `### ${sec.name} (${sec.statement})\n\n` + sgs.map((sg) => {
     const rows = A.filter((a) => a[3] === sg.key).sort((x, y) => x[0] - y[0]);
-    return `**${sg.name}** (${sg.normal}; role \`${sg.role}\`)\n\n| No. | Name | SNC | C | W | I | P | K | Note |\n|---|---|---|:-:|:-:|:-:|:-:|:-:|---|\n` + table(rows.map((a) => [a[0], a[1] + (a[9] ? " *(contra)*" : ""), a[4] + (a[5] === "confirm" ? " ⚑" : a[5] === "sub" ? " ›" : ""), ...Object.keys(TEMPLATES).map((t) => (a[6].includes(t) ? "●" : "")), a[8] ?? ""])) + "\n";
+    return `**${sg.name}** (${sg.normal}; role \`${sg.role}\`)\n\n| No. | Name | C | W | I | P | K | Note |\n|---|---|:-:|:-:|:-:|:-:|:-:|---|\n` + table(rows.map((a) => [a[0], a[1] + (a[9] ? " *(contra)*" : ""), ...Object.keys(TEMPLATES).map((t) => (a[6].includes(t) ? "●" : "")), a[8] ?? ""])) + "\n";
   }).join("\n");
 }).join("\n");
 
@@ -72,15 +72,15 @@ const md = `# Chart of accounts: DRAFT for review
 
 ## Why a new chart
 
-The current chart (90 accounts, from the Teia workbook) has wrong classifications (withheld tax and the employee's social security as costs, loan repayments as expenses), no logic to its numbering, one construction-only set of cost accounts for every business, and no link to the Portuguese official chart. The review that led to this draft is in the conversation. Your own data shows which accounts matter: 57 of the 90 were used in the workbook, mostly materials, fuel, subcontractors, wages and transfers.
+The old chart (90 accounts, from the Teia workbook) had wrong classifications (withheld tax and the employee's social security as costs, loan repayments as expenses), no logic to its numbering, and one construction-only set of cost accounts for every business. The review that led to this draft is in the conversation. Your own data shows which accounts matter: 57 of the 90 were used in the workbook, mostly materials, fuel, subcontractors, wages and transfers.
 
 ## Design in six rules
 
 1. **One structure, five templates.** Every company gets the same spine; a template adds or leaves out the accounts that business needs. The matrix below shows which. C = Construction (Teia Firme), W = Carpentry (Woodgrain), I = Decorations (Algarve Interior), P = Property management (Casas Algarve), K = Client money account.
-2. **The account number is the SNC number.** SNC (Sistema de Normalização Contabilística) is the Portuguese official chart: 1 cash and bank, 2 receivables, payables, State and financing, 3 stock, 4 fixed assets, 5 equity, 6 costs, 7 income, 8 results. Using its numbers means your accountant, and the tax authority's SAF-T file, need no translation. Where SNC has only three digits and we need more detail, we add a digit (a *sub-account*, marked ›). Anything I am not sure of is flagged ⚑ for your accountant.
+2. **Our own numbering, nothing official behind it.** This is an internal bookkeeping tool, so the numbers follow our groups. An account number has four digits: the first is the group (1 Income, 2 Cost of sales, 3 Operating expenses, 4 Current assets, 5 Non-current assets, 6 Liabilities, 7 Long-term debt, 8 Equity, 9 Financing and tax), the second is the subgroup within it (11 Revenue, 12 Other income, 13 Interest earned, and so on), and the last two number the account. A heading's number is therefore the start of every account under it.
 3. **Three levels stay:** section (a line of the statements) › subgroup › account. Subgroups carry a **role**, and so do a handful of single accounts (below), so the app stops depending on numbers. Renumbering later would then be harmless.
 4. **Costs by nature, direct costs separated.** Cost of sales holds materials, subcontractors, direct labour and, for property management, the cleaning, laundry and repairs bought for managed properties. Everything else is an operating expense. The P&L shows gross profit and an operating result as it does now.
-5. **Liabilities that are not costs stay out of the P&L.** Withheld tax (2421), social security owed (2451), VAT (2433, 2436), loan principal (2511, 2514) and client money (2788) are balance-sheet accounts.
+5. **Liabilities that are not costs stay out of the P&L.** Withheld tax (${renum('2421')}), social security owed (${renum('2451')}), VAT (${renum('2433')}, ${renum('2436')}), loan principal (${renum('2511')}, ${renum('2514')}) and client money (${renum('2788')}) are balance-sheet accounts.
 6. **No manual "current year result" account.** The app calculates it.
 
 ## What this draft contains
@@ -92,7 +92,7 @@ The current chart (90 accounts, from the Teia workbook) has wrong classification
 
 ## The chart
 
-Legend: ● in the template; › our own sub-account of the SNC account; ⚑ to be confirmed with your accountant.
+Legend: ● the account is in that business's template.
 
 ${sectionsMd}
 
@@ -122,23 +122,23 @@ One payroll entry per person per month, instead of single-account bank lines:
 
 | | Debit | Credit |
 |---|---|---|
-| Gross pay | 6321 or 6322 | |
-| Employer social security (about 23.75%) | 6351 or 6352 | |
-| Net pay to the employee | | 2311 |
-| Tax withheld (IRS) | | 2421 |
-| Social security: employee share and employer share | | 2451 |
-| Holiday and Christmas pay as duodecimos (a twelfth of each paid with the monthly salary) | 6321 or 6322, part of the gross | none needed |
-| Paying the net pay | 2311 | bank |
-| Paying the State | 2421, 2451 | bank |
+| Gross pay | ${renum('6321')} or ${renum('6322')} | |
+| Employer social security (about 23.75%) | ${renum('6351')} or ${renum('6352')} | |
+| Net pay to the employee | | ${renum('2311')} |
+| Tax withheld (IRS) | | ${renum('2421')} |
+| Social security: employee share and employer share | | ${renum('2451')} |
+| Holiday and Christmas pay as duodecimos (a twelfth of each paid with the monthly salary) | ${renum('6321')} or ${renum('6322')}, part of the gross | none needed |
+| Paying the net pay | ${renum('2311')} | bank |
+| Paying the State | ${renum('2421')}, ${renum('2451')} | bank |
 
 ## Questions for you and your accountant
 
-1. ANSWERED (Tony, 2026-11-25): no SAF-T reporting; the app is for management use. The SNC numbering stays only as a tidy structure.
+1. ANSWERED (Tony, 2026-11-25): no SAF-T reporting; the app is for management use. The chart uses our own numbering.
 2. ANSWERED: autonomous taxation is handled by the external accountants, so there is no account for it (8123 removed).
 3. ANSWERED: sub-account numbers as drafted.
-4. ANSWERED: retentions yes (2119, 2212 stay in the Construction template); no work in progress (3610 removed).
-5. ANSWERED: client money exists only in Casas Algarve and the Client Account company; Teia, Woodgrain and Algarve Interior do not use it (2788 stays in templates P and K only).
-6. ANSWERED: stock for Teia and Woodgrain only (3210 stays in C and W, removed from I, P, K).
+4. ANSWERED: retentions yes (${renum('2119')}, ${renum('2212')} stay in the Construction template); no work in progress removed.
+5. ANSWERED: client money exists only in Casas Algarve and the Client Account company; Teia, Woodgrain and Algarve Interior do not use it (${renum('2788')} stays in templates P and K only).
+6. ANSWERED: stock for Teia and Woodgrain only (${renum('3210')} stays in C and W, removed from I, P, K).
 7. ANSWERED: monthly for some companies and quarterly for others (a setting per company); non-deductible VAT is left to the external accountants.
 8. OPEN: Tony will check once the last changes are in and the sample data has run.
 

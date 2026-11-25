@@ -39,13 +39,6 @@ export default async function ChartOfAccountsPage() {
     entry.bySubgroup.get(a.subgroup_no)!.push(a);
   }
 
-  // The numbers a group or subgroup holds, as a range: that is what a reader needs, not an internal key.
-  const rangeOf = (rows: AccountRow[]) => {
-    const nos = rows.map((r) => r.account_no);
-    const lo = Math.min(...nos), hi = Math.max(...nos);
-    return lo === hi ? `${lo}` : `${lo}–${hi}`;
-  };
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -65,8 +58,7 @@ export default async function ChartOfAccountsPage() {
           <section key={group.group_no} className="rounded-lg border border-line bg-surface">
             <header className="flex items-center justify-between border-b border-line px-4 py-3">
               <h2 className="font-semibold text-primary">
-                {group.group_name}{" "}
-                <span className="font-mono text-sm font-normal text-neutral-500">{rangeOf(Array.from(bySubgroup.values()).flat())}</span>
+                {group.group_no}. {group.group_name}
               </h2>
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                 {group.statement}
@@ -76,8 +68,7 @@ export default async function ChartOfAccountsPage() {
               {Array.from(bySubgroup.entries()).map(([subgroupNo, rows]) => (
                 <div key={subgroupNo} className="px-4 py-3">
                   <h3 className="mb-2 text-sm font-semibold text-neutral-700">
-                    {rows[0].subgroup_name}{" "}
-                    <span className="font-mono font-normal text-neutral-500">{rangeOf(rows)}</span>{" "}
+                    {subgroupNo} &middot; {rows[0].subgroup_name}{" "}
                     <span className="font-normal text-neutral-400">
                       ({rows[0].normal_balance === "debit" ? "Debit-normal" : "Credit-normal"})
                     </span>

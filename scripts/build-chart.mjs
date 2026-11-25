@@ -7,7 +7,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { TEMPLATES, SECTIONS, SUBGROUPS, A, GROUP_NO, GROUP_NAME, SUBGROUP_NO } from "./chart-data.mjs";
+import { TEMPLATES, SECTIONS, SUBGROUPS, A, GROUP_NO, GROUP_NAME, SUBGROUP_NO, NEW_NO } from "./chart-data.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dbDir = path.join(root, "db");
@@ -50,9 +50,9 @@ for (const [letter, label] of Object.entries(TEMPLATES)) {
   };
   const sales = ref("default_sales");
   const banks = [
-    ["BANK1", "Bank account 1", 1210, false],
-    ...(letter === "K" ? [] : [["BANK2", "Bank account 2", 1220, false]]),
-    ...(letter === "K" ? [] : [["CASH", "Petty cash", 1110, true]]),
+    ["BANK1", "Bank account 1", NEW_NO[1210], false],
+    ...(letter === "K" ? [] : [["BANK2", "Bank account 2", NEW_NO[1220], false]]),
+    ...(letter === "K" ? [] : [["CASH", "Petty cash", NEW_NO[1110], true]]),
   ];
   // Accounts the entry forms must not post to directly: the ledgers the app maintains itself.
   const reserved = [ref("accounts_receivable"), ref("accounts_payable"), ref("vat_output"), ref("vat_input"), ...banks.map((b) => b[2])];

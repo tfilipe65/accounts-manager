@@ -20,6 +20,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { PGlite } from "@electric-sql/pglite";
+import { NEW_NO } from "./chart-data.mjs";
 
 const args = process.argv.slice(2);
 const opt = (n, d) => (args.includes(n) ? args[args.indexOf(n) + 1] : d);
@@ -32,7 +33,7 @@ if (fs.existsSync(TO)) throw new Error(`${TO} already exists. Choose a new folde
 fs.mkdirSync(path.dirname(path.resolve(TO)), { recursive: true });
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-// old account number -> new account number
+// old (workbook) account number -> the number in the draft chart; NEW_NO then turns that into the final number
 const MAP = {
   100: 1210, 110: 1220, 122: 1230, 130: 1110,
   300: 2110, 720: 4330, 740: 4350, 760: 4340, 780: 4110, 790: 3210,
@@ -52,7 +53,8 @@ const mapAccount = (n) => {
   if (n == null) return n;
   const m = MAP[Number(n)];
   if (m === undefined) throw new Error(`No new account for old account ${n}`);
-  return m;
+  if (NEW_NO[m] === undefined) throw new Error(`Draft account ${m} is not in the chart`);
+  return NEW_NO[m];
 };
 
 // ---------- the old database (read only) ----------

@@ -53,13 +53,13 @@ export const SUBGROUPS = [
   { key: "itax", section: "FIN", name: "Income tax", normal: "debit", role: "income_tax" },
 ];
 
-// [number, name, Portuguese name, subgroup, SNC code, match, templates, app role (single-use), note, contra?]
-// match: exact = same SNC account; sub = our own subdivision of that SNC account; confirm = to be confirmed with the accountant
+// Rows are written with the numbers of the first draft (a reference only: they are renumbered at the bottom of this file).
+// [draft number, name, Portuguese name, subgroup, reference code, match, templates, app role (single-use), note, contra?]
 const ALL = "CWIPK";
-export const A = [
+const A_SRC = [
   // ---- cash and bank ----
   [1110, "Petty cash", "Caixa", "cash", "11", "exact", "CWIP", "petty_cash"],
-  [1210, "Bank account 1: current account", "Depósitos à ordem: conta corrente", "cash", "12", "exact", ALL, "", "Account 3 is 1230; further bank accounts added in the app take the next free number up to 1289."],
+  [1210, "Bank account 1: current account", "Depósitos à ordem: conta corrente", "cash", "12", "exact", ALL, "", "Further bank accounts added in the app take the next free number in this subgroup."],
   [1220, "Bank account 2: IVA and tax reserve", "Depósitos à ordem: conta IVA/impostos", "cash", "12", "exact", "CWIP"],
   [1240, "Payment platforms to collect (card terminals, booking payouts)", "Valores a receber de plataformas de pagamento", "cash", "12", "confirm", "P"],
   [1230, "Bank account 3", "Depósitos à ordem: conta 3", "cash", "12", "exact", "CWIP"],
@@ -71,7 +71,7 @@ export const A = [
   // ---- other current assets ----
   [2250, "Advances to suppliers", "Fornecedores: adiantamentos", "oca", "225", "exact", "CWIP"],
   [2321, "Advances to staff", "Adiantamentos ao pessoal", "oca", "232", "exact", "CWIP"],
-  [2411, "IRC paid on account", "IRC: pagamentos por conta", "oca", "2411", "confirm", "CWIP", "", "Sub-account number to be confirmed."],
+  [2411, "IRC paid on account", "IRC: pagamentos por conta", "oca", "2411", "confirm", "CWIP"],
   [2432, "VAT recoverable (input VAT)", "IVA dedutível", "oca", "2432", "exact", ALL, "vat_input"],
   [2437, "VAT to be refunded", "IVA a recuperar", "oca", "2437", "exact", "CWIP"],
   [2721, "Accrued income", "Devedores por acréscimos de rendimentos", "oca", "2721", "exact", "CWIP"],
@@ -101,7 +101,7 @@ export const A = [
   // ---- VAT and State ----
   [2433, "VAT charged (output VAT)", "IVA liquidado", "state", "2433", "exact", ALL, "vat_output"],
   [2436, "VAT payable: settlement account", "IVA a pagar", "state", "2436", "exact", ALL, "vat_settlement", "Replaces the old 'IVA paid / received' account. Payments to the State clear it."],
-  [2414, "IRC: estimated tax payable", "IRC: imposto estimado", "state", "2414", "confirm", "CWIP", "", "Sub-account number to be confirmed."],
+  [2414, "IRC: estimated tax payable", "IRC: imposto estimado", "state", "2414", "confirm", "CWIP"],
   [2421, "Withheld income tax payable (IRS and IRC withholding)", "Retenção de impostos sobre rendimentos", "state", "2421/2422", "confirm", "CWIP", "withholding_payable", "Tax withheld from salaries and from independent professionals. Owed to the State, never a cost."],
   [2451, "Social security payable", "Contribuições para a Segurança Social", "state", "245", "exact", "CWIP", "social_security_payable", "Employee 11% and employer share, owed to the State."],
   [2441, "Other taxes payable (IMI, stamp duty, municipal)", "Outros impostos", "state", "244", "exact", "CWIP"],
@@ -239,7 +239,7 @@ export const A = [
 ];
 
 // Where every account of the CURRENT chart goes. [old no, old name, new number(s), why]
-export const OLD = [
+const OLD_SRC = [
   [100, "Business Check Acct.", "1210", "Bank account 1"],
   [110, "Business IVA Acct.", "1220", "Bank account 2"],
   [122, "Cash Account", "1230", "It is a bank account, not cash"],
@@ -342,7 +342,7 @@ export const GROUP_NAME = {
   CL: "Liabilities", LTD: "Long Term Debt", EQ: "Equity", FIN: "Financing and Tax",
 };
 /** subgroup_no: group number x 100, then steps of 10 in the order listed above. */
-export const SUBGROUP_NO = (() => {
+const SUBGROUP_NO_OLD = (() => {
   const next = {};
   const out = {};
   for (const sg of SUBGROUPS) {
@@ -361,3 +361,42 @@ export const TEMPLATE_BY_SLUG = {
   "casas-algarve-clients": "K",
   test: "C",
 };
+
+
+// ---- OUR OWN NUMBERING ------------------------------------------------------------------------------
+// Account number = 4 digits: group, subgroup, account.
+//   first digit   the group      (1 Income, 2 Cost of sales, 3 Operating expenses, 4 Current assets, 5 Non-current assets,
+//                                 6 Liabilities, 7 Long-term debt, 8 Equity, 9 Financing and tax)
+//   second digit  the subgroup within its group (Revenue 11, Other income 12, ...)
+//   last two      the account within its subgroup, 01, 02, ... in the order listed above
+// The app never depends on a number (it finds accounts by role), so this can be changed here at any time.
+export const SUBGROUP_NO_NEW = (() => {
+  const next = {};
+  const out = {};
+  for (const sg of SUBGROUPS) {
+    next[sg.section] = (next[sg.section] ?? 0) + 1;
+    if (next[sg.section] > 9) throw new Error(`group ${sg.section} has more than 9 subgroups`);
+    out[sg.key] = GROUP_NO[sg.section] * 10 + next[sg.section];
+  }
+  return out;
+})();
+
+/** draft number -> new number, for every account in the chart. */
+export const NEW_NO = (() => {
+  const map = {};
+  for (const sg of SUBGROUPS) {
+    const rows = A_SRC.filter((a) => a[3] === sg.key).sort((x, y) => x[0] - y[0]);
+    if (rows.length > 99) throw new Error(`subgroup ${sg.key} has more than 99 accounts`);
+    rows.forEach((a, i) => (map[a[0]] = SUBGROUP_NO_NEW[sg.key] * 100 + i + 1));
+  }
+  return map;
+})();
+
+/** Replace draft account numbers inside a piece of text with the new ones. */
+export const renum = (text) => (text == null ? text : String(text).replace(/\b\d{4,5}\b/g, (n) => (NEW_NO[n] !== undefined ? String(NEW_NO[n]) : n)));
+
+export const A = A_SRC.map((a) => [NEW_NO[a[0]], a[1], a[2], a[3], a[4], a[5], a[6], a[7], renum(a[8]), a[9]]);
+// [old number, old name, new number(s) as text, why]
+export const OLD = OLD_SRC.map((o) => [o[0], o[1], renum(o[2]), renum(o[3])]);
+
+export const SUBGROUP_NO = SUBGROUP_NO_NEW;

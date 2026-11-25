@@ -4,15 +4,15 @@
 
 ## Why a new chart
 
-The current chart (90 accounts, from the Teia workbook) has wrong classifications (withheld tax and the employee's social security as costs, loan repayments as expenses), no logic to its numbering, one construction-only set of cost accounts for every business, and no link to the Portuguese official chart. The review that led to this draft is in the conversation. Your own data shows which accounts matter: 57 of the 90 were used in the workbook, mostly materials, fuel, subcontractors, wages and transfers.
+The old chart (90 accounts, from the Teia workbook) had wrong classifications (withheld tax and the employee's social security as costs, loan repayments as expenses), no logic to its numbering, and one construction-only set of cost accounts for every business. The review that led to this draft is in the conversation. Your own data shows which accounts matter: 57 of the 90 were used in the workbook, mostly materials, fuel, subcontractors, wages and transfers.
 
 ## Design in six rules
 
 1. **One structure, five templates.** Every company gets the same spine; a template adds or leaves out the accounts that business needs. The matrix below shows which. C = Construction (Teia Firme), W = Carpentry (Woodgrain), I = Decorations (Algarve Interior), P = Property management (Casas Algarve), K = Client money account.
-2. **The account number is the SNC number.** SNC (Sistema de Normalização Contabilística) is the Portuguese official chart: 1 cash and bank, 2 receivables, payables, State and financing, 3 stock, 4 fixed assets, 5 equity, 6 costs, 7 income, 8 results. Using its numbers means your accountant, and the tax authority's SAF-T file, need no translation. Where SNC has only three digits and we need more detail, we add a digit (a *sub-account*, marked ›). Anything I am not sure of is flagged ⚑ for your accountant.
+2. **Our own numbering, nothing official behind it.** This is an internal bookkeeping tool, so the numbers follow our groups. An account number has four digits: the first is the group (1 Income, 2 Cost of sales, 3 Operating expenses, 4 Current assets, 5 Non-current assets, 6 Liabilities, 7 Long-term debt, 8 Equity, 9 Financing and tax), the second is the subgroup within it (11 Revenue, 12 Other income, 13 Interest earned, and so on), and the last two number the account. A heading's number is therefore the start of every account under it.
 3. **Three levels stay:** section (a line of the statements) › subgroup › account. Subgroups carry a **role**, and so do a handful of single accounts (below), so the app stops depending on numbers. Renumbering later would then be harmless.
 4. **Costs by nature, direct costs separated.** Cost of sales holds materials, subcontractors, direct labour and, for property management, the cleaning, laundry and repairs bought for managed properties. Everything else is an operating expense. The P&L shows gross profit and an operating result as it does now.
-5. **Liabilities that are not costs stay out of the P&L.** Withheld tax (2421), social security owed (2451), VAT (2433, 2436), loan principal (2511, 2514) and client money (2788) are balance-sheet accounts.
+5. **Liabilities that are not costs stay out of the P&L.** Withheld tax (6202), social security owed (6206), VAT (6203, 6204), loan principal (6501, 7101) and client money (6402) are balance-sheet accounts.
 6. **No manual "current year result" account.** The app calculates it.
 
 ## What this draft contains
@@ -24,362 +24,362 @@ The current chart (90 accounts, from the Teia workbook) has wrong classification
 
 ## The chart
 
-Legend: ● in the template; › our own sub-account of the SNC account; ⚑ to be confirmed with your accountant.
+Legend: ● the account is in that business's template.
 
 ### Current assets (Balance sheet)
 
 **Cash and bank** (debit; role `cash`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 1110 | Petty cash | 11 | ● | ● | ● | ● |  |  |
-| 1210 | Bank account 1: current account | 12 | ● | ● | ● | ● | ● | Account 3 is 1230; further bank accounts added in the app take the next free number up to 1289. |
-| 1220 | Bank account 2: IVA and tax reserve | 12 | ● | ● | ● | ● |  |  |
-| 1230 | Bank account 3 | 12 | ● | ● | ● | ● |  |  |
-| 1240 | Payment platforms to collect (card terminals, booking payouts) | 12 ⚑ |  |  |  | ● |  |  |
-| 1290 | Transfers between own accounts (clearing) | 12 › | ● | ● | ● | ● | ● | Always nets to zero; shown so a missing side of a transfer is visible. |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 4101 | Petty cash | ● | ● | ● | ● |  |  |
+| 4102 | Bank account 1: current account | ● | ● | ● | ● | ● | Further bank accounts added in the app take the next free number in this subgroup. |
+| 4103 | Bank account 2: IVA and tax reserve | ● | ● | ● | ● |  |  |
+| 4104 | Bank account 3 | ● | ● | ● | ● |  |  |
+| 4105 | Payment platforms to collect (card terminals, booking payouts) |  |  |  | ● |  |  |
+| 4106 | Transfers between own accounts (clearing) | ● | ● | ● | ● | ● | Always nets to zero; shown so a missing side of a transfer is visible. |
 
 **Clients** (debit; role `receivables`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 2110 | Clients (accounts receivable) | 211 | ● | ● | ● | ● | ● |  |
-| 2118 | Doubtful clients | 218 | ● | ● | ● | ● |  |  |
-| 2119 | Clients: guarantee retentions held back | 211 › | ● |  |  |  |  | Builders: part of each stage payment held until the guarantee period ends. |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 4201 | Clients (accounts receivable) | ● | ● | ● | ● | ● |  |
+| 4202 | Doubtful clients | ● | ● | ● | ● |  |  |
+| 4203 | Clients: guarantee retentions held back | ● |  |  |  |  | Builders: part of each stage payment held until the guarantee period ends. |
 
 **Other current assets and VAT recoverable** (debit; role `other_current_assets`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 2250 | Advances to suppliers | 225 | ● | ● | ● | ● |  |  |
-| 2321 | Advances to staff | 232 | ● | ● | ● | ● |  |  |
-| 2411 | IRC paid on account | 2411 ⚑ | ● | ● | ● | ● |  | Sub-account number to be confirmed. |
-| 2432 | VAT recoverable (input VAT) | 2432 | ● | ● | ● | ● | ● |  |
-| 2437 | VAT to be refunded | 2437 | ● | ● | ● | ● |  |  |
-| 2721 | Accrued income | 2721 | ● | ● | ● | ● |  |  |
-| 2781 | Other debtors | 278 | ● | ● | ● | ● |  |  |
-| 2784 | Deposits and guarantees paid | 278 › | ● | ● | ● | ● |  |  |
-| 2811 | Prepaid expenses | 281 | ● | ● | ● | ● |  | For example insurance paid for the whole year. |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 4301 | Advances to suppliers | ● | ● | ● | ● |  |  |
+| 4302 | Advances to staff | ● | ● | ● | ● |  |  |
+| 4303 | IRC paid on account | ● | ● | ● | ● |  |  |
+| 4304 | VAT recoverable (input VAT) | ● | ● | ● | ● | ● |  |
+| 4305 | VAT to be refunded | ● | ● | ● | ● |  |  |
+| 4306 | Accrued income | ● | ● | ● | ● |  |  |
+| 4307 | Other debtors | ● | ● | ● | ● |  |  |
+| 4308 | Deposits and guarantees paid | ● | ● | ● | ● |  |  |
+| 4309 | Prepaid expenses | ● | ● | ● | ● |  | For example insurance paid for the whole year. |
 
 **Stock** (debit; role `inventory`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 3210 | Goods and materials in stock | 32/33 | ● | ● |  |  |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 4401 | Goods and materials in stock | ● | ● |  |  |  |  |
 
 ### Non-current assets (Balance sheet)
 
 **Fixed assets (cost)** (debit; role `fixed_assets`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 4320 | Buildings and improvements | 432 | ● | ● | ● |  |  |  |
-| 4330 | Plant, machinery and tools | 433 | ● | ● |  |  |  |  |
-| 4340 | Motor vehicles | 434 | ● | ● | ● | ● |  |  |
-| 4350 | Office and IT equipment | 435 | ● | ● | ● | ● |  |  |
-| 4370 | Other tangible assets | 437 | ● | ● | ● | ● |  |  |
-| 4410 | Software and intangible assets | 44 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 5101 | Buildings and improvements | ● | ● | ● |  |  |  |
+| 5102 | Plant, machinery and tools | ● | ● |  |  |  |  |
+| 5103 | Motor vehicles | ● | ● | ● | ● |  |  |
+| 5104 | Office and IT equipment | ● | ● | ● | ● |  |  |
+| 5105 | Other tangible assets | ● | ● | ● | ● |  |  |
+| 5106 | Software and intangible assets | ● | ● | ● | ● |  |  |
 
 **Accumulated depreciation** (credit; role `accumulated_depreciation`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 4822 | Accumulated depreciation: buildings *(contra)* | 4822 | ● | ● | ● |  |  |  |
-| 4823 | Accumulated depreciation: plant and machinery *(contra)* | 4823 | ● | ● |  |  |  |  |
-| 4824 | Accumulated depreciation: vehicles *(contra)* | 4824 | ● | ● | ● | ● |  |  |
-| 4825 | Accumulated depreciation: office and IT *(contra)* | 4825 | ● | ● | ● | ● |  |  |
-| 4827 | Accumulated depreciation: other *(contra)* | 4827 | ● | ● | ● | ● |  |  |
-| 4841 | Accumulated amortisation: intangibles *(contra)* | 484 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 5201 | Accumulated depreciation: buildings *(contra)* | ● | ● | ● |  |  |  |
+| 5202 | Accumulated depreciation: plant and machinery *(contra)* | ● | ● |  |  |  |  |
+| 5203 | Accumulated depreciation: vehicles *(contra)* | ● | ● | ● | ● |  |  |
+| 5204 | Accumulated depreciation: office and IT *(contra)* | ● | ● | ● | ● |  |  |
+| 5205 | Accumulated depreciation: other *(contra)* | ● | ● | ● | ● |  |  |
+| 5206 | Accumulated amortisation: intangibles *(contra)* | ● | ● | ● | ● |  |  |
 
 **Other non-current assets** (debit; role `other_noncurrent`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 4110 | Long-term investments and deposits | 41 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 5301 | Long-term investments and deposits | ● | ● | ● | ● |  |  |
 
 ### Liabilities (Balance sheet)
 
 **Suppliers** (credit; role `payables`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 2210 | Suppliers (accounts payable) | 221 | ● | ● | ● | ● | ● |  |
-| 2212 | Suppliers: guarantee retentions withheld | 221 › | ● |  |  |  |  | Builders: retained from subcontractors until their guarantee ends. |
-| 2710 | Suppliers of fixed assets | 271 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 6101 | Suppliers (accounts payable) | ● | ● | ● | ● | ● |  |
+| 6102 | Suppliers: guarantee retentions withheld | ● |  |  |  |  | Builders: retained from subcontractors until their guarantee ends. |
+| 6103 | Suppliers of fixed assets | ● | ● | ● | ● |  |  |
 
 **VAT and State** (credit; role `state_liabilities`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 2414 | IRC: estimated tax payable | 2414 ⚑ | ● | ● | ● | ● |  | Sub-account number to be confirmed. |
-| 2421 | Withheld income tax payable (IRS and IRC withholding) | 2421/2422 ⚑ | ● | ● | ● | ● |  | Tax withheld from salaries and from independent professionals. Owed to the State, never a cost. |
-| 2433 | VAT charged (output VAT) | 2433 | ● | ● | ● | ● | ● |  |
-| 2436 | VAT payable: settlement account | 2436 | ● | ● | ● | ● | ● | Replaces the old 'IVA paid / received' account. Payments to the State clear it. |
-| 2441 | Other taxes payable (IMI, stamp duty, municipal) | 244 | ● | ● | ● | ● |  |  |
-| 2451 | Social security payable | 245 | ● | ● | ● | ● |  | Employee 11% and employer share, owed to the State. |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 6201 | IRC: estimated tax payable | ● | ● | ● | ● |  |  |
+| 6202 | Withheld income tax payable (IRS and IRC withholding) | ● | ● | ● | ● |  | Tax withheld from salaries and from independent professionals. Owed to the State, never a cost. |
+| 6203 | VAT charged (output VAT) | ● | ● | ● | ● | ● |  |
+| 6204 | VAT payable: settlement account | ● | ● | ● | ● | ● | Replaces the old 'IVA paid / received' account. Payments to the State clear it. |
+| 6205 | Other taxes payable (IMI, stamp duty, municipal) | ● | ● | ● | ● |  |  |
+| 6206 | Social security payable | ● | ● | ● | ● |  | Employee 11% and employer share, owed to the State. |
 
 **Staff and accruals** (credit; role `staff_liabilities`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 2311 | Salaries payable | 231 | ● | ● | ● | ● |  |  |
-| 2722 | Accrued holiday and Christmas pay | 2722 | ● | ● | ● | ● |  | The two extra months of pay built up through the year. |
-| 2723 | Other accrued costs | 2722 › | ● | ● | ● | ● |  |  |
-| 2821 | Deferred income | 282 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 6301 | Salaries payable | ● | ● | ● | ● |  |  |
+| 6302 | Accrued holiday and Christmas pay | ● | ● | ● | ● |  | The two extra months of pay built up through the year. |
+| 6303 | Other accrued costs | ● | ● | ● | ● |  |  |
+| 6304 | Deferred income | ● | ● | ● | ● |  |  |
 
 **Customer money and deposits** (credit; role `customer_funds`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 2761 | Customer advances and deposits | 276 | ● | ● | ● |  |  |  |
-| 2788 | Client money held for owners | 278 › |  |  |  | ● | ● | Property management: rent collected and held for owners. |
-| 2789 | Guest and tenant deposits held | 278 › |  |  |  | ● | ● |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 6401 | Customer advances and deposits | ● | ● | ● |  |  |  |
+| 6402 | Client money held for owners |  |  |  | ● | ● | Property management: rent collected and held for owners. |
+| 6403 | Guest and tenant deposits held |  |  |  | ● | ● |  |
 
 **Borrowings due within a year** (credit; role `short_term_debt`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 2511 | Bank loans: due within a year | 2511 | ● | ● | ● | ● |  |  |
-| 2512 | Bank overdraft | 2512 | ● | ● | ● | ● |  |  |
-| 2513 | Leasing | 2513 | ● | ● | ● | ● |  |  |
-| 2519 | Credit cards and other financing | 2519 | ● | ● | ● | ● |  |  |
-| 2681 | Shareholder loans (suprimentos) | 268 › | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 6501 | Bank loans: due within a year | ● | ● | ● | ● |  |  |
+| 6502 | Bank overdraft | ● | ● | ● | ● |  |  |
+| 6503 | Leasing | ● | ● | ● | ● |  |  |
+| 6504 | Credit cards and other financing | ● | ● | ● | ● |  |  |
+| 6505 | Shareholder loans (suprimentos) | ● | ● | ● | ● |  |  |
 
 ### Long-term debt (Balance sheet)
 
 **Borrowings due after a year** (credit; role `long_term_debt`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 2514 | Bank loans: due after a year | 2511 › | ● | ● | ● | ● |  | Own split of 251 so the balance sheet can show current and non-current. |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 7101 | Bank loans: due after a year | ● | ● | ● | ● |  | Own split of 251 so the balance sheet can show current and non-current. |
 
 ### Equity (Balance sheet)
 
 **Capital** (credit; role `equity_capital`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 2631 | Partner drawings (advances on profits) *(contra)* | 263 | ● | ● | ● | ● |  | Money taken out by the owners; reduces equity. |
-| 5110 | Share capital | 51 | ● | ● | ● | ● | ● |  |
-| 5310 | Additional capital contributions | 53 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 8101 | Partner drawings (advances on profits) *(contra)* | ● | ● | ● | ● |  | Money taken out by the owners; reduces equity. |
+| 8102 | Share capital | ● | ● | ● | ● | ● |  |
+| 8103 | Additional capital contributions | ● | ● | ● | ● |  |  |
 
 **Reserves and retained earnings** (credit; role `retained_earnings`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 5510 | Legal reserve | 551 | ● | ● | ● | ● |  |  |
-| 5590 | Other reserves | 559 | ● | ● | ● | ● |  |  |
-| 5610 | Retained earnings | 56 | ● | ● | ● | ● | ● | The current year's result is calculated by the app and is not an account here. |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 8201 | Legal reserve | ● | ● | ● | ● |  |  |
+| 8202 | Other reserves | ● | ● | ● | ● |  |  |
+| 8203 | Retained earnings | ● | ● | ● | ● | ● | The current year's result is calculated by the app and is not an account here. |
 
 ### Income (Profit & loss)
 
 **Revenue** (credit; role `revenue`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 7110 | Sales of goods and materials | 711 | ● | ● | ● |  |  |  |
-| 7120 | Sales of made-to-order joinery (kitchens, wardrobes, doors) | 712 |  | ● |  |  |  |  |
-| 7190 | Discounts and returns allowed *(contra)* | 71 ⚑ | ● | ● | ● | ● | ● | Credit notes can post here. |
-| 7211 | Construction works | 721 › | ● |  |  |  |  |  |
-| 7212 | Labour and site supervision | 721 › | ● |  |  |  |  |  |
-| 7213 | Design and project management | 721 › | ● |  |  |  |  |  |
-| 7214 | Installation and fitting | 721 › |  | ● | ● |  |  |  |
-| 7215 | Repairs and restoration | 721 › |  | ● |  |  |  |  |
-| 7221 | Design and consultancy fees | 722 › |  |  | ● |  |  |  |
-| 7222 | Styling and staging | 722 › |  |  | ● |  |  |  |
-| 7231 | Management commissions | 723 › |  |  |  | ● |  |  |
-| 7232 | Guest services (check-in, linen, concierge) | 723 › |  |  |  | ● |  |  |
-| 7233 | Maintenance coordination fees | 723 › |  |  |  | ● |  |  |
-| 7234 | Rental income from own properties | 723 › |  |  |  | ● |  |  |
-| 7235 | Inspections and reports | 723 › |  |  |  | ● |  |  |
-| 7241 | Account administration fees | 724 › |  |  |  |  | ● |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 1101 | Sales of goods and materials | ● | ● | ● |  |  |  |
+| 1102 | Sales of made-to-order joinery (kitchens, wardrobes, doors) |  | ● |  |  |  |  |
+| 1103 | Discounts and returns allowed *(contra)* | ● | ● | ● | ● | ● | Credit notes can post here. |
+| 1104 | Construction works | ● |  |  |  |  |  |
+| 1105 | Labour and site supervision | ● |  |  |  |  |  |
+| 1106 | Design and project management | ● |  |  |  |  |  |
+| 1107 | Installation and fitting |  | ● | ● |  |  |  |
+| 1108 | Repairs and restoration |  | ● |  |  |  |  |
+| 1109 | Design and consultancy fees |  |  | ● |  |  |  |
+| 1110 | Styling and staging |  |  | ● |  |  |  |
+| 1111 | Management commissions |  |  |  | ● |  |  |
+| 1112 | Guest services (check-in, linen, concierge) |  |  |  | ● |  |  |
+| 1113 | Maintenance coordination fees |  |  |  | ● |  |  |
+| 1114 | Rental income from own properties |  |  |  | ● |  |  |
+| 1115 | Inspections and reports |  |  |  | ● |  |  |
+| 1116 | Account administration fees |  |  |  |  | ● |  |
 
 **Other income and gains** (credit; role `other_income`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 7510 | Operating grants | 75 | ● | ● | ● | ● |  |  |
-| 7810 | Recharged costs and supplementary income | 781 | ● | ● | ● | ● |  |  |
-| 7820 | Early-payment discounts received | 782 | ● | ● | ● | ● |  |  |
-| 7830 | Recovered bad debts | 783 | ● | ● | ● | ● |  |  |
-| 7881 | Insurance claims received | 788 › | ● | ● | ● | ● |  |  |
-| 7885 | Gains on disposal of assets | 788 › | ● | ● | ● | ● |  |  |
-| 7889 | Other income and gains | 788 | ● | ● | ● | ● | ● |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 1201 | Operating grants | ● | ● | ● | ● |  |  |
+| 1202 | Recharged costs and supplementary income | ● | ● | ● | ● |  |  |
+| 1203 | Early-payment discounts received | ● | ● | ● | ● |  |  |
+| 1204 | Recovered bad debts | ● | ● | ● | ● |  |  |
+| 1205 | Insurance claims received | ● | ● | ● | ● |  |  |
+| 1206 | Gains on disposal of assets | ● | ● | ● | ● |  |  |
+| 1207 | Other income and gains | ● | ● | ● | ● | ● |  |
 
 **Interest earned** (credit; role `interest_income`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 7910 | Interest earned | 791 | ● | ● | ● | ● | ● |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 1301 | Interest earned | ● | ● | ● | ● | ● |  |
 
 ### Cost of sales (direct costs) (Profit & loss)
 
 **Materials and goods** (debit; role `cost_materials`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6110 | Materials and goods used | 61 | ● | ● | ● |  |  |  |
-| 6111 | Timber and boards | 61 › |  | ● |  |  |  |  |
-| 6112 | Hardware and fittings | 61 › |  | ● |  |  |  |  |
-| 6113 | Finishes (varnish, paint, glue) | 61 › |  | ● |  |  |  |  |
-| 6121 | Furnishings and soft goods for resale | 61 › |  |  | ● |  |  |  |
-| 6150 | Change in stock (year-end count) | 61 | ● | ● |  |  |  | Posted by Year-End Stock: the closing count on 31 Dec, reversed on 1 Jan. |
-| 6190 | Purchase returns and discounts *(contra)* | 61 › | ● | ● | ● |  |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 2101 | Materials and goods used | ● | ● | ● |  |  |  |
+| 2102 | Timber and boards |  | ● |  |  |  |  |
+| 2103 | Hardware and fittings |  | ● |  |  |  |  |
+| 2104 | Finishes (varnish, paint, glue) |  | ● |  |  |  |  |
+| 2105 | Furnishings and soft goods for resale |  |  | ● |  |  |  |
+| 2106 | Change in stock (year-end count) | ● | ● |  |  |  | Posted by Year-End Stock: the closing count on 31 Dec, reversed on 1 Jan. |
+| 2107 | Purchase returns and discounts *(contra)* | ● | ● | ● |  |  |  |
 
 **Subcontractors and direct services** (debit; role `cost_direct_services`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6211 | Subcontractors (trades) | 621 | ● | ● | ● |  |  |  |
-| 6212 | Specialist and design services | 6221 | ● | ● | ● |  |  |  |
-| 6213 | Equipment and plant hire for jobs | 6261 | ● | ● |  |  |  |  |
-| 6214 | Skip hire and waste removal | 6268 | ● |  |  |  |  |  |
-| 6215 | Site consumables and small tools | 6231 | ● | ● |  |  |  |  |
-| 6216 | Other direct job costs | 6268 | ● | ● | ● |  |  |  |
-| 6217 | Cleaning and laundry for managed properties | 6267 |  |  |  | ● |  |  |
-| 6218 | Pool and garden maintenance | 6226 |  |  |  | ● |  |  |
-| 6219 | Repairs and maintenance of managed properties | 6226 |  |  |  | ● |  |  |
-| 6220 | Booking-platform commissions | 6225 |  |  |  | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 2201 | Subcontractors (trades) | ● | ● | ● |  |  |  |
+| 2202 | Specialist and design services | ● | ● | ● |  |  |  |
+| 2203 | Equipment and plant hire for jobs | ● | ● |  |  |  |  |
+| 2204 | Skip hire and waste removal | ● |  |  |  |  |  |
+| 2205 | Site consumables and small tools | ● | ● |  |  |  |  |
+| 2206 | Other direct job costs | ● | ● | ● |  |  |  |
+| 2207 | Cleaning and laundry for managed properties |  |  |  | ● |  |  |
+| 2208 | Pool and garden maintenance |  |  |  | ● |  |  |
+| 2209 | Repairs and maintenance of managed properties |  |  |  | ● |  |  |
+| 2210 | Booking-platform commissions |  |  |  | ● |  |  |
 
 **Direct labour** (debit; role `cost_direct_labour`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6321 | Wages: site and workshop staff | 632 › | ● | ● |  |  |  |  |
-| 6351 | Employer social security: direct staff | 635 › | ● | ● |  |  |  |  |
-| 6361 | Work-accident insurance: direct staff | 636 › | ● | ● |  |  |  |  |
-| 6381 | Health and safety, training: direct staff | 638 › | ● | ● |  |  |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 2301 | Wages: site and workshop staff | ● | ● |  |  |  |  |
+| 2302 | Employer social security: direct staff | ● | ● |  |  |  |  |
+| 2303 | Work-accident insurance: direct staff | ● | ● |  |  |  |  |
+| 2304 | Health and safety, training: direct staff | ● | ● |  |  |  |  |
 
 ### Operating expenses (Profit & loss)
 
 **Staff costs: office and management** (debit; role `opex_staff`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6311 | Management remuneration | 631 | ● | ● | ● | ● |  |  |
-| 6322 | Wages: office staff | 632 › | ● | ● | ● | ● |  |  |
-| 6352 | Employer social security: office staff | 635 › | ● | ● | ● | ● |  |  |
-| 6353 | Employer social security: management | 635 › | ● | ● | ● | ● |  |  |
-| 6362 | Work-accident insurance: office staff | 636 › | ● | ● | ● | ● |  |  |
-| 6371 | Staff health insurance and welfare | 637 | ● | ● | ● | ● |  |  |
-| 6382 | Training and other staff costs | 638 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 3101 | Management remuneration | ● | ● | ● | ● |  |  |
+| 3102 | Wages: office staff | ● | ● | ● | ● |  |  |
+| 3103 | Employer social security: office staff | ● | ● | ● | ● |  |  |
+| 3104 | Employer social security: management | ● | ● | ● | ● |  |  |
+| 3105 | Work-accident insurance: office staff | ● | ● | ● | ● |  |  |
+| 3106 | Staff health insurance and welfare | ● | ● | ● | ● |  |  |
+| 3107 | Training and other staff costs | ● | ● | ● | ● |  |  |
 
 **Premises and utilities** (debit; role `opex_premises`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6226 | Repairs and maintenance of premises | 6226 | ● | ● | ● | ● |  |  |
-| 6241 | Electricity | 6241 | ● | ● | ● | ● |  |  |
-| 6243 | Water | 6243 | ● | ● | ● | ● |  |  |
-| 6261 | Rent of premises | 6261 | ● | ● | ● | ● |  |  |
-| 6262 | Telephone and internet | 6262 | ● | ● | ● | ● |  |  |
-| 6267 | Cleaning and hygiene of premises | 6267 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 3201 | Repairs and maintenance of premises | ● | ● | ● | ● |  |  |
+| 3202 | Electricity | ● | ● | ● | ● |  |  |
+| 3203 | Water | ● | ● | ● | ● |  |  |
+| 3204 | Rent of premises | ● | ● | ● | ● |  |  |
+| 3205 | Telephone and internet | ● | ● | ● | ● |  |  |
+| 3206 | Cleaning and hygiene of premises | ● | ● | ● | ● |  |  |
 
 **Vehicles and travel** (debit; role `opex_vehicles`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6227 | Vehicle repairs, servicing and inspections | 6226 › | ● | ● | ● | ● |  |  |
-| 6242 | Fuel | 6242 | ● | ● | ● | ● |  |  |
-| 6251 | Travel and accommodation | 6251 | ● | ● | ● | ● |  |  |
-| 6252 | Tolls and parking | 6252 ⚑ | ● | ● | ● | ● |  |  |
-| 62631 | Insurance: vehicles | 6263 › | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 3301 | Vehicle repairs, servicing and inspections | ● | ● | ● | ● |  |  |
+| 3302 | Fuel | ● | ● | ● | ● |  |  |
+| 3303 | Travel and accommodation | ● | ● | ● | ● |  |  |
+| 3304 | Tolls and parking | ● | ● | ● | ● |  |  |
+| 3305 | Insurance: vehicles | ● | ● | ● | ● |  |  |
 
 **Professional and administrative** (debit; role `opex_admin`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6222 | Advertising and marketing | 6222 | ● | ● | ● | ● |  |  |
-| 6224 | Accounting and professional fees | 6224 | ● | ● | ● | ● | ● |  |
-| 6225 | Commissions paid to agents | 6225 | ● | ● | ● | ● |  |  |
-| 6231 | Small tools and equipment (expensed) | 6231 | ● | ● | ● | ● |  |  |
-| 6233 | Office supplies and printing | 6233 | ● | ● | ● | ● |  |  |
-| 6234 | Gifts and samples | 6234 | ● | ● | ● | ● |  |  |
-| 6265 | Legal and notary fees | 6265 | ● | ● | ● | ● |  |  |
-| 6266 | Meals and entertainment | 6266 | ● | ● | ● | ● |  |  |
-| 6268 | Other external services | 6268 | ● | ● | ● | ● | ● |  |
-| 62632 | Insurance: business, liability and contract works | 6263 › | ● | ● | ● | ● |  |  |
-| 62681 | Bank charges and commissions | 6268 ⚑ | ● | ● | ● | ● | ● |  |
-| 62682 | Software, subscriptions and web services | 6268 › | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 3401 | Advertising and marketing | ● | ● | ● | ● |  |  |
+| 3402 | Accounting and professional fees | ● | ● | ● | ● | ● |  |
+| 3403 | Commissions paid to agents | ● | ● | ● | ● |  |  |
+| 3404 | Small tools and equipment (expensed) | ● | ● | ● | ● |  |  |
+| 3405 | Office supplies and printing | ● | ● | ● | ● |  |  |
+| 3406 | Gifts and samples | ● | ● | ● | ● |  |  |
+| 3407 | Legal and notary fees | ● | ● | ● | ● |  |  |
+| 3408 | Meals and entertainment | ● | ● | ● | ● |  |  |
+| 3409 | Other external services | ● | ● | ● | ● | ● |  |
+| 3410 | Insurance: business, liability and contract works | ● | ● | ● | ● |  |  |
+| 3411 | Bank charges and commissions | ● | ● | ● | ● | ● |  |
+| 3412 | Software, subscriptions and web services | ● | ● | ● | ● |  |  |
 
 **Taxes and licences** (debit; role `opex_taxes`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6811 | Vehicle and property taxes (IUC, IMI) | 6811 | ● | ● | ● | ● |  |  |
-| 6812 | Stamp duty and indirect taxes | 6812 | ● | ● | ● | ● |  |  |
-| 6813 | Fees, licences and permits | 6813 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 3501 | Vehicle and property taxes (IUC, IMI) | ● | ● | ● | ● |  |  |
+| 3502 | Stamp duty and indirect taxes | ● | ● | ● | ● |  |  |
+| 3503 | Fees, licences and permits | ● | ● | ● | ● |  |  |
 
 **Depreciation** (debit; role `depreciation`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6422 | Depreciation: buildings and improvements | 6422 | ● | ● | ● |  |  |  |
-| 6423 | Depreciation: plant and machinery | 6423 | ● | ● |  |  |  |  |
-| 6424 | Depreciation: vehicles | 6424 | ● | ● | ● | ● |  |  |
-| 6425 | Depreciation: office and IT equipment | 6425 | ● | ● | ● | ● |  |  |
-| 6427 | Depreciation: other tangible assets | 6427 | ● | ● | ● | ● |  |  |
-| 6441 | Amortisation: software and intangibles | 644 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 3601 | Depreciation: buildings and improvements | ● | ● | ● |  |  |  |
+| 3602 | Depreciation: plant and machinery | ● | ● |  |  |  |  |
+| 3603 | Depreciation: vehicles | ● | ● | ● | ● |  |  |
+| 3604 | Depreciation: office and IT equipment | ● | ● | ● | ● |  |  |
+| 3605 | Depreciation: other tangible assets | ● | ● | ● | ● |  |  |
+| 3606 | Amortisation: software and intangibles | ● | ● | ● | ● |  |  |
 
 **Other expenses and losses** (debit; role `other_expense`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6830 | Bad debts written off | 683 | ● | ● | ● | ● |  |  |
-| 6840 | Stock losses | 684 | ● | ● | ● |  |  |  |
-| 6881 | Prior-period corrections | 6881 | ● | ● | ● | ● |  |  |
-| 6882 | Donations | 6882 | ● | ● | ● | ● |  |  |
-| 6883 | Memberships (associations) | 6883 | ● | ● | ● | ● |  |  |
-| 6887 | Losses on disposal of assets | 688 › | ● | ● | ● | ● |  |  |
-| 6888 | Other expenses and losses | 6888 | ● | ● | ● | ● | ● |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 3701 | Bad debts written off | ● | ● | ● | ● |  |  |
+| 3702 | Stock losses | ● | ● | ● |  |  |  |
+| 3703 | Prior-period corrections | ● | ● | ● | ● |  |  |
+| 3704 | Donations | ● | ● | ● | ● |  |  |
+| 3705 | Memberships (associations) | ● | ● | ● | ● |  |  |
+| 3706 | Losses on disposal of assets | ● | ● | ● | ● |  |  |
+| 3707 | Other expenses and losses | ● | ● | ● | ● | ● |  |
 
 ### Financing and tax (Profit & loss)
 
 **Financing costs** (debit; role `interest_expense`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 6911 | Interest on bank loans | 691 | ● | ● | ● | ● |  |  |
-| 6912 | Interest on overdraft, leasing and cards | 691 | ● | ● | ● | ● |  |  |
-| 6981 | Loan arrangement fees and other financing costs | 698 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 9101 | Interest on bank loans | ● | ● | ● | ● |  |  |
+| 9102 | Interest on overdraft, leasing and cards | ● | ● | ● | ● |  |  |
+| 9103 | Loan arrangement fees and other financing costs | ● | ● | ● | ● |  |  |
 
 **Income tax** (debit; role `income_tax`)
 
-| No. | Name | SNC | C | W | I | P | K | Note |
-|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
-| 8121 | IRC: estimated tax for the year | 8121 | ● | ● | ● | ● |  |  |
+| No. | Name | C | W | I | P | K | Note |
+|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 9201 | IRC: estimated tax for the year | ● | ● | ● | ● |  |  |
 
 
 ## Accounts the app will use by role
 
 | Role | Account | What the app does with it |
 |---|---|---|
-| `petty_cash` | 1110 | Default petty cash |
-| `transfers_clearing` | 1290 | Both sides of a transfer between own accounts |
-| `accounts_receivable` | 2110 | Debited by invoices, credited by payments received |
-| `vat_input` | 2432 | VAT paid on purchases |
-| `accounts_payable` | 2210 | Credited by purchase invoices, debited by payments made |
-| `vat_output` | 2433 | VAT charged on sales |
-| `vat_settlement` | 2436 | IVA paid to or refunded by the State |
-| `withholding_payable` | 2421 | Tax withheld from pay, until paid to the State |
-| `social_security_payable` | 2451 | Social security, until paid |
-| `net_pay_payable` | 2311 | Net pay owed to staff, until paid |
-| `holiday_accrual` | 2722 | Monthly build-up of holiday and Christmas pay |
-| `client_money` | 2788 | Money held for owners (Property management, Client account) |
-| `loan_principal` | 2511 | Loan repayments reduce this account (the Loan instalment split) |
-| `share_capital` | 5110 | Where an opening balance for bank accounts is set against |
-| `retained_earnings` | 5610 | Profit kept from earlier years |
-| `default_sales` | 7120, 7211, 7221, 7231, 7241 | Default account on a new sales invoice (one per business) |
-| `interest_income` | 7910 | Interest earned |
-| `default_materials` | 6110 | Default account on a new purchase invoice |
-| `stock_change` | 6150 |  |
-| `wages_direct` | 6321 | Gross pay of site and workshop staff |
-| `employer_social_security_direct` | 6351 | Employer social security on direct staff |
-| `wages_office` | 6322 | Gross pay of office staff |
-| `employer_social_security_office` | 6352 | Employer social security on office staff |
-| `bank_charges` | 62681 | Bank fees (the Loan instalment split) |
-| `interest_expense` | 6911 | Interest cover on the dashboard |
-| `income_tax` | 8121 | Tax on profits |
+| `petty_cash` | 4101 | Default petty cash |
+| `transfers_clearing` | 4106 | Both sides of a transfer between own accounts |
+| `accounts_receivable` | 4201 | Debited by invoices, credited by payments received |
+| `vat_input` | 4304 | VAT paid on purchases |
+| `accounts_payable` | 6101 | Credited by purchase invoices, debited by payments made |
+| `vat_output` | 6203 | VAT charged on sales |
+| `vat_settlement` | 6204 | IVA paid to or refunded by the State |
+| `withholding_payable` | 6202 | Tax withheld from pay, until paid to the State |
+| `social_security_payable` | 6206 | Social security, until paid |
+| `net_pay_payable` | 6301 | Net pay owed to staff, until paid |
+| `holiday_accrual` | 6302 | Monthly build-up of holiday and Christmas pay |
+| `client_money` | 6402 | Money held for owners (Property management, Client account) |
+| `loan_principal` | 6501 | Loan repayments reduce this account (the Loan instalment split) |
+| `share_capital` | 8102 | Where an opening balance for bank accounts is set against |
+| `retained_earnings` | 8203 | Profit kept from earlier years |
+| `default_sales` | 1102, 1104, 1109, 1111, 1116 | Default account on a new sales invoice (one per business) |
+| `interest_income` | 1301 | Interest earned |
+| `default_materials` | 2101 | Default account on a new purchase invoice |
+| `stock_change` | 2106 |  |
+| `wages_direct` | 2301 | Gross pay of site and workshop staff |
+| `employer_social_security_direct` | 2302 | Employer social security on direct staff |
+| `wages_office` | 3102 | Gross pay of office staff |
+| `employer_social_security_office` | 3103 | Employer social security on office staff |
+| `bank_charges` | 3411 | Bank fees (the Loan instalment split) |
+| `interest_expense` | 9101 | Interest cover on the dashboard |
+| `income_tax` | 9201 | Tax on profits |
 
 ## How payroll would post (the next change, once the chart is agreed)
 
@@ -387,23 +387,23 @@ One payroll entry per person per month, instead of single-account bank lines:
 
 | | Debit | Credit |
 |---|---|---|
-| Gross pay | 6321 or 6322 | |
-| Employer social security (about 23.75%) | 6351 or 6352 | |
-| Net pay to the employee | | 2311 |
-| Tax withheld (IRS) | | 2421 |
-| Social security: employee share and employer share | | 2451 |
-| Holiday and Christmas pay as duodecimos (a twelfth of each paid with the monthly salary) | 6321 or 6322, part of the gross | none needed |
-| Paying the net pay | 2311 | bank |
-| Paying the State | 2421, 2451 | bank |
+| Gross pay | 2301 or 3102 | |
+| Employer social security (about 23.75%) | 2302 or 3103 | |
+| Net pay to the employee | | 6301 |
+| Tax withheld (IRS) | | 6202 |
+| Social security: employee share and employer share | | 6206 |
+| Holiday and Christmas pay as duodecimos (a twelfth of each paid with the monthly salary) | 2301 or 3102, part of the gross | none needed |
+| Paying the net pay | 6301 | bank |
+| Paying the State | 6202, 6206 | bank |
 
 ## Questions for you and your accountant
 
-1. ANSWERED (Tony, 2026-11-25): no SAF-T reporting; the app is for management use. The SNC numbering stays only as a tidy structure.
+1. ANSWERED (Tony, 2026-11-25): no SAF-T reporting; the app is for management use. The chart uses our own numbering.
 2. ANSWERED: autonomous taxation is handled by the external accountants, so there is no account for it (8123 removed).
 3. ANSWERED: sub-account numbers as drafted.
-4. ANSWERED: retentions yes (2119, 2212 stay in the Construction template); no work in progress (3610 removed).
-5. ANSWERED: client money exists only in Casas Algarve and the Client Account company; Teia, Woodgrain and Algarve Interior do not use it (2788 stays in templates P and K only).
-6. ANSWERED: stock for Teia and Woodgrain only (3210 stays in C and W, removed from I, P, K).
+4. ANSWERED: retentions yes (4203, 6102 stay in the Construction template); no work in progress removed.
+5. ANSWERED: client money exists only in Casas Algarve and the Client Account company; Teia, Woodgrain and Algarve Interior do not use it (6402 stays in templates P and K only).
+6. ANSWERED: stock for Teia and Woodgrain only (4401 stays in C and W, removed from I, P, K).
 7. ANSWERED: monthly for some companies and quarterly for others (a setting per company); non-deductible VAT is left to the external accountants.
 8. OPEN: Tony will check once the last changes are in and the sample data has run.
 

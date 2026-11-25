@@ -57,12 +57,15 @@ export async function createBankAccount(input: NewBankAccountInput): Promise<num
       const exists = await tx.query("SELECT 1 FROM accounts WHERE account_no = $1", [accountNo]);
       if (!exists.rows.length) throw new Error(`Chart account ${accountNo} does not exist.`);
     } else {
+      // The next free number in the cash and bank subgroup (subgroup 41 gives 4101 to 4199).
+      const cashSub = await cashSubgroupNo(tx);
       const free = await tx.query<{ n: number }>(
-        "SELECT n FROM generate_series(1230, 1289) n WHERE NOT EXISTS (SELECT 1 FROM accounts WHERE account_no = n) ORDER BY n LIMIT 1"
+        "SELECT n FROM generate_series($1::int * 100 + 1, $1::int * 100 + 99) n WHERE NOT EXISTS (SELECT 1 FROM accounts WHERE account_no = n) ORDER BY n LIMIT 1",
+        [cashSub]
       );
-      if (!free.rows[0]) throw new Error("No free account number left between 1230 and 1289.");
+      if (!free.rows[0]) throw new Error(`No free account number left between ${cashSub * 100 + 1} and ${cashSub * 100 + 99}.`);
       accountNo = free.rows[0].n;
-      await tx.query("INSERT INTO accounts (account_no, name, subgroup_no, is_reserved) VALUES ($1, $2, $3, true)", [accountNo, name, await cashSubgroupNo(tx)]);
+      await tx.query("INSERT INTO accounts (account_no, name, subgroup_no, is_reserved) VALUES ($1, $2, $3, true)", [accountNo, name, cashSub]);
     }
     await tx.query("UPDATE accounts SET is_reserved = true WHERE account_no = $1", [accountNo]);
 
