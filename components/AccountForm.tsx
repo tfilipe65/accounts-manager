@@ -41,7 +41,7 @@ export default function AccountForm({
             </option>
             {subgroups.map((s) => (
               <option key={s.subgroup_no} value={s.subgroup_no}>
-                {s.group_name} &rsaquo; {s.subgroup_no} {s.name}
+                {s.group_name} &rsaquo; {s.name}{s.range ? ` (${s.range})` : ""}
               </option>
             ))}
           </select>

@@ -48,12 +48,15 @@ export async function deleteAccount(accountNo: number): Promise<void> {
   revalidatePath("/chart-of-accounts");
 }
 
-export type SubgroupOption = { subgroup_no: number; name: string; group_name: string };
+export type SubgroupOption = { subgroup_no: number; name: string; group_name: string; /** e.g. "7110-7213": the account numbers it holds, empty when it has none. */ range: string };
 
 export async function listSubgroupOptions(): Promise<SubgroupOption[]> {
   await requireSession();
   return query<SubgroupOption>(`
-    SELECT sg.subgroup_no, sg.name, g.name AS group_name
+    SELECT sg.subgroup_no, sg.name, g.name AS group_name,
+           COALESCE((SELECT CASE WHEN MIN(a.account_no) = MAX(a.account_no) THEN MIN(a.account_no)::text
+                                 ELSE MIN(a.account_no) || '-' || MAX(a.account_no) END
+                     FROM accounts a WHERE a.subgroup_no = sg.subgroup_no), '') AS range
     FROM account_subgroups sg JOIN account_groups g ON g.group_no = sg.group_no
     ORDER BY g.group_no, sg.subgroup_no
   `);
