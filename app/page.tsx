@@ -296,11 +296,16 @@ export default async function DashboardPage() {
           <Card title="Cashflow" note="Money in less money out, each month">
             <BarChart categories={categories} series={[{ key: "cash", label: "Net cash flow", color: SALES_COLOR }]} data={monthly.map((m) => ({ cash: m.cashIn - m.cashOut }))} money signed />
           </Card>
-          <div className="flex flex-col gap-4">
-            <StatCard label="Bank" value={fmt(d.banks.filter((b) => !b.isCash).reduce((t, b) => t + b.balance, 0))} />
-            <StatCard label="Petty cash" value={fmt(d.banks.filter((b) => b.isCash).reduce((t, b) => t + b.balance, 0))} />
-            <StatCard label="Total" value={fmt(d.totalCash)} />
-          </div>
+          <Card title="Operating costs as a share of sales" note="Overheads %">
+            <div className="flex items-center gap-4">
+              <DonutChart value={overheadShare} color={COSTS_COLOR} />
+              <div className="flex flex-col gap-1 text-sm">
+                <span className="text-2xl font-semibold text-primary">{fmt(s.operatingCosts)}</span>
+                <span className="text-neutral-600">{pct(overheadShare)} of sales</span>
+                <span className="text-xs text-neutral-500">Operating costs = overheads: everything except cost of sales, other expenses &amp; losses, and tax.</span>
+              </div>
+            </div>
+          </Card>
         </div>
       </section>
 
@@ -354,19 +359,8 @@ export default async function DashboardPage() {
           <StatCard label="Result (net income)" value={fmt(s.netIncome)} tone={s.netIncome >= 0 ? "debit" : "credit"} sub={`Operating result ${fmt(s.operatingResult)}`} />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Card title="Operating costs as a share of sales" note="Overheads %">
-            <div className="flex items-center gap-4">
-              <DonutChart value={overheadShare} color={COSTS_COLOR} />
-              <div className="flex flex-col gap-1 text-sm">
-                <span className="text-2xl font-semibold text-primary">{fmt(s.operatingCosts)}</span>
-                <span className="text-neutral-600">{pct(overheadShare)} of sales</span>
-                <span className="text-xs text-neutral-500">Operating costs = overheads: everything except cost of sales, other expenses &amp; losses, and tax.</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card title="Cost structure" className="md:col-span-2">
+        <div className="grid grid-cols-1 gap-4">
+          <Card title="Cost structure">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">
@@ -412,6 +406,13 @@ export default async function DashboardPage() {
                 ))}
               </tbody>
             </table>
+          </Card>
+
+          <Card title={`Top 5 ${labels.client.toLowerCase()}`} note="Sales net of IVA, share of all sales">
+            <HBarChart
+              items={d.topClients.slice(0, 5).map((c) => ({ label: c.name, value: c.amount, share: d.clientSalesTotal > 0 ? c.amount / d.clientSalesTotal : null }))}
+              color={SALES_COLOR}
+            />
           </Card>
         </div>
       </section>

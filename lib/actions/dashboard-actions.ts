@@ -72,6 +72,8 @@ export type DashboardData = {
   keyPurchases: KeyFigures;
   vat: { onSales: number; onPurchases: number; due: number; paid: number; balance: number };
   topClients: Ranked[];
+  /** Everything invoiced to clients in the year, net of IVA: the whole that each client's share is measured against. */
+  clientSalesTotal: number;
   topSuppliers: Ranked[];
   topProjects: Ranked[];
   metrics: Metric[];
@@ -220,9 +222,15 @@ export async function getDashboard(yearOverride?: number): Promise<DashboardData
     cashByMonth(year),
   ]);
 
-  const [keySales, keyPurchases, topClients, topSuppliers, topProjects, vatPaid, interestPaid] = await Promise.all([
+  const [keySales, keyPurchases, clientSalesRow, topClients, topSuppliers, topProjects, vatPaid, interestPaid] = await Promise.all([
     keyFigures("sales", year, cutoff),
     keyFigures("purchases", year, cutoff),
+    queryOne<{ amount: string | null }>(
+      `SELECT SUM(sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc)) AS amount
+       FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id
+       WHERE EXTRACT(YEAR FROM si.date) = $1 AND si.doc_type <> 'Proforma'`,
+      [year]
+    ),
     topRanked(
       `SELECT c.name, SUM(sil.quantity * sil.price_ex_vat * (1 - sil.discount_perc)) AS amount
        FROM sales_invoice_lines sil JOIN sales_invoices si ON si.id = sil.sales_invoice_id JOIN customers c ON c.id = si.customer_id
@@ -367,6 +375,7 @@ export async function getDashboard(yearOverride?: number): Promise<DashboardData
     keyPurchases,
     vat: { onSales: vatReport.totalOutput, onPurchases: vatReport.totalInput, due: vatDue, paid: vatPaid, balance: vatDue - vatPaid },
     topClients,
+    clientSalesTotal: Number(clientSalesRow?.amount ?? 0),
     topSuppliers,
     topProjects,
     metrics,
