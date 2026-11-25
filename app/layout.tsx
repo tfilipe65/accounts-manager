@@ -20,7 +20,8 @@ export const viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = (await headers()).get("x-pathname") ?? "";
-  const onPicker = pathname.startsWith("/companies");
+  // The company list and the sign-in screen are full-screen pages: no menu, no app frame.
+  const onPicker = pathname.startsWith("/companies") || pathname.startsWith("/login");
   const session = onPicker ? null : await getSession();
   const company = session ? await getCurrentCompany() : undefined;
   const allowed = session ? await getAllowedSections(session) : null;

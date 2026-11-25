@@ -55,8 +55,9 @@ body {
 }
 
 /* The first block of every page (its title and buttons) stays put at the top of the scrolling area.
-   The block takes the page background so content slides underneath it. */
-.app-main > div > :first-child {
+   The block takes the page background so content slides underneath it. A full-screen page such as the sign-in
+   screen marks itself data-bare and keeps its own look, even when the app shell is still around it. */
+.app-main > div:not([data-bare]) > :first-child {
   position: sticky;
   top: 0;
   z-index: 30;
@@ -66,7 +67,7 @@ body {
 }
 
 @media print {
-  .app-main > div > :first-child {
+  .app-main > div:not([data-bare]) > :first-child {
     position: static;
     box-shadow: none;
     padding: 0;

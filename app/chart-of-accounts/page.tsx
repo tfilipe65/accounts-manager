@@ -2,6 +2,10 @@ import { query } from "@/lib/db";
 import { listSubgroupOptions } from "@/lib/actions/account-actions";
 import AccountDialogButton from "@/components/AccountDialog";
 import { deleteAccountAction } from "@/lib/actions/account-form-actions";
+import { getTrialBalance } from "@/lib/actions/trial-balance-actions";
+import { getEffectiveReportingYear } from "@/lib/reporting-year";
+import { reportingYearCutoffDate } from "@/lib/reporting-year-utils";
+import { formatDate, formatMoney as fmt } from "@/lib/formatters";
 
 type AccountRow = {
   account_no: number;
@@ -28,7 +32,25 @@ async function getAccounts(): Promise<AccountRow[]> {
 }
 
 export default async function ChartOfAccountsPage() {
-  const [accounts, subgroups] = await Promise.all([getAccounts(), listSubgroupOptions()]);
+  const year = await getEffectiveReportingYear();
+  const cutoff = reportingYearCutoffDate(year);
+  const [accounts, subgroups, now, before] = await Promise.all([
+    getAccounts(),
+    listSubgroupOptions(),
+    getTrialBalance(cutoff ?? undefined),
+    getTrialBalance(`${year - 1}-12-31`),
+  ]);
+  // The balance of each account, the way QuickBooks shows it next to the chart. Balance sheet accounts: what they hold at
+  // the end of the reporting year (today for the current year). Income and cost accounts: the year's total, so they start
+  // from zero each year. Shown in the account's own direction (assets and costs by debit, the rest by credit).
+  const nowBy = new Map(now.rows.map((r) => [r.account_no, r.debit - r.credit]));
+  const beforeBy = new Map(before.rows.map((r) => [r.account_no, r.debit - r.credit]));
+  const balanceOf = (a: AccountRow) => {
+    let net = nowBy.get(a.account_no) ?? 0;
+    if (a.statement === "P&L") net -= beforeBy.get(a.account_no) ?? 0;
+    return a.normal_balance === "debit" ? net : -net;
+  };
+  const money = (n: number) => (Math.abs(n) < 0.005 ? <span className="text-neutral-300">&ndash;</span> : fmt(n));
 
   const byGroup = new Map<string, { group: AccountRow; bySubgroup: Map<number, AccountRow[]> }>();
   for (const a of accounts) {
@@ -53,6 +75,11 @@ export default async function ChartOfAccountsPage() {
         </div>
       </div>
 
+      <p className="-mt-3 text-xs text-neutral-500">
+        Balances {cutoff ? `at ${formatDate(cutoff)}` : "as of today"} for balance sheet accounts; income and cost accounts show the {year} total.
+        Change the year in the menu bar.
+      </p>
+
       <div className="flex flex-col gap-6">
         {Array.from(byGroup.values()).map(({ group, bySubgroup }) => (
           <section key={group.group_no} className="rounded-lg border border-line bg-surface">
@@ -67,11 +94,14 @@ export default async function ChartOfAccountsPage() {
             <div className="divide-y divide-line">
               {Array.from(bySubgroup.entries()).map(([subgroupNo, rows]) => (
                 <div key={subgroupNo} className="px-4 py-3">
-                  <h3 className="mb-2 text-sm font-semibold text-neutral-700">
-                    {subgroupNo} &middot; {rows[0].subgroup_name}{" "}
-                    <span className="font-normal text-neutral-400">
-                      ({rows[0].normal_balance === "debit" ? "Debit-normal" : "Credit-normal"})
+                  <h3 className="mb-2 flex items-baseline justify-between text-sm font-semibold text-neutral-700">
+                    <span>
+                      {subgroupNo} &middot; {rows[0].subgroup_name}{" "}
+                      <span className="font-normal text-neutral-400">
+                        ({rows[0].normal_balance === "debit" ? "Debit-normal" : "Credit-normal"})
+                      </span>
                     </span>
+                    <span className="pr-[8.5rem] font-mono text-sm">{money(rows.reduce((s, a) => s + balanceOf(a), 0))}</span>
                   </h3>
                   <table className="w-full text-sm">
                     <tbody>
@@ -84,6 +114,7 @@ export default async function ChartOfAccountsPage() {
                               <span className="rounded-full bg-accent/20 px-2 py-0.5 text-xs text-accent">reserved</span>
                             )}
                           </td>
+                          <td className="w-32 py-1 pr-4 text-right font-mono text-neutral-700">{money(balanceOf(a))}</td>
                           <td className="w-28 py-1 text-right">
                             <div className="flex items-center justify-end gap-3">
                               <AccountDialogButton
