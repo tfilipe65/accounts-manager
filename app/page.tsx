@@ -237,6 +237,73 @@ export default async function DashboardPage() {
 
       <BalanceWarningBanner diagnostics={d.diagnostics} />
 
+      {/* ---------- Overview: the six charts of the old Excel dashboard ---------- */}
+      <section className="flex flex-col gap-3">
+        <Heading note={`${d.reportingYear}, month by month`}>Overview</Heading>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Card title="Income / Expense" note="Money in and out, transfers left out">
+            <BarChart
+              categories={categories}
+              series={[
+                { key: "cashIn", label: "In", color: SALES_COLOR },
+                { key: "cashOut", label: "Out", color: COSTS_COLOR },
+              ]}
+              data={monthly.map((m) => ({ cashIn: m.cashIn, cashOut: m.cashOut }))}
+              money
+            />
+          </Card>
+          <Card title="Sales & Costs" note="Cumulative">
+            <LineChart
+              categories={categories}
+              series={[
+                { key: "cumSales", label: "Revenue", color: SALES_COLOR },
+                { key: "cumCosts", label: "Cost", color: COSTS_COLOR },
+              ]}
+              data={monthly.map((m) => ({ cumSales: m.cumSales, cumCosts: m.cumCosts }))}
+              money
+            />
+          </Card>
+          <Card title="Result / Net Income" note="Cumulative">
+            <LineChart
+              categories={categories}
+              series={[{ key: "cumNet", label: "Result", color: SALES_COLOR }]}
+              data={monthly.map((m) => ({ cumNet: m.cumNet }))}
+              money
+            />
+          </Card>
+          <Card title="Overall Age Analysis - Sales" note="Number of invoices, by days past due">
+            <BarChart
+              categories={d.receivablesByBucket.map((b) => b.bucket.replace(" days", ""))}
+              series={[{ key: "count", label: "Invoices", color: SALES_COLOR }]}
+              data={d.receivablesByBucket.map((b) => ({ count: b.count }))}
+            />
+          </Card>
+          <Card title="Overall Age Analysis - Purchases" note="Number of invoices, by days past due">
+            <BarChart
+              categories={d.payablesByBucket.map((b) => b.bucket.replace(" days", ""))}
+              series={[{ key: "count", label: "Invoices", color: COSTS_COLOR }]}
+              data={d.payablesByBucket.map((b) => ({ count: b.count }))}
+            />
+          </Card>
+          <Card title="Operating Expenses" note="Amount for the year">
+            <HBarChart items={d.operatingCostLines.map((l) => ({ label: l.label, value: l.value, share: l.share }))} color={COSTS_COLOR} />
+          </Card>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Card title="Liquid Assets" note="Month-end balance of all banks and cash">
+            <LineChart categories={categories} series={[{ key: "balance", label: "Balance", color: SALES_COLOR }]} data={monthly.map((m) => ({ balance: m.balance }))} money />
+          </Card>
+          <Card title="Cashflow" note="Money in less money out, each month">
+            <BarChart categories={categories} series={[{ key: "cash", label: "Net cash flow", color: SALES_COLOR }]} data={monthly.map((m) => ({ cash: m.cashIn - m.cashOut }))} money signed />
+          </Card>
+          <div className="flex flex-col gap-4">
+            <StatCard label="Bank" value={fmt(d.banks.filter((b) => !b.isCash).reduce((t, b) => t + b.balance, 0))} />
+            <StatCard label="Petty cash" value={fmt(d.banks.filter((b) => b.isCash).reduce((t, b) => t + b.balance, 0))} />
+            <StatCard label="Total" value={fmt(d.totalCash)} />
+          </div>
+        </div>
+      </section>
+
       {/* ---------- Money position ---------- */}
       <section className="flex flex-col gap-3">
         <Heading>Money position</Heading>
@@ -324,9 +391,6 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Card title="Operating costs by type" note="Amount and % of sales">
-            <HBarChart items={d.operatingCostLines.map((l) => ({ label: l.label, value: l.value, share: l.share }))} color={COSTS_COLOR} />
-          </Card>
           <Card title="By quarter">
             <table className="w-full text-sm">
               <thead>
@@ -369,32 +433,6 @@ export default async function DashboardPage() {
           </Card>
           <Card title="Result by month">
             <BarChart categories={categories} series={[{ key: "net", label: "Result", color: SALES_COLOR }]} data={monthly.map((m) => ({ net: m.net }))} money signed />
-          </Card>
-          <Card title="Year to date" note="Cumulative">
-            <LineChart
-              categories={categories}
-              series={[
-                { key: "cumSales", label: "Sales", color: SALES_COLOR },
-                { key: "cumCosts", label: "Costs", color: COSTS_COLOR },
-                { key: "cumNet", label: "Result", color: RESULT_COLOR, dashed: true },
-              ]}
-              data={monthly.map((m) => ({ cumSales: m.cumSales, cumCosts: m.cumCosts, cumNet: m.cumNet }))}
-              money
-            />
-          </Card>
-          <Card title="Money in and out" note="Transfers between accounts left out">
-            <BarChart
-              categories={categories}
-              series={[
-                { key: "cashIn", label: "In", color: SALES_COLOR },
-                { key: "cashOut", label: "Out", color: COSTS_COLOR },
-              ]}
-              data={monthly.map((m) => ({ cashIn: m.cashIn, cashOut: m.cashOut }))}
-              money
-            />
-          </Card>
-          <Card title="Liquid assets" note="Month-end balance of all banks and cash" className="md:col-span-2">
-            <LineChart categories={categories} series={[{ key: "balance", label: "Balance", color: SALES_COLOR }]} data={monthly.map((m) => ({ balance: m.balance }))} money />
           </Card>
         </div>
       </section>

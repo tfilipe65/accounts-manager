@@ -5,6 +5,7 @@
 // legend for two or more series, and a crosshair tooltip that reads all series at the hovered category.
 
 import { useState } from "react";
+import { useChartWidth } from "@/components/useChartWidth";
 
 export type LineChartSeries = { key: string; label: string; color: string; dashed?: boolean };
 
@@ -22,6 +23,7 @@ export default function LineChart({
   money?: boolean;
 }) {
   const [hover, setHover] = useState<number | null>(null);
+  const [wrapRef, width] = useChartWidth();
 
   const fmt = (n: number) =>
     money
@@ -34,7 +36,6 @@ export default function LineChart({
   const minVal = Math.min(0, ...values);
   const range = maxVal - minVal || 1;
 
-  const width = 640;
   const pad = { top: 12, right: 14, bottom: 24, left: 48 };
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
@@ -44,8 +45,8 @@ export default function LineChart({
   const step = plotW / Math.max(1, categories.length - 1);
 
   return (
-    <div className="relative">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" onMouseLeave={() => setHover(null)}>
+    <div ref={wrapRef} className="relative">
+      <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} className="block" role="img" onMouseLeave={() => setHover(null)}>
         {ticks.map((v) => (
           <g key={v}>
             <line x1={pad.left} x2={width - pad.right} y1={y(v)} y2={y(v)} stroke="var(--line)" strokeWidth={1} />

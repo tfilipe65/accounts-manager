@@ -7,6 +7,7 @@
 // per-bar hover tooltip (values lead, series name follows).
 
 import { useState } from "react";
+import { useChartWidth } from "@/components/useChartWidth";
 
 export type BarChartSeries = { key: string; label: string; color: string };
 
@@ -30,6 +31,7 @@ export default function BarChart({
   signed?: boolean;
 }) {
   const [hover, setHover] = useState<{ cat: number; series: number } | null>(null);
+  const [wrapRef, width] = useChartWidth();
 
   const formatValue = (n: number) =>
     money
@@ -41,7 +43,6 @@ export default function BarChart({
   const minVal = Math.min(0, ...allValues);
   const range = maxVal - minVal || 1;
 
-  const width = 640;
   const padding = { top: 12, right: 12, bottom: 24, left: 44 };
   const plotW = width - padding.left - padding.right;
   const plotH = height - padding.top - padding.bottom;
@@ -49,7 +50,7 @@ export default function BarChart({
 
   const groupW = plotW / categories.length;
   const barGap = 2;
-  const barW = Math.min(24, (groupW - barGap * (series.length + 1)) / series.length);
+  const barW = Math.max(2, Math.min(14, (groupW - barGap * (series.length + 1)) / series.length));
 
   // Y-axis: 0 plus max and min (rounded), enough for a reader to gauge scale without clutter.
   const yTicks = Array.from(new Set([0, maxVal, minVal])).filter((v) => Number.isFinite(v));
@@ -59,8 +60,8 @@ export default function BarChart({
   }
 
   return (
-    <div className="relative">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img">
+    <div ref={wrapRef} className="relative">
+      <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} className="block" role="img">
         {yTicks.map((v) => (
           <g key={v}>
             <line x1={padding.left} x2={width - padding.right} y1={yFor(v)} y2={yFor(v)} stroke="var(--line)" strokeWidth={1} />
@@ -91,7 +92,7 @@ export default function BarChart({
                     y={barTop}
                     width={barW}
                     height={barH}
-                    rx={4}
+                    rx={3}
                     fill={color}
                     opacity={isHover ? 1 : 0.85}
                     onMouseEnter={() => setHover({ cat: ci, series: si })}
