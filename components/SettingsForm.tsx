@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { updateSettingsFormAction } from "@/lib/actions/settings-form-actions";
 import type { AppSettings } from "@/lib/actions/settings-actions";
 import type { AccountOption } from "@/lib/actions/reference-actions";
+import AccountSelect from "@/components/AccountSelect";
 
 export default function SettingsForm({ initial, accounts }: { initial: AppSettings; accounts: AccountOption[] }) {
   const [state, formAction, pending] = useActionState(updateSettingsFormAction, undefined);
@@ -69,14 +70,7 @@ export default function SettingsForm({ initial, accounts }: { initial: AppSettin
           <input name="project_label" defaultValue={initial.project_label} className="input" />
         </Field>
         <Field label="Interest expense account (for interest cover)">
-          <select name="account_no_interest_expense" defaultValue={initial.account_no_interest_expense ?? ""} className="input">
-            <option value="">None</option>
-            {accounts.map((a) => (
-              <option key={a.account_no} value={a.account_no}>
-                {a.account_no} {a.name}
-              </option>
-            ))}
-          </select>
+          <AccountSelect accounts={accounts} name="account_no_interest_expense" defaultValue={initial.account_no_interest_expense ?? ""} blankLabel="None" />
         </Field>
         <Field label="VAT return is filed">
           <select name="vat_return_period" defaultValue={initial.vat_return_period} className="input">

@@ -6,6 +6,7 @@ import type { AccountOption } from "@/lib/actions/reference-actions";
 import type { BankTransactionInput } from "@/lib/actions/banking-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import VatSelect from "@/components/VatSelect";
+import AccountSelect from "@/components/AccountSelect";
 
 type InvoiceOption = { id: number; label: string };
 type LinkType = "sales" | "purchase" | "account" | "none";
@@ -106,16 +107,7 @@ export default function BankingEntryForm({
 
         {linkType === "account" && (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <select name="account_no" className="input" defaultValue={initial?.account_no ?? ""}>
-              <option value="" disabled>
-                Select account
-              </option>
-              {accounts.map((a) => (
-                <option key={a.account_no} value={a.account_no}>
-                  {a.account_no} {a.name}
-                </option>
-              ))}
-            </select>
+            <AccountSelect accounts={accounts} name="account_no" defaultValue={initial?.account_no ?? ""} required placeholder="Type to find an account" />
             {employees.length > 0 && (
               <select name="employee_id" className="input" defaultValue={initial?.employee_id ?? ""}>
                 <option value="">No employee (not a payment to staff)</option>

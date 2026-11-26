@@ -5,6 +5,7 @@ import type { AccountOption } from "@/lib/actions/reference-actions";
 import type { JournalEntryInput } from "@/lib/actions/journal-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import VatSelect from "@/components/VatSelect";
+import AccountSelect from "@/components/AccountSelect";
 
 type FormState = { error?: string; success?: boolean } | undefined;
 
@@ -56,22 +57,7 @@ export default function JournalEntryForm({
           <input type="date" name="date" defaultValue={initial?.date} required className="input" />
         </Field>
         <Field label="Account" className="md:col-span-2">
-          <select
-            name="account_no"
-            required
-            value={accountNo}
-            onChange={(e) => setAccountNo(e.target.value ? Number(e.target.value) : "")}
-            className="input"
-          >
-            <option value="" disabled>
-              Select
-            </option>
-            {accounts.map((a) => (
-              <option key={a.account_no} value={a.account_no}>
-                {a.account_no} {a.name}
-              </option>
-            ))}
-          </select>
+          <AccountSelect accounts={accounts} name="account_no" required value={accountNo} onChange={setAccountNo} placeholder="Type to find an account" />
           {selected && (
             <span className="text-xs text-neutral-500">
               {selected.normal_balance === "debit"

@@ -5,6 +5,7 @@ import type { AccountOption, NamedOption, ProjectOption, ProductOption } from "@
 import type { SalesInvoiceDetail, SalesInvoiceLineInput } from "@/lib/actions/income-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import VatSelect from "@/components/VatSelect";
+import AccountSelect from "@/components/AccountSelect";
 
 const DOC_TYPES = ["Invoice", "Credit Note", "Proforma", "Commission", "Tax Refund", "Interest", "Other"];
 
@@ -190,20 +191,12 @@ export default function IncomeForm({
                   />
                 </td>
                 <td className="p-1">
-                  <select
-                    className="input"
+                  <AccountSelect
+                    accounts={accounts}
                     value={l.account_no || ""}
-                    onChange={(e) => updateLine(i, { account_no: Number(e.target.value) })}
-                  >
-                    <option value="" disabled>
-                      Select
-                    </option>
-                    {accounts.map((a) => (
-                      <option key={a.account_no} value={a.account_no}>
-                        {a.account_no} {a.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(n) => updateLine(i, { account_no: n === "" ? 0 : n })}
+                    placeholder="Type to find"
+                  />
                 </td>
                 <td className="p-1">
                   <select

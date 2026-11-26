@@ -5,6 +5,7 @@
 
 import { useState, useTransition } from "react";
 import Modal from "@/components/Modal";
+import AccountSelect from "@/components/AccountSelect";
 import { createSplit, updateSplit, type SplitInput, type SplitLine } from "@/lib/actions/split-actions";
 import type { AccountOption } from "@/lib/actions/reference-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
@@ -262,14 +263,7 @@ function SplitForm({
                 <td className="px-2 py-2">
                   {r.kind === "account" && (
                     <div className="flex flex-col gap-1">
-                      <select value={r.account_no} onChange={(e) => update(r.key, { account_no: e.target.value })} className="input">
-                        <option value="">Select account</option>
-                        {accounts.map((a) => (
-                          <option key={a.account_no} value={a.account_no}>
-                            {a.account_no} {a.name}
-                          </option>
-                        ))}
-                      </select>
+                      <AccountSelect accounts={accounts} value={r.account_no} onChange={(n) => update(r.key, { account_no: n === "" ? "" : String(n) })} />
                       {employees.length > 0 && (
                         <select value={r.employee_id} onChange={(e) => update(r.key, { employee_id: e.target.value })} className="input text-xs">
                           <option value="">No employee</option>

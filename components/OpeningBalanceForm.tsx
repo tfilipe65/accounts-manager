@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import type { AccountOption } from "@/lib/actions/reference-actions";
 import type { OpeningBalanceInput } from "@/lib/actions/opening-balance-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
+import AccountSelect from "@/components/AccountSelect";
 
 type FormState = { error?: string; success?: boolean } | undefined;
 
@@ -41,16 +42,7 @@ export default function OpeningBalanceForm({
           <input type="date" name="date" defaultValue={initial?.date} required className="input" />
         </Field>
         <Field label="Account">
-          <select name="account_no" required defaultValue={initial?.account_no ?? ""} className="input">
-            <option value="" disabled>
-              Select
-            </option>
-            {accounts.map((a) => (
-              <option key={a.account_no} value={a.account_no}>
-                {a.account_no} {a.name}
-              </option>
-            ))}
-          </select>
+          <AccountSelect accounts={accounts} name="account_no" required defaultValue={initial?.account_no ?? ""} placeholder="Type to find an account" />
         </Field>
         <Field label="Description">
           <input name="description" defaultValue={initial?.description ?? ""} className="input" />
