@@ -140,7 +140,7 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
       )}
 
       {bankAccounts.length > 1 && (
-        <TransferForm accounts={bankAccounts.map((b) => ({ id: b.id, name: b.name }))} fromId={active.id} defaultDate={formDate} closedThroughYear={closedThroughYear} />
+        <TransferForm accounts={bankAccounts.map((b) => ({ id: b.id, name: b.name }))} fromId={active.id} defaultDate={formDate} closedThroughYear={closedThroughYear} isAdmin={isAdmin} unlinked={unlinked} />
       )}
 
       <ReconcilePanel

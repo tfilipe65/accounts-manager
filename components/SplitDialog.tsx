@@ -200,7 +200,7 @@ function SplitForm({
 
   return (
     <div className="flex flex-col gap-4 text-sm">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-[9rem_9rem_11rem_minmax(10rem,1fr)]">
         <Field label="Date">
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input" />
         </Field>
@@ -210,7 +210,7 @@ function SplitForm({
             <option value="in">Received (+)</option>
           </select>
         </Field>
-        <Field label="Amount on the bank statement">
+        <Field label="Bank statement amount">
           <input type="number" step="0.01" min="0" value={total} onChange={(e) => setTotal(e.target.value)} className="input" autoFocus />
         </Field>
         <Field label="Description">

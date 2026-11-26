@@ -14,11 +14,16 @@ export function TransferForm({
   fromId,
   defaultDate,
   closedThroughYear,
+  isAdmin = false,
+  unlinked = [],
 }: {
   accounts: { id: number; name: string }[];
   fromId: number;
   defaultDate: string;
   closedThroughYear: number | null;
+  isAdmin?: boolean;
+  /** Bank-type chart accounts that are not set up as bank accounts yet (administrators only). */
+  unlinked?: { account_no: number; name: string }[];
 }) {
   const [state, action, pending] = useActionState(transferFormAction, undefined as FormState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -67,6 +72,22 @@ export function TransferForm({
           </Field>
         </div>
         <p className="text-xs text-neutral-500">Records the money going out of one account and into the other as a pair. It is left out of money in / money out totals.</p>
+        <p className="text-xs text-neutral-500">
+          {!isAdmin ? (
+            <>Account missing from the lists? Ask the administrator to add it as a bank account.</>
+          ) : unlinked.length > 0 ? (
+            <>
+              Account missing from the lists? These ledger accounts are not set up as bank accounts yet:{" "}
+              <strong className="text-neutral-700">{unlinked.map((a) => `${a.account_no} ${a.name}`).join(", ")}</strong>. Add them under{" "}
+              <em>Manage bank accounts and cash boxes</em>{" "}
+              (Ledger account: Use &hellip;).
+            </>
+          ) : (
+            <>
+              Account missing from the lists? Add it under <em>Manage bank accounts and cash boxes</em>.
+            </>
+          )}
+        </p>
         {state?.error && <p className="text-sm text-red-700">{state.error}</p>}
         {state?.success && <p className="text-sm text-green-700">Transfer recorded.</p>}
         <div>
