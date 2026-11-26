@@ -10,6 +10,7 @@ import { query, queryOne, withTransaction } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
 import type { Queryable } from "@/lib/db";
+import { assertLineAccounts } from "@/lib/account-rules";
 
 export type PurchaseInvoiceLineInput = {
   description: string | null;
@@ -145,6 +146,7 @@ export async function createPurchaseInvoice(input: PurchaseInvoiceInput): Promis
       [input.invoice_number, input.date, input.supplier_id]
     );
     const newId = header.rows[0].id;
+    await assertLineAccounts(client, "expense", input.lines.map((l) => l.account_no));
     await insertLines(client, newId, input.lines);
     return newId;
   });
@@ -165,6 +167,8 @@ export async function updatePurchaseInvoice(id: number, input: PurchaseInvoiceIn
       input.date,
       input.supplier_id,
     ]);
+    const carried = (await client.query<{ account_no: number }>("SELECT account_no FROM purchase_invoice_lines WHERE purchase_invoice_id = $1", [id])).rows.map((r) => r.account_no);
+    await assertLineAccounts(client, "expense", input.lines.map((l) => l.account_no), carried);
     await client.query("DELETE FROM purchase_invoice_lines WHERE purchase_invoice_id = $1", [id]);
     await insertLines(client, id, input.lines);
   });

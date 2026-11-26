@@ -2,20 +2,21 @@ import { notFound } from "next/navigation";
 import ExpenseForm from "@/components/ExpenseForm";
 import { updateExpenseFormAction } from "@/lib/actions/expense-form-actions";
 import { getPurchaseInvoiceForEdit } from "@/lib/actions/expense-actions";
-import { listSupplierOptions, listAccountOptions, listProjectOptions } from "@/lib/actions/reference-actions";
+import { listSupplierOptions, listExpenseAccountOptions, listProjectOptions } from "@/lib/actions/reference-actions";
 import { getClosedThroughYear } from "@/lib/year-close";
 
 export default async function EditExpensePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const invoiceId = Number(id);
-  const [invoice, suppliers, accounts, projects, closedThroughYear] = await Promise.all([
-    getPurchaseInvoiceForEdit(invoiceId),
+  const invoice = await getPurchaseInvoiceForEdit(invoiceId);
+  if (!invoice) notFound();
+  // the accounts the invoice already uses stay in the list, even if they would not be offered on a new one
+  const [suppliers, accounts, projects, closedThroughYear] = await Promise.all([
     listSupplierOptions(),
-    listAccountOptions(),
+    listExpenseAccountOptions(invoice.lines.map((l) => l.account_no)),
     listProjectOptions(),
     getClosedThroughYear(),
   ]);
-  if (!invoice) notFound();
 
   return (
     <div className="flex flex-col gap-6">

@@ -8,6 +8,7 @@
 
 import { query } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
+import { excludedAccountRolesFor, subgroupRolesFor, type LineKind } from "@/lib/account-rules";
 
 export type AccountOption = { account_no: number; name: string; normal_balance: "debit" | "credit" };
 export type NamedOption = { id: number; name: string };
@@ -25,6 +26,26 @@ export async function listAccountOptions(): Promise<AccountOption[]> {
     FROM accounts a JOIN account_subgroups sg ON sg.subgroup_no = a.subgroup_no
     WHERE a.is_reserved = false ORDER BY a.account_no
   `);
+}
+
+// The accounts a sales line (income) or a purchase line (cost, or a fixed asset bought) may use -- see
+// lib/account-rules.ts. `alsoInclude` keeps the accounts an invoice being edited already carries.
+async function lineAccountOptions(kind: LineKind, alsoInclude: number[]): Promise<AccountOption[]> {
+  await requireSession();
+  return query<AccountOption>(
+    `SELECT a.account_no, a.name, sg.normal_balance
+     FROM accounts a JOIN account_subgroups sg ON sg.subgroup_no = a.subgroup_no
+     WHERE a.is_reserved = false
+       AND ((COALESCE(sg.role, '') = ANY($1::text[]) AND COALESCE(a.role, '') <> ALL($2::text[])) OR a.account_no = ANY($3::int[]))
+     ORDER BY a.account_no`,
+    [subgroupRolesFor(kind), excludedAccountRolesFor(kind), alsoInclude]
+  );
+}
+export async function listIncomeAccountOptions(alsoInclude: number[] = []): Promise<AccountOption[]> {
+  return lineAccountOptions("income", alsoInclude);
+}
+export async function listExpenseAccountOptions(alsoInclude: number[] = []): Promise<AccountOption[]> {
+  return lineAccountOptions("expense", alsoInclude);
 }
 
 // Unfiltered -- Journal Entries and Opening Balance legitimately post to

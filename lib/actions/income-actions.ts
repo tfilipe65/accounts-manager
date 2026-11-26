@@ -13,6 +13,7 @@ import { query, queryOne, withTransaction } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
 import type { Queryable } from "@/lib/db";
+import { assertLineAccounts } from "@/lib/account-rules";
 
 export type SalesInvoiceLineInput = {
   product_service_id: number | null;
@@ -180,6 +181,7 @@ export async function createSalesInvoice(input: SalesInvoiceInput): Promise<numb
       [input.invoice_number, input.date, input.doc_type, input.customer_id, input.reference, input.sales_id]
     );
     const newId = header.rows[0].id;
+    await assertLineAccounts(client, "income", input.lines.map((l) => l.account_no));
     await insertLines(client, newId, input.lines);
     return newId;
   });
@@ -199,6 +201,8 @@ export async function updateSalesInvoice(id: number, input: SalesInvoiceInput): 
        WHERE id = $1`,
       [id, input.invoice_number, input.date, input.doc_type, input.customer_id, input.reference, input.sales_id]
     );
+    const carried = (await client.query<{ account_no: number }>("SELECT account_no FROM sales_invoice_lines WHERE sales_invoice_id = $1", [id])).rows.map((r) => r.account_no);
+    await assertLineAccounts(client, "income", input.lines.map((l) => l.account_no), carried);
     await client.query("DELETE FROM sales_invoice_lines WHERE sales_invoice_id = $1", [id]);
     await insertLines(client, id, input.lines);
   });

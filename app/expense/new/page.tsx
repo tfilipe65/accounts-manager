@@ -1,12 +1,12 @@
 import ExpenseForm from "@/components/ExpenseForm";
 import { createExpenseFormAction } from "@/lib/actions/expense-form-actions";
-import { listSupplierOptions, listAccountOptions, listProjectOptions } from "@/lib/actions/reference-actions";
+import { listSupplierOptions, listExpenseAccountOptions, listProjectOptions } from "@/lib/actions/reference-actions";
 import { getClosedThroughYear } from "@/lib/year-close";
 
 export default async function NewExpensePage() {
   const [suppliers, accounts, projects, closedThroughYear] = await Promise.all([
     listSupplierOptions(),
-    listAccountOptions(),
+    listExpenseAccountOptions(),
     listProjectOptions(),
     getClosedThroughYear(),
   ]);
