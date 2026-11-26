@@ -6,6 +6,7 @@ import type { JournalEntryInput } from "@/lib/actions/journal-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import VatSelect from "@/components/VatSelect";
 import AccountSelect from "@/components/AccountSelect";
+import DebitCreditHelp from "@/components/DebitCreditHelp";
 
 type FormState = { error?: string; success?: boolean } | undefined;
 
@@ -25,7 +26,6 @@ export default function JournalEntryForm({
   const [state, formAction, pending] = useActionState(action, undefined);
   const formRef = useRef<HTMLFormElement>(null);
   const [accountNo, setAccountNo] = useState<number | "">(initial?.account_no ?? "");
-  const selected = accounts.find((a) => a.account_no === accountNo);
 
   useEffect(() => {
     // Only auto-reset the blank "add" form on success -- an edit form has
@@ -45,12 +45,7 @@ export default function JournalEntryForm({
       }}
       className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-4"
     >
-      <div className="rounded-md bg-background px-3 py-2 text-xs text-neutral-600">
-        <strong className="text-neutral-700">Debit or credit?</strong> Debit <em>increases</em> assets and expenses (bank, cash,
-        receivables, cost accounts) and <em>decreases</em> income, liabilities and equity. Credit does the opposite: it{" "}
-        <em>increases</em> income, liabilities and equity, and <em>decreases</em> assets and expenses. Pick an account below and
-        this will tell you which side normally increases it.
-      </div>
+      <DebitCreditHelp accountNo={accountNo} />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
         <Field label="Date">
@@ -58,13 +53,6 @@ export default function JournalEntryForm({
         </Field>
         <Field label="Account" className="md:col-span-2">
           <AccountSelect accounts={accounts} name="account_no" required value={accountNo} onChange={setAccountNo} placeholder="Type to find an account" />
-          {selected && (
-            <span className="text-xs text-neutral-500">
-              {selected.normal_balance === "debit"
-                ? "This account increases with a Debit, decreases with a Credit."
-                : "This account increases with a Credit, decreases with a Debit."}
-            </span>
-          )}
         </Field>
         <Field label="Description">
           <input name="description" defaultValue={initial?.description ?? ""} className="input" />

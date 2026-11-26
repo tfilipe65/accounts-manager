@@ -7,6 +7,7 @@
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { groupOf } from "@/lib/account-groups";
 
 type Opt = { account_no: number; name: string };
 
@@ -25,22 +26,7 @@ type Props = {
   className?: string;
 };
 
-// The first digit of an account number is its group (1 Income ... 9 Financing and tax). Each group has a colour, so a
-// glance at the list tells an income account from a cost, an asset or a liability.
-const GROUPS: Record<number, { label: string; rgb: string }> = {
-  1: { label: "Income", rgb: "37, 99, 235" }, // blue
-  2: { label: "Cost of sales", rgb: "234, 88, 12" }, // orange
-  3: { label: "Expenses", rgb: "249, 115, 22" }, // orange
-  4: { label: "Current assets", rgb: "22, 163, 74" }, // green
-  5: { label: "Fixed assets", rgb: "13, 148, 136" }, // teal
-  6: { label: "Liabilities", rgb: "202, 138, 4" }, // amber
-  7: { label: "Loans", rgb: "161, 98, 7" }, // dark amber
-  8: { label: "Equity", rgb: "147, 51, 234" }, // purple
-  9: { label: "Financing & tax", rgb: "219, 39, 119" }, // pink
-};
-const groupOf = (no: number) => GROUPS[Math.floor(no / 1000)];
-
-const fold =(s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const labelOf = (a: Opt) => `${a.account_no} ${a.name}`;
 
 export default function AccountSelect({
@@ -62,6 +48,7 @@ export default function AccountSelect({
   const current: number | "" = controlled ? (Number(value) ? Number(value) : "") : inner;
   const selected = accounts.find((a) => a.account_no === current);
   // An account that is not in the list any more (an old invoice) still shows its number.
+  const selectedGroup = selected ? groupOf(selected.account_no) : undefined;
   const selectedText = selected ? labelOf(selected) : current ? String(current) : "";
 
   const [open, setOpen] = useState(false);
@@ -160,7 +147,7 @@ export default function AccountSelect({
         autoComplete="off"
         spellCheck={false}
         className={className}
-        style={selected && groupOf(selected.account_no) ? { borderLeft: `4px solid rgb(${groupOf(selected.account_no).rgb})` } : undefined}
+        style={selectedGroup ? { borderLeft: `4px solid rgb(${selectedGroup.rgb})` } : undefined}
         placeholder={blankLabel && !current ? blankLabel : placeholder}
         value={shown}
         title={selectedText}
@@ -223,11 +210,14 @@ export default function AccountSelect({
                 })()}
               >
                 <span>{a ? labelOf(a) : blankLabel}</span>
-                {a && groupOf(a.account_no) && (
-                  <span className="shrink-0 text-[0.65rem] font-semibold uppercase tracking-wide" style={{ color: `rgb(${groupOf(a.account_no).rgb})` }}>
-                    {groupOf(a.account_no).label}
-                  </span>
-                )}
+                {a && (() => {
+                  const g = groupOf(a.account_no);
+                  return g ? (
+                    <span className="shrink-0 text-[0.65rem] font-semibold uppercase tracking-wide" style={{ color: `rgb(${g.rgb})` }}>
+                      {g.label}
+                    </span>
+                  ) : null;
+                })()}
               </li>
             ))}
           </ul>,

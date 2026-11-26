@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import type { AccountOption } from "@/lib/actions/reference-actions";
 import type { OpeningBalanceInput } from "@/lib/actions/opening-balance-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import AccountSelect from "@/components/AccountSelect";
+import DebitCreditHelp from "@/components/DebitCreditHelp";
 
 type FormState = { error?: string; success?: boolean } | undefined;
 
@@ -23,9 +24,13 @@ export default function OpeningBalanceForm({
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const formRef = useRef<HTMLFormElement>(null);
+  const [accountNo, setAccountNo] = useState<number | "">(initial?.account_no ?? "");
 
   useEffect(() => {
-    if (state?.success && !initial) formRef.current?.reset();
+    if (state?.success && !initial) {
+      formRef.current?.reset();
+      setAccountNo("");
+    }
   }, [state, initial]);
 
   return (
@@ -37,12 +42,14 @@ export default function OpeningBalanceForm({
       }}
       className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-4"
     >
+      <DebitCreditHelp accountNo={accountNo} />
+
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <Field label="Date">
           <input type="date" name="date" defaultValue={initial?.date} required className="input" />
         </Field>
         <Field label="Account">
-          <AccountSelect accounts={accounts} name="account_no" required defaultValue={initial?.account_no ?? ""} placeholder="Type to find an account" />
+          <AccountSelect accounts={accounts} name="account_no" required value={accountNo} onChange={setAccountNo} placeholder="Type to find an account" />
         </Field>
         <Field label="Description">
           <input name="description" defaultValue={initial?.description ?? ""} className="input" />
