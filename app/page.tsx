@@ -285,7 +285,7 @@ export default async function DashboardPage() {
               data={d.payablesByBucket.map((b) => ({ count: b.count }))}
             />
           </Card>
-          <Card title="Operating Expenses" note="Amount for the year">
+          <Card title="Operating costs" note="What they are made of, for the year">
             <HBarChart items={d.operatingCostLines.map((l) => ({ label: l.label, value: l.value, share: l.share }))} color={COSTS_COLOR} />
           </Card>
         </div>
@@ -296,13 +296,13 @@ export default async function DashboardPage() {
           <Card title="Cashflow" note="Money in less money out, each month">
             <BarChart categories={categories} series={[{ key: "cash", label: "Net cash flow", color: SALES_COLOR }]} data={monthly.map((m) => ({ cash: m.cashIn - m.cashOut }))} money signed />
           </Card>
-          <Card title="Operating costs as a share of sales" note="Overheads %">
+          <Card title="Operating costs, share of sales" note="Overheads %">
             <div className="flex items-center gap-4">
               <DonutChart value={overheadShare} color={COSTS_COLOR} />
               <div className="flex flex-col gap-1 text-sm">
                 <span className="text-2xl font-semibold text-primary">{fmt(s.operatingCosts)}</span>
                 <span className="text-neutral-600">{pct(overheadShare)} of sales</span>
-                <span className="text-xs text-neutral-500">Operating costs = overheads: everything except cost of sales, other expenses &amp; losses, and tax.</span>
+                <span className="text-xs text-neutral-500">The total of the Operating costs list above, shown against sales. It leaves out cost of sales, other expenses &amp; losses, and tax.</span>
               </div>
             </div>
           </Card>
