@@ -151,13 +151,6 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
         defaultDate={formDate}
       />
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-line bg-surface px-4 py-3">
-        <span className="text-sm text-neutral-600">
-          One line on the statement that belongs in several places, such as a loan instalment (principal, interest, fees) or a payment to the State?
-        </span>
-        <SplitDialog {...splitProps} label="Split transaction" className="whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark" />
-      </div>
-
       <BankingEntryForm
         bankAccountId={active.id}
         accounts={accounts}
@@ -165,6 +158,7 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
         purchaseInvoices={purchaseInvoices}
         employees={employees}
         closedThroughYear={closedThroughYear}
+        splitSlot={<SplitDialog {...splitProps} inline label="Split transaction" className="whitespace-nowrap rounded-md border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-background" />}
       />
 
       <div className="overflow-x-auto rounded-lg border border-line bg-surface">

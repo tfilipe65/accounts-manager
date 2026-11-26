@@ -22,6 +22,7 @@ export default function BankingEntryForm({
   initial,
   submitLabel = "Add entry",
   closedThroughYear,
+  splitSlot,
 }: {
   bankAccountId: number;
   accounts: AccountOption[];
@@ -32,6 +33,8 @@ export default function BankingEntryForm({
   initial?: BankTransactionInput;
   submitLabel?: string;
   closedThroughYear: number | null;
+  /** The Split transaction button, shown beside Add entry (one statement line that belongs in several places). */
+  splitSlot?: React.ReactNode;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const [linkType, setLinkType] = useState<LinkType>(initial?.link_type ?? "account");
@@ -51,6 +54,7 @@ export default function BankingEntryForm({
   }, [state, initial]);
 
   return (
+    <>
     <form
       ref={formRef}
       action={(fd) => {
@@ -161,7 +165,7 @@ export default function BankingEntryForm({
 
       {state?.error && <p className="text-sm text-red-700">{state.error}</p>}
 
-      <div>
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="submit"
           disabled={pending}
@@ -169,8 +173,17 @@ export default function BankingEntryForm({
         >
           {pending ? "Saving…" : submitLabel}
         </button>
+        {splitSlot && (
+          <>
+            <span className="text-sm text-neutral-400">or</span>
+            {splitSlot}
+            <span className="text-xs text-neutral-500">One line on the statement that belongs in several places, such as a loan instalment or a payment to the State.</span>
+          </>
+        )}
       </div>
     </form>
+    {splitSlot && <div id="split-panel-host" className="empty:hidden" />}
+    </>
   );
 }
 

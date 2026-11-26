@@ -3,7 +3,8 @@
 // A floating window to enter (or edit) a split transaction: one line on the bank statement divided between
 // several accounts and/or invoices. Shows how much is still to be placed and will not save until it is nil.
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import Modal from "@/components/Modal";
 import AccountSelect from "@/components/AccountSelect";
 import { createSplit, updateSplit, type SplitInput, type SplitLine } from "@/lib/actions/split-actions";
@@ -61,6 +62,7 @@ export default function SplitDialog({
   initial,
   label,
   className,
+  inline = false,
 }: {
   bankAccountId: number;
   accounts: AccountOption[];
@@ -74,14 +76,28 @@ export default function SplitDialog({
   initial?: { splitId: string; input: SplitInput };
   label: string;
   className?: string;
+  /** Open the split in the page itself (under the entry form, in #split-panel-host) instead of a floating window. */
+  inline?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setHost(open && inline ? document.getElementById("split-panel-host") : null);
+  }, [open, inline]);
+  const formProps = { bankAccountId, accounts, salesInvoices, purchaseInvoices, employees, vatRates, presets, closedThroughYear, defaultDate, initial };
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className}>
-        {label}
+      <button type="button" onClick={() => setOpen((o) => (inline ? !o : true))} className={className}>
+        {inline && open ? "Close split" : label}
       </button>
-      {open && (
+      {inline && open && host && createPortal(
+        <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
+          <h2 className="text-lg font-semibold text-primary">Split transaction</h2>
+          <SplitForm {...formProps} onDone={() => setOpen(false)} />
+        </div>,
+        host
+      )}
+      {!inline && open && (
         <Modal title={initial ? "Edit split transaction" : "Split transaction"} onClose={() => setOpen(false)} wide>
           <SplitForm
             bankAccountId={bankAccountId}
