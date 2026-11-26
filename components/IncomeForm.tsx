@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import type { AccountOption, NamedOption, ProjectOption, ProductOption } from "@/lib/actions/reference-actions";
 import type { SalesInvoiceDetail, SalesInvoiceLineInput } from "@/lib/actions/income-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
+import VatSelect from "@/components/VatSelect";
 
 const DOC_TYPES = ["Invoice", "Credit Note", "Proforma", "Commission", "Tax Refund", "Interest", "Other"];
 
@@ -116,7 +117,7 @@ export default function IncomeForm({
             <col />
             <col style={{ width: "4.5rem" }} />
             <col style={{ width: "6.5rem" }} />
-            <col style={{ width: "4.5rem" }} />
+            <col style={{ width: "5rem" }} />
             <col style={{ width: "4.5rem" }} />
             <col style={{ width: "16rem" }} />
             <col style={{ width: "6rem" }} />
@@ -174,21 +175,18 @@ export default function IncomeForm({
                   />
                 </td>
                 <td className="p-1 w-20">
-                  <input
-                    type="number"
-                    step="any"
-                    className="input"
-                    value={l.vat_perc}
-                    onChange={(e) => updateLine(i, { vat_perc: Number(e.target.value) })}
-                  />
+                  <VatSelect value={l.vat_perc} onChange={(v) => updateLine(i, { vat_perc: v })} />
                 </td>
                 <td className="p-1 w-20">
                   <input
                     type="number"
                     step="any"
                     className="input"
-                    value={l.discount_perc}
-                    onChange={(e) => updateLine(i, { discount_perc: Number(e.target.value) })}
+                    min={0}
+                    max={100}
+                    placeholder="%"
+                    value={l.discount_perc ? Math.round(l.discount_perc * 10000) / 100 : ""}
+                    onChange={(e) => updateLine(i, { discount_perc: Math.min(100, Math.max(0, Number(e.target.value) || 0)) / 100 })}
                   />
                 </td>
                 <td className="p-1">

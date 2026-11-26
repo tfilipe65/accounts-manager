@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import type { AccountOption } from "@/lib/actions/reference-actions";
 import type { JournalEntryInput } from "@/lib/actions/journal-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
+import VatSelect from "@/components/VatSelect";
 
 type FormState = { error?: string; success?: boolean } | undefined;
 
@@ -83,7 +84,7 @@ export default function JournalEntryForm({
           <input name="description" defaultValue={initial?.description ?? ""} className="input" />
         </Field>
         <Field label="VAT %">
-          <input type="number" step="any" name="vat_perc" defaultValue={initial?.vat_perc ?? ""} className="input" />
+          <VatSelect name="vat_perc" defaultValue={initial?.vat_perc ?? null} allowBlank />
         </Field>
         <Field label="Debit">
           <input type="number" step="any" name="debit" defaultValue={initial?.debit ?? 0} className="input" />

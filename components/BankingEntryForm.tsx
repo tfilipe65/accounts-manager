@@ -5,6 +5,7 @@ import { createBankTransactionFormAction } from "@/lib/actions/banking-form-acti
 import type { AccountOption } from "@/lib/actions/reference-actions";
 import type { BankTransactionInput } from "@/lib/actions/banking-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
+import VatSelect from "@/components/VatSelect";
 
 type InvoiceOption = { id: number; label: string };
 type LinkType = "sales" | "purchase" | "account" | "none";
@@ -75,7 +76,7 @@ export default function BankingEntryForm({
           <input type="number" step="any" name="out_vat" defaultValue={initial?.out_vat ?? 0} className="input" />
         </Field>
         <Field label="VAT %">
-          <input type="number" step="any" name="vat_perc" defaultValue={initial?.vat_perc ?? 0} className="input" />
+          <VatSelect name="vat_perc" defaultValue={initial?.vat_perc ?? 0} />
         </Field>
       </div>
 

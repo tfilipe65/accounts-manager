@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import type { Product } from "@/lib/actions/product-actions";
+import VatSelect from "@/components/VatSelect";
 
 type FormState = { error?: string } | undefined;
 
@@ -21,7 +22,7 @@ export default function ProductForm({ action, initial }: { action: (prev: FormSt
           <input type="number" step="any" name="price_ex_vat" defaultValue={initial?.price_ex_vat ?? ""} className="input" />
         </Field>
         <Field label="VAT %">
-          <input type="number" step="any" name="vat_perc" defaultValue={initial?.vat_perc ?? ""} className="input" />
+          <VatSelect name="vat_perc" defaultValue={initial?.vat_perc ?? null} allowBlank />
         </Field>
         <Field label="Free Code 1">
           <input name="free_code_1" defaultValue={initial?.free_code_1 ?? ""} className="input" />

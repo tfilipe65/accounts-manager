@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import type { AccountOption, NamedOption, ProjectOption } from "@/lib/actions/reference-actions";
 import type { PurchaseInvoiceDetail, PurchaseInvoiceLineInput } from "@/lib/actions/expense-actions";
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
+import VatSelect from "@/components/VatSelect";
 
 const BLANK_LINE: PurchaseInvoiceLineInput = {
   description: "",
@@ -86,7 +87,7 @@ export default function ExpenseForm({
             <col />
             <col style={{ width: "20rem" }} />
             <col style={{ width: "6rem" }} />
-            <col style={{ width: "4.5rem" }} />
+            <col style={{ width: "5rem" }} />
             <col style={{ width: "7rem" }} />
             <col style={{ width: "10rem" }} />
             <col style={{ width: "5rem" }} />
@@ -139,13 +140,7 @@ export default function ExpenseForm({
                   </select>
                 </td>
                 <td className="p-1 w-20">
-                  <input
-                    type="number"
-                    step="any"
-                    className="input"
-                    value={l.vat_perc}
-                    onChange={(e) => updateLine(i, { vat_perc: Number(e.target.value) })}
-                  />
+                  <VatSelect value={l.vat_perc} onChange={(v) => updateLine(i, { vat_perc: v })} />
                 </td>
                 <td className="p-1 w-32">
                   <input
