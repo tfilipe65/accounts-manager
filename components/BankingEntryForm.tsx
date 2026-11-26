@@ -36,6 +36,10 @@ export default function BankingEntryForm({
   const [state, formAction, pending] = useActionState(action, undefined);
   const [linkType, setLinkType] = useState<LinkType>(initial?.link_type ?? "account");
   const formRef = useRef<HTMLFormElement>(null);
+  // VAT is only entered here for an entry with no invoice behind it (a bank fee, a till receipt). A payment of an
+  // invoice carries its VAT on the invoice. An older entry that already holds VAT keeps showing it.
+  const hadVat = !!initial && (initial.in_vat !== 0 || initial.out_vat !== 0);
+  const showVat = linkType === "account" || hadVat;
 
   useEffect(() => {
     // Only auto-reset the blank "add" form on success -- an edit form has
@@ -51,13 +55,22 @@ export default function BankingEntryForm({
       ref={formRef}
       action={(fd) => {
         if (!confirmClosedYearWrite(String(fd.get("payment_date") || ""), closedThroughYear)) return;
+        if (!showVat) {
+          fd.set("in_vat", "0");
+          fd.set("out_vat", "0");
+          fd.delete("vat_perc");
+        }
         formAction(fd);
       }}
       className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-4"
     >
       <input type="hidden" name="bank_account_id" value={bankAccountId} />
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div
+        className={`grid grid-cols-2 gap-4 md:grid-cols-4 ${
+          showVat ? "xl:grid-cols-[9rem_minmax(10rem,1fr)_7rem_6rem_7rem_6rem_6rem]" : "xl:grid-cols-[9rem_minmax(10rem,1fr)_8rem_8rem]"
+        }`}
+      >
         <Field label="Date">
           <input type="date" name="payment_date" defaultValue={initial?.payment_date} required className="input" />
         </Field>
@@ -67,16 +80,16 @@ export default function BankingEntryForm({
         <Field label="In (+)">
           <input type="number" step="any" name="in_amount" defaultValue={initial?.in_amount ?? 0} className="input" />
         </Field>
-        <Field label="In VAT">
+        <Field label="In VAT" hidden={!showVat}>
           <input type="number" step="any" name="in_vat" defaultValue={initial?.in_vat ?? 0} className="input" />
         </Field>
         <Field label="Out (-)">
           <input type="number" step="any" name="out_amount" defaultValue={initial?.out_amount ?? 0} className="input" />
         </Field>
-        <Field label="Out VAT">
+        <Field label="Out VAT" hidden={!showVat}>
           <input type="number" step="any" name="out_vat" defaultValue={initial?.out_vat ?? 0} className="input" />
         </Field>
-        <Field label="VAT %">
+        <Field label="VAT %" hidden={!showVat}>
           <VatSelect name="vat_perc" defaultValue={initial?.vat_perc ?? 0} />
         </Field>
       </div>
@@ -106,7 +119,7 @@ export default function BankingEntryForm({
         </div>
 
         {linkType === "account" && (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[22rem_18rem]">
             <AccountSelect accounts={accounts} name="account_no" defaultValue={initial?.account_no ?? ""} required placeholder="Type to find an account" />
             {employees.length > 0 && (
               <select name="employee_id" className="input" defaultValue={initial?.employee_id ?? ""}>
@@ -121,7 +134,7 @@ export default function BankingEntryForm({
           </div>
         )}
         {linkType === "sales" && (
-          <select name="sales_invoice_id" className="input" defaultValue={initial?.sales_invoice_id ?? ""}>
+          <select name="sales_invoice_id" className="input max-w-2xl" defaultValue={initial?.sales_invoice_id ?? ""}>
             <option value="" disabled>
               Select sales invoice
             </option>
@@ -133,7 +146,7 @@ export default function BankingEntryForm({
           </select>
         )}
         {linkType === "purchase" && (
-          <select name="purchase_invoice_id" className="input" defaultValue={initial?.purchase_invoice_id ?? ""}>
+          <select name="purchase_invoice_id" className="input max-w-2xl" defaultValue={initial?.purchase_invoice_id ?? ""}>
             <option value="" disabled>
               Select purchase invoice
             </option>
@@ -161,9 +174,9 @@ export default function BankingEntryForm({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, hidden }: { label: string; children: React.ReactNode; hidden?: boolean }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={`flex flex-col gap-1 ${hidden ? "hidden" : ""}`}>
       <label className="text-xs font-semibold uppercase tracking-wide text-neutral-600">{label}</label>
       {children}
     </div>
