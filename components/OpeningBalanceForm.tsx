@@ -44,7 +44,7 @@ export default function OpeningBalanceForm({
     >
       <DebitCreditHelp accountNo={accountNo} />
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-[9rem_20rem_minmax(10rem,1fr)_7rem_7rem]">
         <Field label="Date">
           <input type="date" name="date" defaultValue={initial?.date} required className="input" />
         </Field>
