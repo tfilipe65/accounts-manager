@@ -15,6 +15,7 @@ import { query, queryOne, withTransaction } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
 import { requireAccountByRole } from "@/lib/roles";
+import { withOverdraftGuard } from "@/lib/overdraft";
 
 export type BankAccountSummary = {
   id: number;
@@ -216,7 +217,7 @@ export async function createBankTransaction(input: BankTransactionInput): Promis
   const session = await requireSession();
   await assertYearOpen(input.payment_date, session);
   const link = linkFields(input);
-  await query(
+  await withOverdraftGuard([input.bank_account_id], (tx) => tx.query(
     `INSERT INTO bank_transactions
       (bank_account_id, payment_date, description, sales_invoice_id, purchase_invoice_id, account_no, employee_id, vat_perc, in_amount, in_vat, out_amount, out_vat)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
@@ -234,7 +235,7 @@ export async function createBankTransaction(input: BankTransactionInput): Promis
       input.out_amount,
       input.out_vat,
     ]
-  );
+  ));
   revalidateBanking();
 }
 
@@ -289,8 +290,8 @@ export async function getBankTransaction(id: number): Promise<(BankTransactionIn
 
 export async function updateBankTransaction(id: number, input: BankTransactionInput): Promise<void> {
   const session = await requireSession();
-  const existing = await queryOne<{ payment_date: string; transfer_id: string | null; split_id: string | null }>(
-    "SELECT payment_date, transfer_id, split_id FROM bank_transactions WHERE id = $1",
+  const existing = await queryOne<{ bank_account_id: number; payment_date: string; transfer_id: string | null; split_id: string | null }>(
+    "SELECT bank_account_id, payment_date, transfer_id, split_id FROM bank_transactions WHERE id = $1",
     [id]
   );
   if (existing?.transfer_id) throw new Error("A transfer has two sides. Delete it and enter it again to change it.");
@@ -298,7 +299,7 @@ export async function updateBankTransaction(id: number, input: BankTransactionIn
   if (existing) await assertYearOpen(existing.payment_date, session);
   await assertYearOpen(input.payment_date, session);
   const link = linkFields(input);
-  await query(
+  await withOverdraftGuard([existing?.bank_account_id, input.bank_account_id], (tx) => tx.query(
     `UPDATE bank_transactions SET
        bank_account_id=$2, payment_date=$3, description=$4, sales_invoice_id=$5, purchase_invoice_id=$6,
        account_no=$7, employee_id=$8, vat_perc=$9, in_amount=$10, in_vat=$11, out_amount=$12, out_vat=$13
@@ -318,7 +319,7 @@ export async function updateBankTransaction(id: number, input: BankTransactionIn
       input.out_amount,
       input.out_vat,
     ]
-  );
+  ));
   revalidateBanking();
 }
 
@@ -330,9 +331,18 @@ export async function deleteBankTransaction(id: number): Promise<void> {
   );
   if (existing) await assertYearOpen(existing.payment_date, session);
   // Both sides of a transfer, and all the parts of a split, go together.
-  if (existing?.transfer_id) await query("DELETE FROM bank_transactions WHERE transfer_id = $1", [existing.transfer_id]);
-  else if (existing?.split_id) await query("DELETE FROM bank_transactions WHERE split_id = $1", [existing.split_id]);
-  else await query("DELETE FROM bank_transactions WHERE id = $1", [id]);
+  const accounts = (
+    await query<{ bank_account_id: number }>(
+      `SELECT DISTINCT bank_account_id FROM bank_transactions
+        WHERE id = $1 OR transfer_id = (SELECT transfer_id FROM bank_transactions WHERE id = $1) OR split_id = (SELECT split_id FROM bank_transactions WHERE id = $1)`,
+      [id]
+    )
+  ).map((r) => r.bank_account_id);
+  await withOverdraftGuard(accounts, async (tx) => {
+    if (existing?.transfer_id) await tx.query("DELETE FROM bank_transactions WHERE transfer_id = $1", [existing.transfer_id]);
+    else if (existing?.split_id) await tx.query("DELETE FROM bank_transactions WHERE split_id = $1", [existing.split_id]);
+    else await tx.query("DELETE FROM bank_transactions WHERE id = $1", [id]);
+  });
   revalidateBanking();
 }
 
@@ -384,7 +394,7 @@ export async function createTransfer(input: TransferInput): Promise<void> {
   const nameOf = (id: number) => names.find((n) => n.id === id)?.name ?? "account";
   const transferId = crypto.randomUUID();
   const note = input.description ? ` - ${input.description}` : "";
-  await withTransaction(async (tx) => {
+  await withOverdraftGuard([input.from_bank_account_id, input.to_bank_account_id], async (tx) => {
     await tx.query(
       `INSERT INTO bank_transactions (bank_account_id, payment_date, description, account_no, out_amount, transfer_id)
        VALUES ($1,$2,$3,$4,$5,$6)`,

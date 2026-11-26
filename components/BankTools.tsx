@@ -104,6 +104,8 @@ export function TransferForm({
 export function ReconcileToggle({ id, checked }: { id: number; checked: boolean }) {
   const [value, setValue] = useState(checked);
   const [pending, startTransition] = useTransition();
+  // The page can be refreshed from the server ("Tick every line up to ..."): follow what it now says.
+  useEffect(() => setValue(checked), [checked]);
   return (
     <input
       type="checkbox"
@@ -173,7 +175,7 @@ export function ReconcilePanel({
             Tick them
           </button>
           {state?.error && <span className="text-sm text-red-700">{state.error}</span>}
-          {state?.success && <span className="text-sm text-green-700">{state.count} lines ticked. Refresh the page to see them.</span>}
+          {state?.success && <span className="text-sm text-green-700">{state.count} {state.count === 1 ? "line" : "lines"} ticked.</span>}
         </form>
         <p className="text-xs text-neutral-500">
           Tick the lines that appear on your statement, then type the statement&apos;s closing balance. When the difference is zero, the account agrees with the bank.

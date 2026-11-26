@@ -15,6 +15,7 @@ import { query, withTransaction } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
 import { SPLIT_SEPARATOR } from "@/lib/banking-group";
+import { withOverdraftGuard } from "@/lib/overdraft";
 
 export type SplitLine = {
   kind: "account" | "sales" | "purchase";
@@ -108,7 +109,7 @@ export async function createSplit(input: SplitInput): Promise<{ error?: string }
   if (problem) return { error: problem };
   try {
     await assertYearOpen(input.payment_date, session);
-    await withTransaction(async (tx) => insertParts(tx as unknown as Tx, crypto.randomUUID(), input, false));
+    await withOverdraftGuard([input.bank_account_id], async (tx) => insertParts(tx as unknown as Tx, crypto.randomUUID(), input, false));
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Could not save the split." };
   }
@@ -121,11 +122,11 @@ export async function updateSplit(splitId: string, input: SplitInput): Promise<{
   const problem = validate(input);
   if (problem) return { error: problem };
   try {
-    const old = (await query<{ payment_date: string; reconciled: boolean }>("SELECT payment_date, reconciled FROM bank_transactions WHERE split_id = $1 LIMIT 1", [splitId]))[0];
+    const old = (await query<{ bank_account_id: number; payment_date: string; reconciled: boolean }>("SELECT bank_account_id, payment_date, reconciled FROM bank_transactions WHERE split_id = $1 LIMIT 1", [splitId]))[0];
     if (!old) return { error: "That split no longer exists." };
     await assertYearOpen(old.payment_date, session);
     await assertYearOpen(input.payment_date, session);
-    await withTransaction(async (tx) => {
+    await withOverdraftGuard([old.bank_account_id, input.bank_account_id], async (tx) => {
       await tx.query("DELETE FROM bank_transactions WHERE split_id = $1", [splitId]);
       await insertParts(tx as unknown as Tx, splitId, input, old.reconciled);
     });

@@ -78,6 +78,12 @@ export default function SettingsForm({ initial, accounts }: { initial: AppSettin
             <option value="monthly">Monthly</option>
           </select>
         </Field>
+        <Field label="Overdraft allowed on the current account">
+          <input type="number" min={0} step="0.01" name="overdraft_limit" defaultValue={initial.overdraft_limit} className="input" />
+          <span className="text-xs text-neutral-500">
+            How far below zero the main current account (the first bank account) may go. 0 means none. Every other bank account and the petty cash can never go below zero.
+          </span>
+        </Field>
         <Field label="VAT Rate 1">
           <input type="number" step="any" name="vat_rate_1" defaultValue={initial.vat_rate_1} className="input" />
         </Field>

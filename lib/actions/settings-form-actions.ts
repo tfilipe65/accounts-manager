@@ -52,6 +52,7 @@ export async function updateSettingsFormAction(_prev: FormState, fd: FormData) {
     project_label: String(fd.get("project_label") || "").trim() || "Projects",
     account_no_interest_expense: fd.get("account_no_interest_expense") ? Number(fd.get("account_no_interest_expense")) : null,
     vat_return_period: fd.get("vat_return_period") === "monthly" ? "monthly" : "quarterly",
+    overdraft_limit: Math.max(0, Number(fd.get("overdraft_limit") || 0)),
   };
   if (!input.company_name) return { error: "Company name is required." };
   try {

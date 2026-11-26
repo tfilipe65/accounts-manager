@@ -17,6 +17,7 @@
 import { revalidatePath } from "next/cache";
 import { query, queryOne, withTransaction } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
+import { withOverdraftGuard } from "@/lib/overdraft";
 import { assertYearOpen } from "@/lib/year-close";
 import { requireAccountByRole } from "@/lib/roles";
 import { computePayroll } from "@/lib/payroll";
@@ -45,7 +46,7 @@ export async function postPayroll(input: PayrollInput): Promise<void> {
   }
   await assertYearOpen(input.date, session);
 
-  await withTransaction(async (tx) => {
+  await withOverdraftGuard([input.pay_from_bank_account_id], async (tx) => {
     const emp = (await tx.query<{ name: string; cost_type: "direct" | "office" }>("SELECT name, cost_type FROM employees WHERE id = $1", [input.employee_id])).rows[0];
     if (!emp) throw new Error("That employee no longer exists.");
     const direct = emp.cost_type === "direct";
