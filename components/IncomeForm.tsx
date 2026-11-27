@@ -31,6 +31,7 @@ export default function IncomeForm({
   action,
   initial,
   closedThroughYear,
+  creditTargets = [],
 }: {
   customers: NamedOption[];
   accounts: AccountOption[];
@@ -39,8 +40,12 @@ export default function IncomeForm({
   action: (prev: FormState, fd: FormData) => Promise<FormState>;
   initial?: SalesInvoiceDetail;
   closedThroughYear: number | null;
+  /** Invoices a credit note can be applied to (with what is still due). */
+  creditTargets?: { id: number; label: string; customer_id: number }[];
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
+  const [docType, setDocType] = useState(initial?.doc_type ?? "Invoice");
+  const [customerId, setCustomerId] = useState<number | "">(initial?.customer_id ?? "");
   const [lines, setLines] = useState<SalesInvoiceLineInput[]>(initial?.lines.length ? initial.lines : [{ ...BLANK_LINE }]);
 
   function updateLine(i: number, patch: Partial<SalesInvoiceLineInput>) {
@@ -83,7 +88,7 @@ export default function IncomeForm({
           <input type="date" name="date" defaultValue={initial?.date} required className="input" />
         </Field>
         <Field label="Type">
-          <select name="doc_type" defaultValue={initial?.doc_type ?? "Invoice"} className="input">
+          <select name="doc_type" value={docType} onChange={(e) => setDocType(e.target.value)} className="input">
             {DOC_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -92,7 +97,7 @@ export default function IncomeForm({
           </select>
         </Field>
         <Field label="Client">
-          <select name="customer_id" defaultValue={initial?.customer_id ?? ""} required className="input">
+          <select name="customer_id" value={customerId} onChange={(e) => setCustomerId(e.target.value ? Number(e.target.value) : "")} required className="input">
             <option value="" disabled>
               Select client
             </option>
@@ -103,6 +108,26 @@ export default function IncomeForm({
             ))}
           </select>
         </Field>
+        {docType === "Credit Note" && (
+          <div className="col-span-2 md:col-span-4">
+            <Field label="Credit for invoice">
+              <select name="credit_for_invoice_id" defaultValue={initial?.credit_for_invoice_id ?? ""} className="input max-w-xl">
+                <option value="">Not applied to an invoice</option>
+                {creditTargets
+                  .filter((t) => t.customer_id === customerId || t.id === initial?.credit_for_invoice_id)
+                  .map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+              </select>
+            </Field>
+            <p className="mt-1 text-xs text-neutral-500">
+              Pick the invoice this credit note corrects (select the client first). The credit note then counts as a payment on that invoice, so only what is
+              still due remains. Enter the credit note with a negative quantity.
+            </p>
+          </div>
+        )}
         <Field label="Reference">
           <input name="reference" defaultValue={initial?.reference ?? ""} className="input" />
         </Field>

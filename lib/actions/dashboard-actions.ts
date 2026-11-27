@@ -124,19 +124,19 @@ async function keyFigures(kind: "sales" | "purchases", year: number, cutoff: str
            FROM sales_invoices si
            LEFT JOIN (SELECT sales_invoice_id, SUM(quantity * price_ex_vat * (1 - discount_perc) * (1 + vat_perc)) AS gross
                       FROM sales_invoice_lines GROUP BY sales_invoice_id) lt ON lt.sales_invoice_id = si.id
-           LEFT JOIN (SELECT sales_invoice_id, SUM(in_amount + in_vat) AS paid FROM bank_transactions
-                      WHERE sales_invoice_id IS NOT NULL AND ($2::date IS NULL OR payment_date <= $2::date) GROUP BY sales_invoice_id) pt
+           LEFT JOIN (SELECT sales_invoice_id, SUM(amount) AS paid FROM sales_invoice_settlements
+                      WHERE ($2::date IS NULL OR settled_on <= $2::date) GROUP BY sales_invoice_id) pt
                   ON pt.sales_invoice_id = si.id
            WHERE EXTRACT(YEAR FROM si.date) = $1 AND si.doc_type <> 'Proforma'`,
           [year, cutoff]
         )
       : await query<{ gross: string; paid: string; doc_type: string }>(
-          `SELECT 'Invoice' AS doc_type, COALESCE(lt.gross, 0) AS gross, COALESCE(pt.paid, 0) AS paid
+          `SELECT pi.doc_type, COALESCE(lt.gross, 0) AS gross, COALESCE(pt.paid, 0) AS paid
            FROM purchase_invoices pi
            LEFT JOIN (SELECT purchase_invoice_id, SUM(amount_inc_vat) AS gross FROM purchase_invoice_lines GROUP BY purchase_invoice_id) lt
                   ON lt.purchase_invoice_id = pi.id
-           LEFT JOIN (SELECT purchase_invoice_id, SUM(out_amount + out_vat) AS paid FROM bank_transactions
-                      WHERE purchase_invoice_id IS NOT NULL AND ($2::date IS NULL OR payment_date <= $2::date) GROUP BY purchase_invoice_id) pt
+           LEFT JOIN (SELECT purchase_invoice_id, SUM(amount) AS paid FROM purchase_invoice_settlements
+                      WHERE ($2::date IS NULL OR settled_on <= $2::date) GROUP BY purchase_invoice_id) pt
                   ON pt.purchase_invoice_id = pi.id
            WHERE EXTRACT(YEAR FROM pi.date) = $1`,
           [year, cutoff]

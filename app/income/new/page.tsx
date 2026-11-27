@@ -1,15 +1,17 @@
 import IncomeForm from "@/components/IncomeForm";
 import { createIncomeFormAction } from "@/lib/actions/income-form-actions";
 import { listCustomerOptions, listIncomeAccountOptions, listProjectOptions, listProductOptions } from "@/lib/actions/reference-actions";
+import { listInvoicesForCredit } from "@/lib/actions/income-actions";
 import { getClosedThroughYear } from "@/lib/year-close";
 
 export default async function NewIncomePage() {
-  const [customers, accounts, projects, products, closedThroughYear] = await Promise.all([
+  const [customers, accounts, projects, products, closedThroughYear, creditTargets] = await Promise.all([
     listCustomerOptions(),
     listIncomeAccountOptions(),
     listProjectOptions(),
     listProductOptions(),
     getClosedThroughYear(),
+    listInvoicesForCredit(),
   ]);
 
   return (
@@ -23,6 +25,7 @@ export default async function NewIncomePage() {
           products={products}
           action={createIncomeFormAction}
           closedThroughYear={closedThroughYear}
+          creditTargets={creditTargets}
         />
       </div>
     </div>

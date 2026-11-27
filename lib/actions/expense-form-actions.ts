@@ -9,6 +9,8 @@ function toInput(fd: FormData): PurchaseInvoiceInput {
     invoice_number: String(fd.get("invoice_number") || "").trim(),
     date: String(fd.get("date") || ""),
     supplier_id: Number(fd.get("supplier_id")),
+    doc_type: String(fd.get("doc_type") || "Invoice"),
+    credit_for_invoice_id: Number(fd.get("credit_for_invoice_id")) || null,
     lines: JSON.parse(linesJson),
   };
 }

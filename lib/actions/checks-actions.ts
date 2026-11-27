@@ -103,7 +103,7 @@ export async function getChecks(year: number): Promise<ChecksResult> {
       `SELECT si.invoice_number || ' (' || c.name || ') paid ' || ROUND(pt.paid::numeric, 2) || ' of ' || ROUND(lt.gross::numeric, 2) AS label
        FROM sales_invoices si JOIN customers c ON c.id = si.customer_id
        JOIN (SELECT sales_invoice_id, SUM(quantity * price_ex_vat * (1 - discount_perc) * (1 + vat_perc)) AS gross FROM sales_invoice_lines GROUP BY 1) lt ON lt.sales_invoice_id = si.id
-       JOIN (SELECT sales_invoice_id, SUM(in_amount + in_vat) AS paid FROM bank_transactions WHERE sales_invoice_id IS NOT NULL GROUP BY 1) pt ON pt.sales_invoice_id = si.id
+       JOIN (SELECT sales_invoice_id, SUM(amount) AS paid FROM sales_invoice_settlements GROUP BY 1) pt ON pt.sales_invoice_id = si.id
        WHERE si.doc_type <> 'Credit Note' AND pt.paid > lt.gross + 0.005 ORDER BY si.date DESC`
     ),
     dataCheck(
@@ -115,7 +115,7 @@ export async function getChecks(year: number): Promise<ChecksResult> {
       `SELECT pi.invoice_number || ' (' || s.name || ') paid ' || ROUND(pt.paid::numeric, 2) || ' of ' || ROUND(lt.gross::numeric, 2) AS label
        FROM purchase_invoices pi JOIN suppliers s ON s.id = pi.supplier_id
        JOIN (SELECT purchase_invoice_id, SUM(amount_inc_vat) AS gross FROM purchase_invoice_lines GROUP BY 1) lt ON lt.purchase_invoice_id = pi.id
-       JOIN (SELECT purchase_invoice_id, SUM(out_amount + out_vat) AS paid FROM bank_transactions WHERE purchase_invoice_id IS NOT NULL GROUP BY 1) pt ON pt.purchase_invoice_id = pi.id
+       JOIN (SELECT purchase_invoice_id, SUM(amount) AS paid FROM purchase_invoice_settlements GROUP BY 1) pt ON pt.purchase_invoice_id = pi.id
        WHERE pt.paid > lt.gross + 0.005 AND lt.gross > 0 ORDER BY pi.date DESC`
     ),
     dataCheck(

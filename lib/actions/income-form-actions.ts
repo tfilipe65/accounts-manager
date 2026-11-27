@@ -12,6 +12,7 @@ function toInput(fd: FormData): SalesInvoiceInput {
     customer_id: Number(fd.get("customer_id")),
     reference: String(fd.get("reference") || "").trim() || null,
     sales_id: String(fd.get("sales_id") || "").trim() || null,
+    credit_for_invoice_id: Number(fd.get("credit_for_invoice_id")) || null,
     lines: JSON.parse(linesJson),
   };
 }

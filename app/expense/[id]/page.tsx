@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import ExpenseForm from "@/components/ExpenseForm";
 import { updateExpenseFormAction } from "@/lib/actions/expense-form-actions";
-import { getPurchaseInvoiceForEdit } from "@/lib/actions/expense-actions";
+import { getPurchaseInvoiceForEdit, listPurchaseInvoicesForCredit } from "@/lib/actions/expense-actions";
 import { listSupplierOptions, listExpenseAccountOptions, listProjectOptions } from "@/lib/actions/reference-actions";
 import { getClosedThroughYear } from "@/lib/year-close";
 
@@ -11,11 +11,12 @@ export default async function EditExpensePage({ params }: { params: Promise<{ id
   const invoice = await getPurchaseInvoiceForEdit(invoiceId);
   if (!invoice) notFound();
   // the accounts the invoice already uses stay in the list, even if they would not be offered on a new one
-  const [suppliers, accounts, projects, closedThroughYear] = await Promise.all([
+  const [suppliers, accounts, projects, closedThroughYear, creditTargets] = await Promise.all([
     listSupplierOptions(),
     listExpenseAccountOptions(invoice.lines.map((l) => l.account_no)),
     listProjectOptions(),
     getClosedThroughYear(),
+    listPurchaseInvoicesForCredit(invoice.credit_for_invoice_id),
   ]);
 
   return (
@@ -29,6 +30,7 @@ export default async function EditExpensePage({ params }: { params: Promise<{ id
           initial={invoice}
           action={updateExpenseFormAction.bind(null, invoiceId)}
           closedThroughYear={closedThroughYear}
+          creditTargets={creditTargets}
         />
       </div>
     </div>

@@ -88,8 +88,8 @@ export async function getReceivablesAgeing(asOfDate?: string): Promise<{ rows: A
       FROM sales_invoice_lines GROUP BY sales_invoice_id
     ) lt ON lt.sales_invoice_id = si.id
     LEFT JOIN (
-      SELECT sales_invoice_id, SUM(in_amount + in_vat) AS paid
-      FROM bank_transactions WHERE sales_invoice_id IS NOT NULL AND ($1::date IS NULL OR payment_date <= $1::date) GROUP BY sales_invoice_id
+      SELECT sales_invoice_id, SUM(amount) AS paid
+      FROM sales_invoice_settlements WHERE ($1::date IS NULL OR settled_on <= $1::date) GROUP BY sales_invoice_id
     ) pt ON pt.sales_invoice_id = si.id
     WHERE si.doc_type <> 'Proforma' AND ($1::date IS NULL OR si.date <= $1::date)
   `,
@@ -124,8 +124,8 @@ export async function getPayablesAgeing(asOfDate?: string): Promise<{ rows: Agei
       FROM purchase_invoice_lines GROUP BY purchase_invoice_id
     ) lt ON lt.purchase_invoice_id = pi.id
     LEFT JOIN (
-      SELECT purchase_invoice_id, SUM(out_amount + out_vat) AS paid
-      FROM bank_transactions WHERE purchase_invoice_id IS NOT NULL AND ($1::date IS NULL OR payment_date <= $1::date) GROUP BY purchase_invoice_id
+      SELECT purchase_invoice_id, SUM(amount) AS paid
+      FROM purchase_invoice_settlements WHERE ($1::date IS NULL OR settled_on <= $1::date) GROUP BY purchase_invoice_id
     ) pt ON pt.purchase_invoice_id = pi.id
     WHERE $1::date IS NULL OR pi.date <= $1::date
   `,

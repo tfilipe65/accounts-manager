@@ -18,8 +18,8 @@ export default async function EditBankTransactionPage({ params }: { params: Prom
     getBankTransaction(txId),
     listBankAccounts(undefined, true),
     listAccountOptions(),
-    listOpenSalesInvoiceOptions(),
-    listOpenPurchaseInvoiceOptions(),
+    getBankTransaction(txId).then((t) => listOpenSalesInvoiceOptions(t?.sales_invoice_id)),
+    getBankTransaction(txId).then((t) => listOpenPurchaseInvoiceOptions(t?.purchase_invoice_id)),
     getClosedThroughYear(),
     listEmployeeOptions(),
   ]);

@@ -16,6 +16,7 @@ import { requireSession } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
 import { requireAccountByRole } from "@/lib/roles";
 import { withOverdraftGuard } from "@/lib/overdraft";
+import { owedLabel } from "@/lib/invoice-labels";
 
 export type BankAccountSummary = {
   id: number;
@@ -409,20 +410,52 @@ export async function createTransfer(input: TransferInput): Promise<void> {
   revalidateBanking();
 }
 
-export async function listOpenSalesInvoiceOptions(): Promise<{ id: number; label: string }[]> {
+/**
+ * Sales invoices that can still receive a payment (not proforma, not fully paid), plus credit notes still waiting to be
+ * refunded to the client (enter the refund as money out). The label shows what is still owed. `keepId` is the invoice an entry being edited is already linked to
+ * -- it stays in the list even when that payment has settled it.
+ */
+export async function listOpenSalesInvoiceOptions(keepId?: number | null): Promise<{ id: number; label: string }[]> {
   await requireSession();
-  const rows = await query<{ id: number; invoice_number: string; customer_name: string }>(
-    `SELECT si.id, si.invoice_number, c.name AS customer_name FROM sales_invoices si JOIN customers c ON c.id = si.customer_id WHERE si.doc_type <> 'Proforma' ORDER BY si.date DESC`
+  const rows = await query<{ id: number; invoice_number: string; customer_name: string; gross: string; paid: string }>(
+    `SELECT si.id, si.invoice_number, c.name AS customer_name, COALESCE(lt.gross, 0) AS gross, COALESCE(pt.paid, 0) AS paid
+     FROM sales_invoices si
+     JOIN customers c ON c.id = si.customer_id
+     LEFT JOIN (
+       SELECT sales_invoice_id, SUM(quantity * price_ex_vat * (1 - discount_perc) * (1 + vat_perc)) AS gross
+       FROM sales_invoice_lines GROUP BY sales_invoice_id
+     ) lt ON lt.sales_invoice_id = si.id
+     LEFT JOIN (
+       SELECT sales_invoice_id, SUM(amount) AS paid FROM sales_invoice_settlements GROUP BY sales_invoice_id
+     ) pt ON pt.sales_invoice_id = si.id
+     WHERE si.doc_type <> 'Proforma'
+       AND (si.id = $1 OR (si.doc_type <> 'Credit Note' AND COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) >= 0.005)
+            OR (si.doc_type = 'Credit Note' AND COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) <= -0.005))
+     ORDER BY si.date DESC, si.invoice_number DESC`,
+    [keepId ?? null]
   );
-  return rows.map((r) => ({ id: r.id, label: `${r.invoice_number} — ${r.customer_name}` }));
+  return rows.map((r) => ({ id: r.id, label: owedLabel(`${r.invoice_number} — ${r.customer_name}`, Number(r.gross), Number(r.paid)) }));
 }
 
-export async function listOpenPurchaseInvoiceOptions(): Promise<{ id: number; label: string }[]> {
+/** Purchase invoices that can still be paid: not fully paid yet. The label shows what is still owed. */
+export async function listOpenPurchaseInvoiceOptions(keepId?: number | null): Promise<{ id: number; label: string }[]> {
   await requireSession();
-  const rows = await query<{ id: number; invoice_number: string; supplier_name: string }>(
-    `SELECT pi.id, pi.invoice_number, s.name AS supplier_name FROM purchase_invoices pi JOIN suppliers s ON s.id = pi.supplier_id ORDER BY pi.date DESC`
+  const rows = await query<{ id: number; invoice_number: string; supplier_name: string; gross: string; paid: string }>(
+    `SELECT pi.id, pi.invoice_number, s.name AS supplier_name, COALESCE(lt.gross, 0) AS gross, COALESCE(pt.paid, 0) AS paid
+     FROM purchase_invoices pi
+     JOIN suppliers s ON s.id = pi.supplier_id
+     LEFT JOIN (
+       SELECT purchase_invoice_id, SUM(amount_inc_vat) AS gross FROM purchase_invoice_lines GROUP BY purchase_invoice_id
+     ) lt ON lt.purchase_invoice_id = pi.id
+     LEFT JOIN (
+       SELECT purchase_invoice_id, SUM(amount) AS paid FROM purchase_invoice_settlements GROUP BY purchase_invoice_id
+     ) pt ON pt.purchase_invoice_id = pi.id
+     WHERE pi.id = $1 OR COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) >= 0.005
+        OR (pi.doc_type = 'Credit Note' AND COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) <= -0.005)
+     ORDER BY pi.date DESC, pi.invoice_number DESC`,
+    [keepId ?? null]
   );
-  return rows.map((r) => ({ id: r.id, label: `${r.invoice_number} — ${r.supplier_name}` }));
+  return rows.map((r) => ({ id: r.id, label: owedLabel(`${r.invoice_number} — ${r.supplier_name}`, Number(r.gross), Number(r.paid)) }));
 }
 
 export type ReconciliationFigures = { bookBalance: number; reconciledBalance: number; unreconciledCount: number };

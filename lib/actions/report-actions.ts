@@ -84,7 +84,7 @@ export async function getInvoiceReport(p: ReportParams): Promise<InvoiceReport> 
          LEFT JOIN projects pr ON pr.id = l.project_id
          LEFT JOIN (SELECT sales_invoice_id, SUM(quantity * price_ex_vat * (1 - discount_perc) * (1 + vat_perc)) AS gross
                     FROM sales_invoice_lines GROUP BY 1) ig ON ig.sales_invoice_id = si.id
-         LEFT JOIN (SELECT sales_invoice_id, SUM(in_amount + in_vat) AS paid FROM bank_transactions WHERE sales_invoice_id IS NOT NULL GROUP BY 1) ip
+         LEFT JOIN (SELECT sales_invoice_id, SUM(amount) AS paid FROM sales_invoice_settlements GROUP BY 1) ip
                 ON ip.sales_invoice_id = si.id
          WHERE si.date >= $1::date AND si.date <= $2::date AND si.doc_type <> 'Proforma'
            AND ($3::int IS NULL OR si.customer_id = $3) AND ($4::int IS NULL OR l.project_id = $4) AND ($5::int IS NULL OR l.account_no = $5)
@@ -104,7 +104,7 @@ export async function getInvoiceReport(p: ReportParams): Promise<InvoiceReport> 
          JOIN accounts a ON a.account_no = l.account_no
          LEFT JOIN projects pr ON pr.id = l.project_id
          LEFT JOIN (SELECT purchase_invoice_id, SUM(amount_inc_vat) AS gross FROM purchase_invoice_lines GROUP BY 1) ig ON ig.purchase_invoice_id = pi.id
-         LEFT JOIN (SELECT purchase_invoice_id, SUM(out_amount + out_vat) AS paid FROM bank_transactions WHERE purchase_invoice_id IS NOT NULL GROUP BY 1) ip
+         LEFT JOIN (SELECT purchase_invoice_id, SUM(amount) AS paid FROM purchase_invoice_settlements GROUP BY 1) ip
                 ON ip.purchase_invoice_id = pi.id
          WHERE pi.date >= $1::date AND pi.date <= $2::date
            AND ($3::int IS NULL OR pi.supplier_id = $3) AND ($4::int IS NULL OR l.project_id = $4) AND ($5::int IS NULL OR l.account_no = $5)

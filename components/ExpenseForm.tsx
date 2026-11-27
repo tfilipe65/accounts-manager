@@ -27,6 +27,7 @@ export default function ExpenseForm({
   action,
   initial,
   closedThroughYear,
+  creditTargets = [],
 }: {
   suppliers: NamedOption[];
   accounts: AccountOption[];
@@ -34,8 +35,12 @@ export default function ExpenseForm({
   action: (prev: FormState, fd: FormData) => Promise<FormState>;
   initial?: PurchaseInvoiceDetail;
   closedThroughYear: number | null;
+  /** Invoices a credit note can be applied to (with what is still due). */
+  creditTargets?: { id: number; label: string; supplier_id: number }[];
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
+  const [docType, setDocType] = useState(initial?.doc_type ?? "Invoice");
+  const [supplierId, setSupplierId] = useState<number | "">(initial?.supplier_id ?? "");
   const [lines, setLines] = useState<PurchaseInvoiceLineInput[]>(initial?.lines.length ? initial.lines : [{ ...BLANK_LINE }]);
 
   function updateLine(i: number, patch: Partial<PurchaseInvoiceLineInput>) {
@@ -61,15 +66,21 @@ export default function ExpenseForm({
     >
       <input type="hidden" name="lines_json" value={JSON.stringify(lines)} />
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Field label="Invoice #">
           <input name="invoice_number" defaultValue={initial?.invoice_number} required className="input" />
         </Field>
         <Field label="Date">
           <input type="date" name="date" defaultValue={initial?.date} required className="input" />
         </Field>
+        <Field label="Type">
+          <select name="doc_type" value={docType} onChange={(e) => setDocType(e.target.value)} className="input">
+            <option value="Invoice">Invoice</option>
+            <option value="Credit Note">Credit note (from the supplier)</option>
+          </select>
+        </Field>
         <Field label="Supplier">
-          <select name="supplier_id" defaultValue={initial?.supplier_id ?? ""} required className="input">
+          <select name="supplier_id" value={supplierId} onChange={(e) => setSupplierId(e.target.value ? Number(e.target.value) : "")} required className="input">
             <option value="" disabled>
               Select supplier
             </option>
@@ -80,6 +91,27 @@ export default function ExpenseForm({
             ))}
           </select>
         </Field>
+        {docType === "Credit Note" && (
+          <div className="col-span-2 md:col-span-4">
+            <Field label="Credit for invoice">
+              <select name="credit_for_invoice_id" defaultValue={initial?.credit_for_invoice_id ?? ""} className="input max-w-xl">
+                <option value="">Not applied to an invoice</option>
+                {creditTargets
+                  .filter((t) => t.supplier_id === supplierId || t.id === initial?.credit_for_invoice_id)
+                  .map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+              </select>
+            </Field>
+            <p className="mt-1 text-xs text-neutral-500">
+              Pick the invoice this credit note corrects (select the supplier first). It then counts as a payment on that invoice, so only what is still due
+              remains. Enter the credit note&apos;s amounts with a minus sign. If the supplier pays the money back instead, leave this empty and record the
+              money received on Banks &amp; Cash, linked to this credit note.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-line">
