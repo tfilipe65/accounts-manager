@@ -24,6 +24,14 @@ export default async function SubsectionsPage() {
     groups.get(r.group_no)!.items.push(r);
   }
 
+  // The list is read from the chart every time. The print size follows its length, so a longer list is packed a little
+  // tighter rather than spilling onto a second page (a page holds about 34 subsections comfortably).
+  const n = rows.length;
+  const pad = n > 46 ? "print:py-0.5" : n > 34 ? "print:py-1" : "print:py-1.5";
+  const small = n > 46 ? "print:text-[10px]" : n > 34 ? "print:text-xs" : "print:text-sm";
+  const heading = n > 46 ? "print:text-sm" : n > 34 ? "print:text-base" : "print:text-lg";
+  const gap = n > 34 ? "print:mb-3" : "print:mb-5";
+
   return (
     <div className="flex flex-col gap-5 print:gap-4">
       <style>{"@media print { @page { size: A4; margin: 12mm; } }"}</style>
@@ -42,18 +50,18 @@ export default async function SubsectionsPage() {
 
       <div className="columns-1 gap-x-10 md:columns-2 print:columns-2 print:gap-x-8">
         {[...groups.entries()].map(([no, g]) => (
-          <section key={no} className="mb-5 break-inside-avoid print:mb-5">
-            <h2 className="border-b border-line pb-1 text-base font-semibold text-primary print:pb-1.5 print:text-lg">
+          <section key={no} className={`mb-5 break-inside-avoid ${gap}`}>
+            <h2 className={`border-b border-line pb-1 text-base font-semibold text-primary print:pb-1.5 ${heading}`}>
               {no}. {g.name}
             </h2>
-            <table className="w-full text-sm print:text-sm">
+            <table className={`w-full text-sm ${small}`}>
               <tbody className="divide-y divide-line">
                 {g.items.map((r) => (
                   <tr key={r.subgroup_no}>
-                    <td className="w-12 py-1 font-mono print:py-1.5 text-xs text-neutral-600">{r.subgroup_no}</td>
-                    <td className="py-1 print:py-1.5">{r.subgroup_name}</td>
-                    <td className="whitespace-nowrap py-1 pl-2 text-right text-xs text-neutral-500 print:py-1.5 print:text-sm">{r.normal_balance === "debit" ? "Debit" : "Credit"}</td>
-                    <td className="w-16 whitespace-nowrap py-1 text-right text-xs text-neutral-500 print:py-1.5 print:text-sm">{Number(r.accounts)} acc.</td>
+                    <td className={`w-12 py-1 font-mono text-xs text-neutral-600 ${pad}`}>{r.subgroup_no}</td>
+                    <td className={`py-1 ${pad}`}>{r.subgroup_name}</td>
+                    <td className={`whitespace-nowrap py-1 pl-2 text-right text-xs text-neutral-500 ${pad} ${small}`}>{r.normal_balance === "debit" ? "Debit" : "Credit"}</td>
+                    <td className={`w-16 whitespace-nowrap py-1 text-right text-xs text-neutral-500 ${pad} ${small}`}>{Number(r.accounts)} acc.</td>
                   </tr>
                 ))}
               </tbody>
