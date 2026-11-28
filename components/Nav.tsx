@@ -3,6 +3,7 @@ import type { SessionUser } from "@/lib/auth";
 import type { Company } from "@/lib/companies";
 import { SECTIONS, MENU_GROUPS } from "@/lib/sections";
 import type { Labels } from "@/lib/labels";
+import { taxify } from "@/lib/tax-label";
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { getAvailableReportingYears } from "@/lib/actions/dashboard-actions";
 import { getEffectiveReportingYear } from "@/lib/reporting-year";
@@ -15,7 +16,7 @@ export default async function Nav({ user, company, allowed, labels }: { user: Se
   const visible = SECTIONS.filter((s) => (!allowed || allowed.includes(s.key)) && (!s.adminOnly || user.role === "ADMIN")).map((s) => ({
     href: s.href,
     group: s.group,
-    label: s.key === "customers" ? labels.client : s.key === "projects" ? labels.project : s.label,
+    label: s.key === "customers" ? labels.client : s.key === "projects" ? labels.project : taxify(s.label, labels.tax),
   }));
   if (user.role === "ADMIN") visible.unshift({ href: "/settings", group: "Admin", label: "Settings" });
   const groups = MENU_GROUPS.map((g) => ({ name: g, links: visible.filter((l) => l.group === g) })).filter((g) => g.links.length > 0);

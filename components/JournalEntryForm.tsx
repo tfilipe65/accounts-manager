@@ -11,6 +11,7 @@ import VatSelect from "@/components/VatSelect";
 import AccountSelect from "@/components/AccountSelect";
 import DebitCreditHelp from "@/components/DebitCreditHelp";
 import BalanceHeadsUp from "@/components/BalanceHeadsUp";
+import { useTx } from "@/components/TaxLabel";
 
 type FormState = { error?: string; success?: boolean } | undefined;
 
@@ -38,6 +39,7 @@ export default function JournalEntryForm({
   /** Debits minus credits already saved in this register (whole register), for the out-of-balance warning. */
   registerDiff?: number;
 }) {
+  const tx = useTx();
   const router = useRouter();
   const [state, formAction, pending] = useActionState(action, undefined);
   const formRef = useRef<HTMLFormElement>(null);
@@ -139,7 +141,7 @@ export default function JournalEntryForm({
         <Field label="Description">
           <input name="description" defaultValue={first?.description ?? ""} className="input" />
         </Field>
-        <Field label="VAT %">
+        <Field label={tx("VAT %")}>
           <VatSelect name="vat_perc" defaultValue={first?.vat_perc ?? null} allowBlank />
         </Field>
         <Field label="Debit">
@@ -167,7 +169,7 @@ export default function JournalEntryForm({
                 <tr className="border-b border-line bg-background text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
                   <th className="px-2 py-2">Account</th>
                   <th className="px-2 py-2">Description</th>
-                  <th className="px-2 py-2">VAT %</th>
+                  <th className="px-2 py-2">{tx("VAT %")}</th>
                   <th className="px-2 py-2 text-right">Debit</th>
                   <th className="px-2 py-2 text-right">Credit</th>
                   <th className="px-2 py-2" />
@@ -275,7 +277,7 @@ export default function JournalEntryForm({
             >
               {multi ? "Cancel split" : "Split entry"}
             </button>
-            {!multi && <span className="text-xs text-neutral-500">One entry with several lines, such as a payment shared between a cost, VAT and a loan. It saves only when debits equal credits.</span>}
+            {!multi && <span className="text-xs text-neutral-500">{tx("One entry with several lines, such as a payment shared between a cost, VAT and a loan. It saves only when debits equal credits.")}</span>}
           </>
         )}
       </div>

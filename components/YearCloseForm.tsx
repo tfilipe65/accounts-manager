@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { closeYearFormAction, reopenYearFormAction } from "@/lib/actions/settings-form-actions";
+import { useTx } from "@/components/TaxLabel";
 
 // An optional lock on finished years. It posts nothing and the books work the same without it; it only
 // stops a regular User from changing entries in a year that has already been filed (QuickBooks calls
@@ -15,6 +16,7 @@ export default function YearCloseForm({
   nextYearToClose: number;
   canClose: boolean;
 }) {
+  const tx = useTx();
   const [closeState, closeFormAction, closePending] = useActionState(closeYearFormAction, undefined);
   const [reopenState, reopenFormAction, reopenPending] = useActionState(reopenYearFormAction, undefined);
 
@@ -27,7 +29,7 @@ export default function YearCloseForm({
       <p className="text-sm text-neutral-600">
         {closedThroughYear != null
           ? `Everything through ${closedThroughYear} is locked: a regular User can no longer add, change or delete an invoice, bank entry, journal entry or opening balance dated in ${closedThroughYear} or earlier. An Admin still can, with a warning.`
-          : "Once a year has been filed (IVA, IRC), you can lock it so nobody changes it by accident. Until then every year can be edited."}
+          : tx("Once a year has been filed (IVA, IRC), you can lock it so nobody changes it by accident. Until then every year can be edited.")}
       </p>
 
       <div className="flex flex-wrap items-center gap-3">

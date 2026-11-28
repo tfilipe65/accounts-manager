@@ -5,8 +5,10 @@ import { updateSettingsFormAction } from "@/lib/actions/settings-form-actions";
 import type { AppSettings } from "@/lib/actions/settings-actions";
 import type { AccountOption } from "@/lib/actions/reference-actions";
 import AccountSelect from "@/components/AccountSelect";
+import { useTx } from "@/components/TaxLabel";
 
 export default function SettingsForm({ initial, accounts }: { initial: AppSettings; accounts: AccountOption[] }) {
+  const tx = useTx();
   const [state, formAction, pending] = useActionState(updateSettingsFormAction, undefined);
 
   return (
@@ -15,7 +17,7 @@ export default function SettingsForm({ initial, accounts }: { initial: AppSettin
         <Field label="Company Name">
           <input name="company_name" defaultValue={initial.company_name} required className="input" />
         </Field>
-        <Field label="VAT Number">
+        <Field label={tx("VAT Number")}>
           <input name="vat_number" defaultValue={initial.vat_number ?? ""} className="input" />
         </Field>
         <Field label="Address">
@@ -72,7 +74,13 @@ export default function SettingsForm({ initial, accounts }: { initial: AppSettin
         <Field label="Interest expense account (for interest cover)">
           <AccountSelect accounts={accounts} name="account_no_interest_expense" defaultValue={initial.account_no_interest_expense ?? ""} blankLabel="None" />
         </Field>
-        <Field label="VAT return is filed">
+        <Field label="Sales tax is called">
+          <select name="tax_label" defaultValue={initial.tax_label} className="input">
+            <option value="IVA">IVA (Portuguese)</option>
+            <option value="VAT">VAT (English)</option>
+          </select>
+        </Field>
+        <Field label={tx("VAT return is filed")}>
           <select name="vat_return_period" defaultValue={initial.vat_return_period} className="input">
             <option value="quarterly">Quarterly</option>
             <option value="monthly">Monthly</option>
@@ -84,16 +92,16 @@ export default function SettingsForm({ initial, accounts }: { initial: AppSettin
             How far below zero the main current account (the first bank account) may go. 0 means none. Every other bank account and the petty cash can never go below zero.
           </span>
         </Field>
-        <Field label="VAT Rate 1">
+        <Field label={tx("VAT Rate 1")}>
           <input type="number" step="any" name="vat_rate_1" defaultValue={initial.vat_rate_1} className="input" />
         </Field>
-        <Field label="VAT Rate 2">
+        <Field label={tx("VAT Rate 2")}>
           <input type="number" step="any" name="vat_rate_2" defaultValue={initial.vat_rate_2} className="input" />
         </Field>
-        <Field label="VAT Rate 3">
+        <Field label={tx("VAT Rate 3")}>
           <input type="number" step="any" name="vat_rate_3" defaultValue={initial.vat_rate_3} className="input" />
         </Field>
-        <Field label="VAT Rate 4">
+        <Field label={tx("VAT Rate 4")}>
           <input type="number" step="any" name="vat_rate_4" defaultValue={initial.vat_rate_4 ?? ""} className="input" />
         </Field>
       </div>

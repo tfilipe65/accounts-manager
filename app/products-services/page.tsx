@@ -1,3 +1,5 @@
+import { taxify } from "@/lib/tax-label";
+import { getLabels } from "@/lib/labels";
 import Link from "next/link";
 import { query } from "@/lib/db";
 import { deleteProductAction } from "@/lib/actions/product-form-actions";
@@ -11,6 +13,8 @@ type Product = {
 };
 
 export default async function ProductsServicesPage() {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const products = await query<Product>("SELECT id, name, unit, price_ex_vat, vat_perc FROM products_services ORDER BY name");
 
   return (
@@ -31,8 +35,8 @@ export default async function ProductsServicesPage() {
             <tr className="border-b border-line bg-background text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
               <th className="px-4 py-2">Name</th>
               <th className="px-4 py-2">Unit</th>
-              <th className="px-4 py-2">Price ex. VAT</th>
-              <th className="px-4 py-2">VAT %</th>
+              <th className="px-4 py-2">{tx("Price ex. VAT")}</th>
+              <th className="px-4 py-2">{tx("VAT %")}</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>

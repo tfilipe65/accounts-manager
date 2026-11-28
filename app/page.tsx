@@ -1,3 +1,4 @@
+import { taxify, type TaxLabel } from "@/lib/tax-label";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
@@ -77,7 +78,8 @@ const STATUS_STYLE: Record<Exclude<MetricStatus, null>, { chip: string; text: st
   bad: { chip: "bg-red-100 text-red-800", text: "Needs attention", value: "text-credit" },
 };
 
-function MetricCard({ m }: { m: Metric }) {
+function MetricCard({ m, tax }: { m: Metric; tax: TaxLabel }) {
+  const t = (s: string) => taxify(s, tax);
   const status = m.status ? STATUS_STYLE[m.status] : null;
   return (
     <details className="group rounded-lg border border-line bg-surface">
@@ -92,15 +94,15 @@ function MetricCard({ m }: { m: Metric }) {
         </span>
       </summary>
       <div className="flex flex-col gap-2 border-t border-line p-3 text-xs">
-        <p className="rounded bg-background px-2 py-1 font-mono text-[11px] text-neutral-700">{m.formula}</p>
-        <p className="text-neutral-700">{m.explanation}</p>
+        <p className="rounded bg-background px-2 py-1 font-mono text-[11px] text-neutral-700">{t(m.formula)}</p>
+        <p className="text-neutral-700">{t(m.explanation)}</p>
         {m.value == null && m.unavailable && <p className="text-neutral-500">{m.unavailable}</p>}
         {m.value != null && (m.status === "watch" || m.status === "bad") && m.advice.length > 0 && (
           <div className={`rounded border px-2 py-2 ${m.status === "bad" ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"}`}>
             <p className={`mb-1 font-semibold ${m.status === "bad" ? "text-red-800" : "text-amber-800"}`}>How to improve it</p>
             <ul className="list-disc space-y-1 pl-4 text-neutral-700">
               {m.advice.map((a) => (
-                <li key={a}>{a}</li>
+                <li key={a}>{t(a)}</li>
               ))}
             </ul>
           </div>
@@ -151,7 +153,7 @@ function BucketTable({ title, buckets }: { title: string; buckets: BucketTotal[]
   );
 }
 
-function KeyTable({ title, k, partyLabel }: { title: string; k: KeyFigures; partyLabel: string }) {
+function KeyTable({ title, k, partyLabel, amountLabel }: { title: string; k: KeyFigures; partyLabel: string; amountLabel: string }) {
   return (
     <Card title={title} note={partyLabel}>
       <table className="w-full text-sm">
@@ -159,7 +161,7 @@ function KeyTable({ title, k, partyLabel }: { title: string; k: KeyFigures; part
           <tr className="border-b border-line text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">
             <th className="py-1" />
             <th className="py-1 text-right">#</th>
-            <th className="py-1 text-right">Amount (incl. IVA)</th>
+            <th className="py-1 text-right">{amountLabel}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-line">
@@ -212,6 +214,8 @@ function TopList({ title, items, empty }: { title: string; items: Ranked[]; empt
 }
 
 export default async function DashboardPage() {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const session = await getSession();
   if (!session) redirect("/login");
   const effectiveYear = await getEffectiveReportingYear();
@@ -408,7 +412,7 @@ export default async function DashboardPage() {
             </table>
           </Card>
 
-          <Card title={`Top 5 ${labels.client.toLowerCase()}`} note="Sales net of IVA, share of all sales">
+          <Card title={`Top 5 ${labels.client.toLowerCase()}`} note={tx("Sales net of IVA, share of all sales")}>
             <HBarChart
               items={d.topClients.slice(0, 5).map((c) => ({ label: c.name, value: c.amount, share: d.clientSalesTotal > 0 ? c.amount / d.clientSalesTotal : null }))}
               color={SALES_COLOR}
@@ -451,9 +455,9 @@ export default async function DashboardPage() {
       <section className="flex flex-col gap-3">
         <Heading>Key figures {d.reportingYear}</Heading>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <KeyTable title="Sales" k={d.keySales} partyLabel={`Invoices dated ${d.reportingYear}`} />
-          <KeyTable title="Purchases" k={d.keyPurchases} partyLabel={`Invoices dated ${d.reportingYear}`} />
-          <Card title="IVA" note={`${d.reportingYear}`}>
+          <KeyTable title="Sales" k={d.keySales} partyLabel={`Invoices dated ${d.reportingYear}`} amountLabel={tx("Amount (incl. IVA)")} />
+          <KeyTable title="Purchases" k={d.keyPurchases} partyLabel={`Invoices dated ${d.reportingYear}`} amountLabel={tx("Amount (incl. IVA)")} />
+          <Card title={tx("IVA")} note={`${d.reportingYear}`}>
             <table className="w-full text-sm">
               <tbody className="divide-y divide-line">
                 <tr>
@@ -465,11 +469,11 @@ export default async function DashboardPage() {
                   <td className="py-1.5 text-right">{fmt(d.vat.onPurchases)}</td>
                 </tr>
                 <tr className="font-medium">
-                  <td className="py-1.5">IVA due (+) / in credit (−)</td>
+                  <td className="py-1.5">{tx("IVA due (+) / in credit (−)")}</td>
                   <td className="py-1.5 text-right">{fmt(d.vat.due)}</td>
                 </tr>
                 <tr>
-                  <td className="py-1.5">IVA paid / received</td>
+                  <td className="py-1.5">{tx("IVA paid / received")}</td>
                   <td className="py-1.5 text-right">{fmt(d.vat.paid)}</td>
                 </tr>
                 <tr className="font-semibold">
@@ -479,7 +483,7 @@ export default async function DashboardPage() {
               </tbody>
             </table>
             <Link href="/vat-report" className="text-xs text-primary hover:underline">
-              Full IVA report &rarr;
+              {tx("Full IVA report")} &rarr;
             </Link>
           </Card>
         </div>
@@ -487,7 +491,7 @@ export default async function DashboardPage() {
 
       {/* ---------- Top 10 ---------- */}
       <section className="flex flex-col gap-3">
-        <Heading note="Net of IVA, reporting year">Top 10</Heading>
+        <Heading note={tx("Net of IVA, reporting year")}>Top 10</Heading>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <TopList title={`Best ${labels.client.toLowerCase()} (sales)`} items={d.topClients} empty="No sales yet this year." />
           <TopList title={`Best ${labels.project.toLowerCase()} (income less costs)`} items={d.topProjects} empty="Nothing booked to a project this year." />
@@ -505,7 +509,7 @@ export default async function DashboardPage() {
               {d.metrics
                 .filter((m) => m.group === g)
                 .map((m) => (
-                  <MetricCard key={m.key} m={m} />
+                  <MetricCard key={m.key} m={m} tax={taxLabel} />
                 ))}
             </div>
           </div>

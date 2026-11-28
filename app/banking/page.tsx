@@ -1,3 +1,5 @@
+import { taxify } from "@/lib/tax-label";
+import { getLabels } from "@/lib/labels";
 import Link from "next/link";
 import { Fragment } from "react";
 import {
@@ -25,6 +27,8 @@ import { TransferForm, ReconcilePanel, ReconcileToggle } from "@/components/Bank
 export const dynamic = "force-dynamic";
 
 export default async function BankingPage({ searchParams }: { searchParams: Promise<{ account?: string; all?: string }> }) {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const { account, all } = await searchParams;
   const showAll = all === "1";
   const session = await getSession();
@@ -218,7 +222,7 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
                           <td className="px-4 py-1">
                             {p.link_label}
                             {p.employee_name && <span className="ml-1 rounded bg-background px-1.5 py-0.5">{p.employee_name}</span>}
-                            {(p.in_vat > 0 || p.out_vat > 0) && <span className="ml-1 text-neutral-400">incl. VAT {fmt(p.in_vat + p.out_vat)}</span>}
+                            {(p.in_vat > 0 || p.out_vat > 0) && <span className="ml-1 text-neutral-400">{tx("incl. VAT")} {fmt(p.in_vat + p.out_vat)}</span>}
                           </td>
                           <td className="px-4 py-1 text-right">{part > 0 ? fmt(part) : ""}</td>
                           <td className="px-4 py-1 text-right">{part < 0 ? fmt(-part) : ""}</td>

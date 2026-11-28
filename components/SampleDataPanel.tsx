@@ -2,17 +2,18 @@
 
 import { useActionState } from "react";
 import { loadSampleDataAction, startFreshAction } from "@/lib/actions/sample-data-actions";
+import { useTx } from "@/components/TaxLabel";
 
 type Result = { error?: string; success?: boolean; message?: string } | undefined;
 
 export default function SampleDataPanel({ companyName }: { companyName: string }) {
+  const tx = useTx();
   const [load, loadAction, loadPending] = useActionState(loadSampleDataAction, undefined as Result);
   const [fresh, freshAction, freshPending] = useActionState(startFreshAction, undefined as Result);
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-6">
       <p className="text-sm text-neutral-600">
-        To see {companyName} working like a real business, load made-up sample data: clients, suppliers, staff, invoices raised and paid (some late), purchases, wages,
-        IVA, transfers and petty cash from last January to today. When you are ready to use the app for real, start fresh. Both keep a backup first.
+        {tx(`To see ${companyName} working like a real business, load made-up sample data: clients, suppliers, staff, invoices raised and paid (some late), purchases, wages, IVA, transfers and petty cash from last January to today. When you are ready to use the app for real, start fresh. Both keep a backup first.`)}
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <form action={loadAction}>

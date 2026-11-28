@@ -1,3 +1,5 @@
+import { taxify } from "@/lib/tax-label";
+import { getLabels } from "@/lib/labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProjectDetail } from "@/lib/actions/project-report-actions";
@@ -5,6 +7,8 @@ import { formatDate, formatMoney as fmt } from "@/lib/formatters";
 import PrintButton from "@/components/PrintButton";
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const { id } = await params;
   const d = await getProjectDetail(Number(id));
   if (!d) notFound();
@@ -25,7 +29,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             {p.status ?? "No status"}
             {p.start_date ? ` · from ${formatDate(p.start_date)}` : ""}
             {p.end_date ? ` · to ${formatDate(p.end_date)}` : ""}
-            {" · amounts without VAT"}
+            {tx(" · amounts without VAT")}
           </p>
         </div>
         <PrintButton />
@@ -35,7 +39,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <Card label="Revenue" value={fmt(t.revenue)} />
         <Card label="Expenditure" value={fmt(t.expenditure)} />
         <Card label="Result" value={fmt(t.result)} tone={t.result < 0 ? "bad" : "good"} note={t.marginPercent != null ? `${t.marginPercent.toFixed(1)}% of revenue` : undefined} />
-        <Card label="Still to collect" value={fmt(stillToCollect)} note={`${fmt(t.received)} received of ${fmt(t.invoiced)} invoiced (with VAT)`} />
+        <Card label="Still to collect" value={fmt(stillToCollect)} note={`${fmt(t.received)} received of ${fmt(t.invoiced)} invoiced (${tx("with VAT")})`} />
       </div>
 
       <section className="flex flex-col gap-2">

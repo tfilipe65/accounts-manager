@@ -5,6 +5,7 @@ import { getInvoiceReport, getBankStatement } from "@/lib/actions/report-actions
 import { listBankAccounts } from "@/lib/actions/banking-actions";
 import { parseReportQuery } from "@/lib/report-params";
 import { csvResponse, toCsv } from "@/lib/csv";
+import { getLabels } from "@/lib/labels";
 
 // /reports/export?<same filters as the page>&view=summary|documents|bank
 export async function GET(req: NextRequest) {
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
     return csvResponse(
       `${name} by ${params.groupBy}.csv`,
       toCsv(
-        ["Group", "Documents", "Net", "IVA", "Total"],
+        ["Group", "Documents", "Net", (await getLabels()).tax, "Total"],
         report.groups.map((g) => [g.label, g.count, money(g.net), money(g.vat), money(g.gross)])
       )
     );
@@ -53,7 +54,7 @@ export async function GET(req: NextRequest) {
   return csvResponse(
     `${name}.csv`,
     toCsv(
-      ["Date", "Number", "Type", view === "income" ? "Client" : "Supplier", "Net", "IVA", "Total", "Outstanding (whole invoice)"],
+      ["Date", "Number", "Type", view === "income" ? "Client" : "Supplier", "Net", (await getLabels()).tax, "Total", "Outstanding (whole invoice)"],
       report.documents.map((d) => [d.date, d.number, d.docType, d.party, money(d.net), money(d.vat), money(d.gross), money(d.invoiceOutstanding)])
     )
   );

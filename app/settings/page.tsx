@@ -1,3 +1,5 @@
+import { taxify } from "@/lib/tax-label";
+import { getLabels } from "@/lib/labels";
 import { getAppSettings, listUsers, getClosedThroughYear, listAuditLog } from "@/lib/actions/settings-actions";
 import { listAllAccountOptions } from "@/lib/actions/reference-actions";
 import { requireAdmin } from "@/lib/auth";
@@ -17,6 +19,8 @@ function when(iso: string): string {
 }
 
 export default async function SettingsPage() {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const session = await requireAdmin();
   const [settings, users, closedThroughYear, accounts, audit] = await Promise.all([
     getAppSettings(),
@@ -33,7 +37,7 @@ export default async function SettingsPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-2xl font-semibold text-primary">Settings</h1>
-        <p className="text-sm text-neutral-600">Company details, VAT rates, year-end, and logins.</p>
+        <p className="text-sm text-neutral-600">{tx("Company details, VAT rates, year-end, and logins.")}</p>
       </div>
 
       <SettingsForm initial={settings} accounts={accounts.filter((a) => a.normal_balance === "debit")} />

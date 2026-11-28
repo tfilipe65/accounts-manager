@@ -1,3 +1,4 @@
+import { taxify } from "@/lib/tax-label";
 import Link from "next/link";
 import { query } from "@/lib/db";
 import { getLabels } from "@/lib/labels";
@@ -15,6 +16,8 @@ type Customer = {
 };
 
 export default async function CustomersPage() {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const labels = await getLabels();
   const customers = await query<Customer>(
     "SELECT id, name, city, country, contact, telephone, email, vat_number FROM customers ORDER BY name"
@@ -42,7 +45,7 @@ export default async function CustomersPage() {
               <th className="px-4 py-2">Contact</th>
               <th className="px-4 py-2">Telephone</th>
               <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">VAT Number</th>
+              <th className="px-4 py-2">{tx("VAT Number")}</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>

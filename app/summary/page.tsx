@@ -1,3 +1,5 @@
+import { taxify } from "@/lib/tax-label";
+import { getLabels } from "@/lib/labels";
 import { getDashboard } from "@/lib/actions/dashboard-actions";
 import { getStatement } from "@/lib/actions/pl-actions";
 import { getBalanceSheet, type BSLine } from "@/lib/actions/balance-sheet-actions";
@@ -31,9 +33,12 @@ function Lines({ rows }: { rows: { label: string; value: string; bold?: boolean;
           <tr key={r.label} className={r.bold ? "font-semibold" : ""}>
             <td className="py-1.5">{r.label}</td>
             {hasCount && (
-              <td className="w-40 py-1.5 pr-10 text-right font-normal text-neutral-500">
-                {r.count != null ? `${r.count} ${r.count === 1 ? "invoice" : "invoices"}` : ""}
-              </td>
+              <>
+                <td className="w-12 py-1.5 text-right font-normal tabular-nums text-neutral-500">{r.count ?? ""}</td>
+                <td className="w-24 py-1.5 pl-1.5 pr-10 text-left font-normal text-neutral-500">
+                  {r.count != null ? (r.count === 1 ? "invoice" : "invoices") : ""}
+                </td>
+              </>
             )}
             <td className="py-1.5 text-right">{r.value}</td>
           </tr>
@@ -66,6 +71,8 @@ function BsColumn({ title, lines, total, totalLabel }: { title: string; lines: B
 }
 
 export default async function SummaryPage() {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const year = await getEffectiveReportingYear();
   const [d, s, b, company] = await Promise.all([getDashboard(year), getStatement(year), getBalanceSheet(year), getCurrentCompany()]);
   const rows = buildRows(s, "quarters");
@@ -120,13 +127,13 @@ export default async function SummaryPage() {
           />
         </Block>
 
-        <Block title="IVA">
+        <Block title={tx("IVA")}>
           <Lines
             rows={[
               { label: "Tax on sales", value: fmt(d.vat.onSales) },
               { label: "Tax on purchases", value: fmt(d.vat.onPurchases) },
-              { label: "IVA due (+) / in credit (−)", value: fmt(d.vat.due), bold: true },
-              { label: "IVA paid / received", value: fmt(d.vat.paid) },
+              { label: tx("IVA due (+) / in credit (−)"), value: fmt(d.vat.due), bold: true },
+              { label: tx("IVA paid / received"), value: fmt(d.vat.paid) },
               { label: "Balance", value: fmt(d.vat.balance), bold: true },
             ]}
           />
@@ -135,7 +142,7 @@ export default async function SummaryPage() {
         <Block title="Sales invoices">
           <Lines
             rows={[
-              { label: "Invoiced (incl. IVA)", count: d.keySales.count, value: fmt(d.keySales.gross) },
+              { label: tx("Invoiced (incl. IVA)"), count: d.keySales.count, value: fmt(d.keySales.gross) },
               { label: "Paid", count: d.keySales.paidCount, value: fmt(d.keySales.paid) },
               { label: "Outstanding", count: d.keySales.outstandingCount, value: fmt(d.keySales.outstanding), bold: true },
               { label: "% outstanding", value: pct(d.keySales.gross > 0.005 ? d.keySales.outstanding / d.keySales.gross : null) },
@@ -146,7 +153,7 @@ export default async function SummaryPage() {
         <Block title="Purchase invoices">
           <Lines
             rows={[
-              { label: "Invoiced (incl. IVA)", count: d.keyPurchases.count, value: fmt(d.keyPurchases.gross) },
+              { label: tx("Invoiced (incl. IVA)"), count: d.keyPurchases.count, value: fmt(d.keyPurchases.gross) },
               { label: "Paid", count: d.keyPurchases.paidCount, value: fmt(d.keyPurchases.paid) },
               { label: "Outstanding", count: d.keyPurchases.outstandingCount, value: fmt(d.keyPurchases.outstanding), bold: true },
               { label: "% outstanding", value: pct(d.keyPurchases.gross > 0.005 ? d.keyPurchases.outstanding / d.keyPurchases.gross : null) },

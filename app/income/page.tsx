@@ -1,3 +1,5 @@
+import { taxify } from "@/lib/tax-label";
+import { getLabels } from "@/lib/labels";
 import Link from "next/link";
 import { listSalesInvoices } from "@/lib/actions/income-actions";
 import { deleteIncomeAction } from "@/lib/actions/income-form-actions";
@@ -5,6 +7,8 @@ import { getEffectiveReportingYear } from "@/lib/reporting-year";
 import { formatDate, formatMoney as fmt } from "@/lib/formatters";
 
 export default async function IncomePage({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const { all } = await searchParams;
   const showAll = all === "1";
   const year = await getEffectiveReportingYear();
@@ -34,7 +38,7 @@ export default async function IncomePage({ searchParams }: { searchParams: Promi
               <th className="px-4 py-2">Type</th>
               <th className="px-4 py-2">Client</th>
               <th className="px-4 py-2 text-right">Net</th>
-              <th className="px-4 py-2 text-right">VAT</th>
+              <th className="px-4 py-2 text-right">{tx("VAT")}</th>
               <th className="px-4 py-2 text-right">Gross</th>
               <th className="px-4 py-2 text-right">Paid</th>
               <th className="px-4 py-2 text-right">Outstanding</th>

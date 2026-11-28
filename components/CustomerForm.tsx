@@ -2,10 +2,12 @@
 
 import { useActionState } from "react";
 import type { Customer } from "@/lib/actions/customer-actions";
+import { useTx } from "@/components/TaxLabel";
 
 type FormState = { error?: string } | undefined;
 
 export default function CustomerForm({ action, initial }: { action: (prev: FormState, fd: FormData) => Promise<FormState>; initial?: Customer }) {
+  const tx = useTx();
   const [state, formAction, pending] = useActionState(action, undefined);
 
   return (
@@ -38,7 +40,7 @@ export default function CustomerForm({ action, initial }: { action: (prev: FormS
         <Field label="Payment Term (days)">
           <input type="number" name="payment_term_days" defaultValue={initial?.payment_term_days ?? ""} className="input" />
         </Field>
-        <Field label="VAT Number">
+        <Field label={tx("VAT Number")}>
           <input name="vat_number" defaultValue={initial?.vat_number ?? ""} className="input" />
         </Field>
         <Field label="COC Number">

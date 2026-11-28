@@ -7,6 +7,7 @@ import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import VatSelect from "@/components/VatSelect";
 import AccountSelect from "@/components/AccountSelect";
 import AmountInput from "@/components/AmountInput";
+import { useTx } from "@/components/TaxLabel";
 
 const DOC_TYPES = ["Invoice", "Credit Note", "Proforma", "Commission", "Tax Refund", "Interest", "Other"];
 
@@ -44,6 +45,7 @@ export default function IncomeForm({
   /** Invoices a credit note can be applied to (with what is still due). */
   creditTargets?: { id: number; label: string; customer_id: number }[];
 }) {
+  const tx = useTx();
   const [state, formAction, pending] = useActionState(action, undefined);
   const [docType, setDocType] = useState(initial?.doc_type ?? "Invoice");
   const [customerId, setCustomerId] = useState<number | "">(initial?.customer_id ?? "");
@@ -155,8 +157,8 @@ export default function IncomeForm({
               <th className="px-2 py-2">Product/Service</th>
               <th className="px-2 py-2">Subject</th>
               <th className="px-2 py-2">Qty</th>
-              <th className="px-2 py-2">Price ex. VAT</th>
-              <th className="px-2 py-2">VAT %</th>
+              <th className="px-2 py-2">{tx("Price ex. VAT")}</th>
+              <th className="px-2 py-2">{tx("VAT %")}</th>
               <th className="px-2 py-2">Disc. %</th>
               <th className="px-2 py-2">Account</th>
               <th className="px-2 py-2">Project</th>
@@ -248,7 +250,7 @@ export default function IncomeForm({
           + Add line
         </button>
         <div className="text-sm text-neutral-600">
-          Net: <span className="font-semibold text-foreground">{net.toFixed(2)}</span> &middot; VAT:{" "}
+          Net: <span className="font-semibold text-foreground">{net.toFixed(2)}</span> &middot; {tx("VAT")}:{" "}
           <span className="font-semibold text-foreground">{vat.toFixed(2)}</span> &middot; Gross:{" "}
           <span className="font-semibold text-foreground">{(net + vat).toFixed(2)}</span>
         </div>

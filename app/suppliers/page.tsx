@@ -1,3 +1,5 @@
+import { taxify } from "@/lib/tax-label";
+import { getLabels } from "@/lib/labels";
 import Link from "next/link";
 import { query } from "@/lib/db";
 import { deleteSupplierAction } from "@/lib/actions/supplier-form-actions";
@@ -13,6 +15,8 @@ type Supplier = {
 };
 
 export default async function SuppliersPage() {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const suppliers = await query<Supplier>(
     "SELECT id, name, city, contact, telephone, email, vat_number FROM suppliers ORDER BY name"
   );
@@ -38,7 +42,7 @@ export default async function SuppliersPage() {
               <th className="px-4 py-2">Contact</th>
               <th className="px-4 py-2">Telephone</th>
               <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">VAT Number</th>
+              <th className="px-4 py-2">{tx("VAT Number")}</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>

@@ -1,3 +1,5 @@
+import { taxify } from "@/lib/tax-label";
+import { getLabels } from "@/lib/labels";
 import Link from "next/link";
 import { listPurchaseInvoices } from "@/lib/actions/expense-actions";
 import { deleteExpenseAction } from "@/lib/actions/expense-form-actions";
@@ -5,6 +7,8 @@ import { getEffectiveReportingYear } from "@/lib/reporting-year";
 import { formatDate, formatMoney as fmt } from "@/lib/formatters";
 
 export default async function ExpensePage({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const { all } = await searchParams;
   const showAll = all === "1";
   const year = await getEffectiveReportingYear();
@@ -33,7 +37,7 @@ export default async function ExpensePage({ searchParams }: { searchParams: Prom
               <th className="px-4 py-2">Date</th>
               <th className="px-4 py-2">Supplier</th>
               <th className="px-4 py-2 text-right">Net</th>
-              <th className="px-4 py-2 text-right">VAT</th>
+              <th className="px-4 py-2 text-right">{tx("VAT")}</th>
               <th className="px-4 py-2 text-right">Gross</th>
               <th className="px-4 py-2 text-right">Paid</th>
               <th className="px-4 py-2 text-right">Outstanding</th>

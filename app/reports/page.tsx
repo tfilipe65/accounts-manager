@@ -1,3 +1,4 @@
+import { taxify } from "@/lib/tax-label";
 import Link from "next/link";
 import { getInvoiceReport, getBankStatement } from "@/lib/actions/report-actions";
 import { listBankAccounts } from "@/lib/actions/banking-actions";
@@ -13,6 +14,8 @@ export const dynamic = "force-dynamic";
 const GROUP_LABEL = { party: "client / supplier", account: "account", project: "project", month: "month" } as const;
 
 export default async function ReportsPage({ searchParams }: { searchParams: Promise<ReportQuery> }) {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const q = await searchParams;
   const year = await getEffectiveReportingYear();
   const { view, params, bankAccountId } = parseReportQuery(q, year);
@@ -159,9 +162,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         <>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <Stat label="Documents" value={String(report.totals.count)} />
-            <Stat label="Net (excl. IVA)" value={fmt(report.totals.net)} />
-            <Stat label="IVA" value={fmt(report.totals.vat)} />
-            <Stat label="Total (incl. IVA)" value={fmt(report.totals.gross)} />
+            <Stat label={tx("Net (excl. IVA)")} value={fmt(report.totals.net)} />
+            <Stat label={tx("IVA")} value={fmt(report.totals.vat)} />
+            <Stat label={tx("Total (incl. IVA)")} value={fmt(report.totals.gross)} />
           </div>
 
           <div className="flex items-center justify-between">
@@ -182,7 +185,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   <th className="px-4 py-2" />
                   <th className="px-4 py-2 text-right">Documents</th>
                   <th className="px-4 py-2 text-right">Net</th>
-                  <th className="px-4 py-2 text-right">IVA</th>
+                  <th className="px-4 py-2 text-right">{tx("IVA")}</th>
                   <th className="px-4 py-2 text-right">Total</th>
                   <th className="px-4 py-2 text-right">% of net</th>
                 </tr>
@@ -219,7 +222,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   <th className="px-4 py-2">Type</th>
                   <th className="px-4 py-2">{partyName}</th>
                   <th className="px-4 py-2 text-right">Net</th>
-                  <th className="px-4 py-2 text-right">IVA</th>
+                  <th className="px-4 py-2 text-right">{tx("IVA")}</th>
                   <th className="px-4 py-2 text-right">Total</th>
                   <th className="px-4 py-2 text-right" title="Of the whole invoice">
                     Outstanding

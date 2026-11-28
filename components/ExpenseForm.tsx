@@ -7,6 +7,7 @@ import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import VatSelect from "@/components/VatSelect";
 import AccountSelect from "@/components/AccountSelect";
 import AmountInput from "@/components/AmountInput";
+import { useTx } from "@/components/TaxLabel";
 
 const BLANK_LINE: PurchaseInvoiceLineInput = {
   description: "",
@@ -39,6 +40,7 @@ export default function ExpenseForm({
   /** Invoices a credit note can be applied to (with what is still due). */
   creditTargets?: { id: number; label: string; supplier_id: number }[];
 }) {
+  const tx = useTx();
   const [state, formAction, pending] = useActionState(action, undefined);
   const [docType, setDocType] = useState(initial?.doc_type ?? "Invoice");
   const [supplierId, setSupplierId] = useState<number | "">(initial?.supplier_id ?? "");
@@ -131,8 +133,8 @@ export default function ExpenseForm({
               <th className="px-2 py-2">Description</th>
               <th className="px-2 py-2">Account</th>
               <th className="px-2 py-2">Project</th>
-              <th className="px-2 py-2">VAT %</th>
-              <th className="px-2 py-2">Amount Inc. VAT</th>
+              <th className="px-2 py-2">{tx("VAT %")}</th>
+              <th className="px-2 py-2">{tx("Amount Inc. VAT")}</th>
               <th className="px-2 py-2">Remarks</th>
               <th className="px-2 py-2" />
             </tr>
@@ -190,7 +192,7 @@ export default function ExpenseForm({
           + Add line
         </button>
         <div className="text-sm text-neutral-600">
-          Net: <span className="font-semibold text-foreground">{(gross - vat).toFixed(2)}</span> &middot; VAT:{" "}
+          Net: <span className="font-semibold text-foreground">{(gross - vat).toFixed(2)}</span> &middot; {tx("VAT")}:{" "}
           <span className="font-semibold text-foreground">{vat.toFixed(2)}</span> &middot; Gross:{" "}
           <span className="font-semibold text-foreground">{gross.toFixed(2)}</span>
         </div>

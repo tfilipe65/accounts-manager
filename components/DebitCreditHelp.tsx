@@ -2,6 +2,7 @@
 // Entries and Opening Balance forms; once an account is picked it says in one line what Debit and Credit do to it.
 
 import { ACCOUNT_GROUPS, groupOf } from "@/lib/account-groups";
+import { useTx } from "@/components/TaxLabel";
 
 // What people actually put in the two columns, by kind of account.
 const ROWS: { groups: number[]; label: string; debit: string; credit: string }[] = [
@@ -16,6 +17,7 @@ const ROWS: { groups: number[]; label: string; debit: string; credit: string }[]
 const rgbOf = (g: number) => ACCOUNT_GROUPS[g].rgb;
 
 export default function DebitCreditHelp({ accountNo }: { accountNo?: number | "" }) {
+  const tx = useTx();
   const group = accountNo ? groupOf(Number(accountNo)) : undefined;
   return (
     <details open className="rounded-md bg-background px-3 py-2 text-xs text-neutral-600">
@@ -37,7 +39,7 @@ export default function DebitCreditHelp({ accountNo }: { accountNo?: number | ""
           </thead>
           <tbody>
             {ROWS.map((r) => (
-              <tr key={r.label} className="border-t border-line align-top">
+              <tr key={tx(r.label)} className="border-t border-line align-top">
                 <td className="py-1 pr-3 font-medium text-neutral-700">
                   <span className="mr-1.5 inline-flex gap-0.5 align-middle">
                     {r.groups.map((g) => (

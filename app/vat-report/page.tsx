@@ -1,3 +1,5 @@
+import { taxify } from "@/lib/tax-label";
+import { getLabels } from "@/lib/labels";
 import Link from "next/link";
 import { Fragment } from "react";
 import { getVatReportMonthly, type VatMonthRow } from "@/lib/actions/vat-report-actions";
@@ -10,6 +12,8 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 const netClass = (n: number) => (n > 0 ? "text-credit" : n < 0 ? "text-debit" : "");
 
 export default async function VatReportPage({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
+  const taxLabel = (await getLabels()).tax;
+  const tx = (s: string) => taxify(s, taxLabel);
   const { all } = await searchParams;
   const showAll = all === "1";
   const year = await getEffectiveReportingYear();
@@ -28,7 +32,7 @@ export default async function VatReportPage({ searchParams }: { searchParams: Pr
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-primary">VAT Report</h1>
+        <h1 className="text-2xl font-semibold text-primary">{tx("VAT Report")}</h1>
         <Link href={showAll ? "/vat-report" : "/vat-report?all=1"} className="text-sm text-primary hover:underline">
           {showAll ? `Show ${year} only` : "Show all years"}
         </Link>
@@ -39,9 +43,9 @@ export default async function VatReportPage({ searchParams }: { searchParams: Pr
           <thead>
             <tr className="border-b border-line bg-background text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
               <th className="px-4 py-2">Month</th>
-              <th className="px-4 py-2 text-right">Output VAT (sales)</th>
-              <th className="px-4 py-2 text-right">Input VAT (purchases)</th>
-              <th className="px-4 py-2 text-right">Net VAT</th>
+              <th className="px-4 py-2 text-right">{tx("Output VAT (sales)")}</th>
+              <th className="px-4 py-2 text-right">{tx("Input VAT (purchases)")}</th>
+              <th className="px-4 py-2 text-right">{tx("Net VAT")}</th>
             </tr>
           </thead>
           <tbody>
@@ -92,9 +96,10 @@ export default async function VatReportPage({ searchParams }: { searchParams: Pr
         </table>
       </div>
       <p className="text-xs text-neutral-500">
-        Positive net VAT is payable to the tax authority; negative is refundable. VAT is counted in the month of the invoice date. {monthlyFiler
-          ? "This company files its VAT return monthly (change it in Settings)."
-          : "This company files its VAT return quarterly, so quarter totals are shown (change it in Settings). Quarters assume a January-start fiscal year."}
+        {tx("Positive net VAT is payable to the tax authority; negative is refundable. VAT is counted in the month of the invoice date.")}{" "}
+        {monthlyFiler
+          ? tx("This company files its VAT return monthly (change it in Settings).")
+          : tx("This company files its VAT return quarterly, so quarter totals are shown (change it in Settings). Quarters assume a January-start fiscal year.")}
       </p>
     </div>
   );

@@ -10,6 +10,7 @@ import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import VatSelect from "@/components/VatSelect";
 import AccountSelect from "@/components/AccountSelect";
 import SplitParts, { blankRow, num, presetRows, type Presets, type SplitRow } from "@/components/SplitParts";
+import { useTx } from "@/components/TaxLabel";
 
 type InvoiceOption = { id: number; label: string };
 type LinkType = "sales" | "purchase" | "account" | "none";
@@ -45,6 +46,7 @@ export default function BankingEntryForm({
   /** An existing split being edited: the form opens already split, filled in. */
   initialSplit?: { splitId: string; input: SplitInput };
 }) {
+  const tx = useTx();
   const router = useRouter();
   const [state, formAction, pending] = useActionState(action, undefined);
   const [linkType, setLinkType] = useState<LinkType>(initial?.link_type ?? "account");
@@ -178,16 +180,16 @@ export default function BankingEntryForm({
         <Field label="In (+)">
           <input type="number" step="any" name="in_amount" value={inAmt} onChange={(e) => setInAmt(e.target.value)} className="input" />
         </Field>
-        <Field label="In VAT" hidden={!showVat}>
+        <Field label={tx("In VAT")} hidden={!showVat}>
           <input type="number" step="any" name="in_vat" defaultValue={initial?.in_vat || ""} className="input" />
         </Field>
         <Field label="Out (-)">
           <input type="number" step="any" name="out_amount" value={outAmt} onChange={(e) => setOutAmt(e.target.value)} className="input" />
         </Field>
-        <Field label="Out VAT" hidden={!showVat}>
+        <Field label={tx("Out VAT")} hidden={!showVat}>
           <input type="number" step="any" name="out_vat" defaultValue={initial?.out_vat || ""} className="input" />
         </Field>
-        <Field label="VAT %" hidden={!showVat}>
+        <Field label={tx("VAT %")} hidden={!showVat}>
           <VatSelect name="vat_perc" defaultValue={initial?.vat_perc ?? 0} />
         </Field>
       </div>

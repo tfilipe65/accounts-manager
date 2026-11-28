@@ -3,10 +3,12 @@
 import { useActionState } from "react";
 import type { Product } from "@/lib/actions/product-actions";
 import VatSelect from "@/components/VatSelect";
+import { useTx } from "@/components/TaxLabel";
 
 type FormState = { error?: string } | undefined;
 
 export default function ProductForm({ action, initial }: { action: (prev: FormState, fd: FormData) => Promise<FormState>; initial?: Product }) {
+  const tx = useTx();
   const [state, formAction, pending] = useActionState(action, undefined);
 
   return (
@@ -18,10 +20,10 @@ export default function ProductForm({ action, initial }: { action: (prev: FormSt
         <Field label="Unit">
           <input name="unit" defaultValue={initial?.unit ?? ""} className="input" />
         </Field>
-        <Field label="Price ex. VAT">
+        <Field label={tx("Price ex. VAT")}>
           <input type="number" step="any" name="price_ex_vat" defaultValue={initial?.price_ex_vat ?? ""} className="input" />
         </Field>
-        <Field label="VAT %">
+        <Field label={tx("VAT %")}>
           <VatSelect name="vat_perc" defaultValue={initial?.vat_perc ?? null} allowBlank />
         </Field>
         <Field label="Free Code 1">

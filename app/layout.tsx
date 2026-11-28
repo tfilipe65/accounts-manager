@@ -7,6 +7,7 @@ import { sectionForPath, isAdminOnlySection } from "@/lib/sections";
 import { getLabels } from "@/lib/labels";
 import Nav from "@/components/Nav";
 import Splash from "@/components/Splash";
+import { TaxLabelProvider } from "@/components/TaxLabel";
 import NoAccessPage from "@/app/no-access/page";
 
 export const metadata = {
@@ -26,7 +27,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const company = session ? await getCurrentCompany() : undefined;
   const allowed = session ? await getAllowedSections(session) : null;
   if (session?.mustChangePassword && !pathname.startsWith("/account")) redirect("/account");
-  const labels = session ? await getLabels() : { client: "Clients", project: "Projects" };
+  const labels = session ? await getLabels() : { client: "Clients", project: "Projects", tax: "IVA" as const };
   const section = sectionForPath(pathname);
   const denied =
     !!session && !!section && ((!!allowed && !allowed.includes(section)) || (session.role !== "ADMIN" && isAdminOnlySection(section)));
@@ -36,6 +37,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         {/* Already shown in this window: hide the splash before the first paint, so a reload does not flash it. */}
         <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem("accounts-manager.splash-seen")==="1")document.documentElement.setAttribute("data-splash-seen","")}catch(e){}` }} />
         <Splash />
+        <TaxLabelProvider tax={labels.tax}>
         {session && <Nav user={session} company={company} allowed={allowed} labels={labels} />}
         {session ? (
           // The page itself never scrolls: only this area does, so its scrollbar sits under the top bar, beside the menu.
@@ -45,6 +47,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         ) : (
           <main className="mx-auto max-w-[1400px] p-6">{children}</main>
         )}
+        </TaxLabelProvider>
       </body>
     </html>
   );
