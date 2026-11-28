@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { query } from "@/lib/db";
 import { listSubgroupOptions } from "@/lib/actions/account-actions";
 import AccountDialogButton from "@/components/AccountDialog";
@@ -67,6 +68,9 @@ export default async function ChartOfAccountsPage() {
         <h1 className="text-2xl font-semibold text-primary">Chart of Accounts</h1>
         <div className="flex items-center gap-4">
           <span className="text-sm text-neutral-600">{accounts.length} accounts</span>
+          <Link href="/chart-of-accounts/subsections" className="text-sm text-primary hover:underline">
+            Subsections list (print)
+          </Link>
           <AccountDialogButton
             subgroups={subgroups}
             label="+ New account"
