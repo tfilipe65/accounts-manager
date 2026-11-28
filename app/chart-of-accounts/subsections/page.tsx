@@ -25,16 +25,16 @@ export default async function SubsectionsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 print:gap-3">
+    <div className="flex flex-col gap-5 print:gap-4">
       <style>{"@media print { @page { size: A4; margin: 12mm; } }"}</style>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href="/chart-of-accounts" className="text-sm text-primary hover:underline print:hidden">
             &larr; Chart of Accounts
           </Link>
-          <h1 className="text-2xl font-semibold text-primary print:text-xl">Chart of Accounts: subsections</h1>
+          <h1 className="text-2xl font-semibold text-primary print:text-2xl">Chart of Accounts: subsections</h1>
           <p className="text-sm text-neutral-600">
-            {company?.name ?? ""} &middot; {rows.length} subsections in {groups.size} groups
+            {company?.name ?? ""} &middot; {rows.length} subsections in {groups.size} groups &middot; Debit / Credit is the side that makes the account grow
           </p>
         </div>
         <PrintButton />
@@ -42,18 +42,18 @@ export default async function SubsectionsPage() {
 
       <div className="columns-1 gap-x-10 md:columns-2 print:columns-2 print:gap-x-8">
         {[...groups.entries()].map(([no, g]) => (
-          <section key={no} className="mb-5 break-inside-avoid print:mb-3">
-            <h2 className="border-b border-line pb-1 text-base font-semibold text-primary print:text-sm">
+          <section key={no} className="mb-5 break-inside-avoid print:mb-5">
+            <h2 className="border-b border-line pb-1 text-base font-semibold text-primary print:pb-1.5 print:text-lg">
               {no}. {g.name}
             </h2>
-            <table className="w-full text-sm print:text-xs">
+            <table className="w-full text-sm print:text-sm">
               <tbody className="divide-y divide-line">
                 {g.items.map((r) => (
                   <tr key={r.subgroup_no}>
-                    <td className="w-12 py-1 font-mono print:py-0.5 text-xs text-neutral-600">{r.subgroup_no}</td>
-                    <td className="py-1 print:py-0.5">{r.subgroup_name}</td>
-                    <td className="py-1 text-right text-xs text-neutral-500 print:py-0.5">{r.normal_balance === "debit" ? "Debit-normal" : "Credit-normal"}</td>
-                    <td className="w-16 py-1 text-right text-xs text-neutral-500 print:py-0.5">{Number(r.accounts)} acc.</td>
+                    <td className="w-12 py-1 font-mono print:py-1.5 text-xs text-neutral-600">{r.subgroup_no}</td>
+                    <td className="py-1 print:py-1.5">{r.subgroup_name}</td>
+                    <td className="whitespace-nowrap py-1 pl-2 text-right text-xs text-neutral-500 print:py-1.5 print:text-sm">{r.normal_balance === "debit" ? "Debit" : "Credit"}</td>
+                    <td className="w-16 whitespace-nowrap py-1 text-right text-xs text-neutral-500 print:py-1.5 print:text-sm">{Number(r.accounts)} acc.</td>
                   </tr>
                 ))}
               </tbody>
