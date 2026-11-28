@@ -14,6 +14,12 @@ export default function BalanceWarningBanner({ diagnostics }: { diagnostics: Bal
         ⚠ The books are out of balance by {fmt(Math.abs(diagnostics.trialBalanceDiff))} (
         {diagnostics.trialBalanceDiff > 0 ? "debits exceed credits" : "credits exceed debits"}).
       </p>
+      {diagnostics.explained && obOff && (
+        <p className="text-sm text-credit">
+          <strong>What to do:</strong> add the missing {diagnostics.openingBalanceDiff > 0 ? "credit" : "debit"} of {fmt(Math.abs(diagnostics.openingBalanceDiff))} on the Opening
+          Balance page &mdash; it has a button that adds it in one click (for example to Share capital).
+        </p>
+      )}
       {diagnostics.explained ? (
         <ul className="list-inside list-disc text-sm text-credit">
           {obOff && (

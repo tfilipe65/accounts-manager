@@ -6,6 +6,7 @@ import type { OpeningBalanceInput } from "@/lib/actions/opening-balance-actions"
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import AccountSelect from "@/components/AccountSelect";
 import DebitCreditHelp from "@/components/DebitCreditHelp";
+import BalanceHeadsUp from "@/components/BalanceHeadsUp";
 
 type FormState = { error?: string; success?: boolean } | undefined;
 
@@ -15,21 +16,28 @@ export default function OpeningBalanceForm({
   initial,
   submitLabel = "Add",
   closedThroughYear,
+  registerDiff = 0,
 }: {
   accounts: AccountOption[];
   action: (prev: FormState, fd: FormData) => Promise<FormState>;
   initial?: OpeningBalanceInput;
   submitLabel?: string;
   closedThroughYear: number | null;
+  /** Debits minus credits already saved in this register (whole register), for the out-of-balance warning. */
+  registerDiff?: number;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const formRef = useRef<HTMLFormElement>(null);
   const [accountNo, setAccountNo] = useState<number | "">(initial?.account_no ?? "");
+  const [debit, setDebit] = useState(initial?.debit ? String(initial.debit) : "");
+  const [credit, setCredit] = useState(initial?.credit ? String(initial.credit) : "");
 
   useEffect(() => {
     if (state?.success && !initial) {
       formRef.current?.reset();
       setAccountNo("");
+      setDebit("");
+      setCredit("");
     }
   }, [state, initial]);
 
@@ -55,12 +63,20 @@ export default function OpeningBalanceForm({
           <input name="description" defaultValue={initial?.description ?? ""} className="input" />
         </Field>
         <Field label="Debit">
-          <input type="number" step="any" name="debit" defaultValue={initial?.debit ?? 0} className="input" />
+          <input type="number" step="any" name="debit" value={debit} onChange={(e) => setDebit(e.target.value)} className="input" />
         </Field>
         <Field label="Credit">
-          <input type="number" step="any" name="credit" defaultValue={initial?.credit ?? 0} className="input" />
+          <input type="number" step="any" name="credit" value={credit} onChange={(e) => setCredit(e.target.value)} className="input" />
         </Field>
       </div>
+
+      <BalanceHeadsUp
+        kind="opening"
+        registerDiff={registerDiff}
+        previous={initial ? { debit: initial.debit, credit: initial.credit } : undefined}
+        debit={Number(debit) || 0}
+        credit={Number(credit) || 0}
+      />
 
       {state?.error && <p className="text-sm text-red-700">{state.error}</p>}
 

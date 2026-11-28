@@ -4,11 +4,17 @@ import { getOpeningBalance } from "@/lib/actions/opening-balance-actions";
 import { updateOpeningBalanceFormAction } from "@/lib/actions/opening-balance-form-actions";
 import { listAllAccountOptions } from "@/lib/actions/reference-actions";
 import { getClosedThroughYear } from "@/lib/year-close";
+import { getRegisterDiffs } from "@/lib/actions/balance-diagnostics-actions";
 
 export default async function EditOpeningBalancePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const rowId = Number(id);
-  const [row, accounts, closedThroughYear] = await Promise.all([getOpeningBalance(rowId), listAllAccountOptions(), getClosedThroughYear()]);
+  const [row, accounts, closedThroughYear, { openingDiff }] = await Promise.all([
+    getOpeningBalance(rowId),
+    listAllAccountOptions(),
+    getClosedThroughYear(),
+    getRegisterDiffs(),
+  ]);
   if (!row) notFound();
 
   return (
@@ -20,6 +26,7 @@ export default async function EditOpeningBalancePage({ params }: { params: Promi
         action={updateOpeningBalanceFormAction.bind(null, rowId)}
         submitLabel="Save"
         closedThroughYear={closedThroughYear}
+        registerDiff={openingDiff}
       />
     </div>
   );

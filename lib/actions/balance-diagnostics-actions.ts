@@ -52,3 +52,11 @@ export async function getBalanceDiagnostics(): Promise<BalanceDiagnostics> {
 
   return { isBalanced: false, trialBalanceDiff, openingBalanceDiff, journalDiff, explained };
 }
+
+/** Debits minus credits of the two hand-entered registers (every year). Zero means that register balances on its own. */
+export async function getRegisterDiffs(): Promise<{ openingDiff: number; journalDiff: number }> {
+  await requireSession();
+  const ob = await query<{ d: string }>("SELECT COALESCE(SUM(debit - credit), 0) AS d FROM opening_balances");
+  const je = await query<{ d: string }>("SELECT COALESCE(SUM(debit - credit), 0) AS d FROM journal_entries");
+  return { openingDiff: Number(ob[0].d), journalDiff: Number(je[0].d) };
+}

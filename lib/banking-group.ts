@@ -63,7 +63,7 @@ export function splitInputFromRows(bankAccountId: number, rows: BankTransactionR
   const direction: "in" | "out" = net > 0 ? "in" : "out";
   const sign = direction === "in" ? 1 : -1;
   const lines = rows.map((r) => {
-    const kind: "account" | "sales" | "purchase" = r.sales_invoice_id ? "sales" : r.purchase_invoice_id ? "purchase" : "account";
+    const kind: "account" | "sales" | "purchase" | "none" = r.sales_invoice_id ? "sales" : r.purchase_invoice_id ? "purchase" : r.account_no ? "account" : "none";
     return {
       kind,
       account_no: kind === "account" ? r.account_no : null,

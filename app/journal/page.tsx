@@ -6,15 +6,18 @@ import { getEffectiveReportingYear } from "@/lib/reporting-year";
 import { getClosedThroughYear } from "@/lib/year-close";
 import { formatDate, formatMoney as fmt } from "@/lib/formatters";
 import JournalEntryForm from "@/components/JournalEntryForm";
+import RegisterBalanceNotice from "@/components/RegisterBalanceNotice";
+import { getRegisterDiffs } from "@/lib/actions/balance-diagnostics-actions";
 
 export default async function JournalPage({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
   const { all } = await searchParams;
   const showAll = all === "1";
   const year = await getEffectiveReportingYear();
-  const [entries, accounts, closedThroughYear] = await Promise.all([
+  const [entries, accounts, closedThroughYear, { journalDiff }] = await Promise.all([
     listJournalEntries(showAll ? undefined : year),
     listAllAccountOptions(),
     getClosedThroughYear(),
+    getRegisterDiffs(),
   ]);
   const totalDebit = entries.reduce((s, e) => s + e.debit, 0);
   const totalCredit = entries.reduce((s, e) => s + e.credit, 0);
@@ -28,7 +31,9 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
         </Link>
       </div>
 
-      <JournalEntryForm accounts={accounts} action={createJournalEntryFormAction} closedThroughYear={closedThroughYear} />
+      <RegisterBalanceNotice kind="journal" diff={journalDiff} />
+
+      <JournalEntryForm accounts={accounts} action={createJournalEntryFormAction} closedThroughYear={closedThroughYear} registerDiff={journalDiff} />
 
       <div className="overflow-x-auto rounded-lg border border-line bg-surface">
         <table className="w-full text-sm">

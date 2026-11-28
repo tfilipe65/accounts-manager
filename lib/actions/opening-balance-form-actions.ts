@@ -1,7 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createOpeningBalance, updateOpeningBalance, deleteOpeningBalance, type OpeningBalanceInput } from "@/lib/actions/opening-balance-actions";
+import {
+  createOpeningBalance,
+  updateOpeningBalance,
+  deleteOpeningBalance,
+  balanceOpeningBalance,
+  type OpeningBalanceInput,
+} from "@/lib/actions/opening-balance-actions";
 
 function toInput(fd: FormData): OpeningBalanceInput {
   return {
@@ -48,4 +54,8 @@ export async function updateOpeningBalanceFormAction(id: number, _prev: { error?
 
 export async function deleteOpeningBalanceAction(id: number) {
   await deleteOpeningBalance(id);
+}
+
+export async function balanceOpeningAction(role: "share_capital" | "retained_earnings") {
+  await balanceOpeningBalance(role);
 }

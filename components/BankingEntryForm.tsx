@@ -82,16 +82,16 @@ export default function BankingEntryForm({
           <input name="description" defaultValue={initial?.description ?? ""} className="input" />
         </Field>
         <Field label="In (+)">
-          <input type="number" step="any" name="in_amount" defaultValue={initial?.in_amount ?? 0} className="input" />
+          <input type="number" step="any" name="in_amount" defaultValue={initial?.in_amount || ""} className="input" />
         </Field>
         <Field label="In VAT" hidden={!showVat}>
-          <input type="number" step="any" name="in_vat" defaultValue={initial?.in_vat ?? 0} className="input" />
+          <input type="number" step="any" name="in_vat" defaultValue={initial?.in_vat || ""} className="input" />
         </Field>
         <Field label="Out (-)">
-          <input type="number" step="any" name="out_amount" defaultValue={initial?.out_amount ?? 0} className="input" />
+          <input type="number" step="any" name="out_amount" defaultValue={initial?.out_amount || ""} className="input" />
         </Field>
         <Field label="Out VAT" hidden={!showVat}>
-          <input type="number" step="any" name="out_vat" defaultValue={initial?.out_vat ?? 0} className="input" />
+          <input type="number" step="any" name="out_vat" defaultValue={initial?.out_vat || ""} className="input" />
         </Field>
         <Field label="VAT %" hidden={!showVat}>
           <VatSelect name="vat_perc" defaultValue={initial?.vat_perc ?? 0} />

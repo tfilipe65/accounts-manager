@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { query, queryOne } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { assertYearOpen } from "@/lib/year-close";
+import { requireAccountByRole } from "@/lib/roles";
 
 export type OpeningBalanceRow = {
   id: number;
@@ -88,4 +89,26 @@ export async function deleteOpeningBalance(id: number): Promise<void> {
   if (existing) await assertYearOpen(existing.date, session);
   await query("DELETE FROM opening_balances WHERE id = $1", [id]);
   revalidatePath("/opening-balance");
+}
+
+/**
+ * Adds the one line that makes the opening balance balance: the other side of whatever is missing, put on the
+ * account with the given role (share capital, retained earnings). Dated like the latest opening balance line.
+ */
+export async function balanceOpeningBalance(role: "share_capital" | "retained_earnings"): Promise<void> {
+  await requireSession();
+  const row = await queryOne<{ d: string; last: string | null }>(
+    "SELECT COALESCE(SUM(debit - credit), 0) AS d, MAX(date)::text AS last FROM opening_balances"
+  );
+  const diff = Number(row?.d ?? 0);
+  if (Math.abs(diff) < 0.005) return;
+  const accountNo = await requireAccountByRole(role, role === "share_capital" ? "Share capital" : "Retained earnings");
+  const date = row?.last ?? new Date().toISOString().slice(0, 10);
+  await createOpeningBalance({
+    date,
+    account_no: accountNo,
+    description: "Balancing line",
+    debit: diff < 0 ? -diff : 0,
+    credit: diff > 0 ? diff : 0,
+  });
 }

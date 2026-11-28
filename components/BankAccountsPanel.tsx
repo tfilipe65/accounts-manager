@@ -172,7 +172,7 @@ function AddAccount({
           </select>
         </Field>
         <Field label="Opening balance">
-          <input type="number" step="0.01" name="opening_balance" defaultValue={0} className="input" />
+          <input type="number" step="0.01" name="opening_balance" className="input" />
         </Field>
         <Field label="Opening date">
           <input type="date" name="opening_date" defaultValue={defaultDate} className="input" />

@@ -23,7 +23,7 @@ type Presets = {
 
 type Row = {
   key: number;
-  kind: "account" | "sales" | "purchase";
+  kind: "account" | "sales" | "purchase" | "none";
   account_no: string;
   sales_invoice_id: string;
   purchase_invoice_id: string;
@@ -247,10 +247,10 @@ function SplitForm({
       )}
 
       <div className="overflow-x-auto rounded-lg border border-line">
-        <table className="w-full min-w-[48rem] table-fixed text-sm">
+        <table className="w-full min-w-[54rem] table-fixed text-sm">
           <colgroup>
-            <col style={{ width: "9rem" }} />
-            <col style={{ width: "30%" }} />
+            <col style={{ width: "13rem" }} />
+            <col style={{ width: "28%" }} />
             <col />
             <col style={{ width: "9.5rem" }} />
             <col style={{ width: "5.5rem" }} />
@@ -274,6 +274,7 @@ function SplitForm({
                     <option value="account">An account</option>
                     <option value="sales">Sales invoice paid</option>
                     <option value="purchase">Purchase invoice paid</option>
+                    <option value="none">N/A (not linked)</option>
                   </select>
                 </td>
                 <td className="px-2 py-2">
@@ -291,6 +292,9 @@ function SplitForm({
                         </select>
                       )}
                     </div>
+                  )}
+                  {r.kind === "none" && (
+                    <span className="block py-2 text-xs text-neutral-500">Not linked to an account or an invoice: it only moves the bank balance.</span>
                   )}
                   {r.kind === "sales" && (
                     <select value={r.sales_invoice_id} onChange={(e) => update(r.key, { sales_invoice_id: e.target.value })} className="input">
@@ -339,7 +343,7 @@ function SplitForm({
                         ))}
                     </select>
                   ) : (
-                    <span className="text-xs text-neutral-400">in the invoice</span>
+                    <span className="text-xs text-neutral-400">{r.kind === "none" ? "none" : "in the invoice"}</span>
                   )}
                 </td>
                 <td className="px-2 py-2 text-right">

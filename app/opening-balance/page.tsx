@@ -6,15 +6,18 @@ import { getEffectiveReportingYear } from "@/lib/reporting-year";
 import { getClosedThroughYear } from "@/lib/year-close";
 import { formatDate, formatMoney as fmt } from "@/lib/formatters";
 import OpeningBalanceForm from "@/components/OpeningBalanceForm";
+import RegisterBalanceNotice from "@/components/RegisterBalanceNotice";
+import { getRegisterDiffs } from "@/lib/actions/balance-diagnostics-actions";
 
 export default async function OpeningBalancePage({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
   const { all } = await searchParams;
   const showAll = all === "1";
   const year = await getEffectiveReportingYear();
-  const [rows, accounts, closedThroughYear] = await Promise.all([
+  const [rows, accounts, closedThroughYear, { openingDiff }] = await Promise.all([
     listOpeningBalances(showAll ? undefined : year),
     listAllAccountOptions(),
     getClosedThroughYear(),
+    getRegisterDiffs(),
   ]);
   const totalDebit = rows.reduce((s, r) => s + r.debit, 0);
   const totalCredit = rows.reduce((s, r) => s + r.credit, 0);
@@ -33,7 +36,9 @@ export default async function OpeningBalancePage({ searchParams }: { searchParam
         </span>
       </div>
 
-      <OpeningBalanceForm accounts={accounts} action={createOpeningBalanceFormAction} closedThroughYear={closedThroughYear} />
+      <RegisterBalanceNotice kind="opening" diff={openingDiff} />
+
+      <OpeningBalanceForm accounts={accounts} action={createOpeningBalanceFormAction} closedThroughYear={closedThroughYear} registerDiff={openingDiff} />
 
       <div className="overflow-x-auto rounded-lg border border-line bg-surface">
         <table className="w-full text-sm">

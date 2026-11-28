@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getProjectReport } from "@/lib/actions/project-report-actions";
 import { formatMoney as fmt } from "@/lib/formatters";
 
@@ -20,6 +21,7 @@ export default async function ProjectReportPage() {
               <th className="px-4 py-2 text-right">Revenue</th>
               <th className="px-4 py-2 text-right">Expenditure</th>
               <th className="px-4 py-2 text-right">Result</th>
+              <th className="px-4 py-2" />
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -31,6 +33,11 @@ export default async function ProjectReportPage() {
                 <td className="px-4 py-2 text-right">{fmt(r.revenue)}</td>
                 <td className="px-4 py-2 text-right">{fmt(r.expenditure)}</td>
                 <td className={`px-4 py-2 text-right font-medium ${r.result < 0 ? "text-credit" : "text-debit"}`}>{fmt(r.result)}</td>
+                <td className="px-4 py-2 text-right">
+                  <Link href={`/project-report/${r.id}`} className="rounded-md border border-primary px-3 py-1 text-xs font-semibold text-primary hover:bg-background">
+                    Report
+                  </Link>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -42,6 +49,7 @@ export default async function ProjectReportPage() {
               <td className="px-4 py-2 text-right">{fmt(totalRevenue)}</td>
               <td className="px-4 py-2 text-right">{fmt(totalExpenditure)}</td>
               <td className="px-4 py-2 text-right">{fmt(totalRevenue - totalExpenditure)}</td>
+              <td />
             </tr>
           </tfoot>
         </table>

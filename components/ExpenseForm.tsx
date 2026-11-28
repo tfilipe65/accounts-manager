@@ -6,6 +6,7 @@ import type { PurchaseInvoiceDetail, PurchaseInvoiceLineInput } from "@/lib/acti
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import VatSelect from "@/components/VatSelect";
 import AccountSelect from "@/components/AccountSelect";
+import AmountInput from "@/components/AmountInput";
 
 const BLANK_LINE: PurchaseInvoiceLineInput = {
   description: "",
@@ -168,13 +169,7 @@ export default function ExpenseForm({
                   <VatSelect value={l.vat_perc} onChange={(v) => updateLine(i, { vat_perc: v })} />
                 </td>
                 <td className="p-1 w-32">
-                  <input
-                    type="number"
-                    step="any"
-                    className="input"
-                    value={l.amount_inc_vat}
-                    onChange={(e) => updateLine(i, { amount_inc_vat: Number(e.target.value) })}
-                  />
+                  <AmountInput value={l.amount_inc_vat} onChange={(n) => updateLine(i, { amount_inc_vat: n })} />
                 </td>
                 <td className="p-1">
                   <input className="input" value={l.remarks ?? ""} onChange={(e) => updateLine(i, { remarks: e.target.value })} />

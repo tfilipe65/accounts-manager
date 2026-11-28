@@ -18,7 +18,7 @@ import { SPLIT_SEPARATOR } from "@/lib/banking-group";
 import { withOverdraftGuard } from "@/lib/overdraft";
 
 export type SplitLine = {
-  kind: "account" | "sales" | "purchase";
+  kind: "account" | "sales" | "purchase" | "none";
   account_no: number | null;
   sales_invoice_id: number | null;
   purchase_invoice_id: number | null;
@@ -69,6 +69,7 @@ async function insertParts(tx: Tx, splitId: string, input: SplitInput, reconcile
     const sideOut = l.amount > 0 === (input.direction === "out");
     const gross = Math.abs(l.amount);
     const isAccount = l.kind === "account";
+    // an account part separates its VAT out; an invoice part or an N/A part carries none
     const net = isAccount ? r2(gross / (1 + l.vat_perc)) : gross;
     const vat = isAccount ? r2(gross - net) : 0;
     await tx.query(

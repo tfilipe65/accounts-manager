@@ -4,11 +4,17 @@ import { getJournalEntry } from "@/lib/actions/journal-actions";
 import { updateJournalEntryFormAction } from "@/lib/actions/journal-form-actions";
 import { listAllAccountOptions } from "@/lib/actions/reference-actions";
 import { getClosedThroughYear } from "@/lib/year-close";
+import { getRegisterDiffs } from "@/lib/actions/balance-diagnostics-actions";
 
 export default async function EditJournalEntryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const entryId = Number(id);
-  const [entry, accounts, closedThroughYear] = await Promise.all([getJournalEntry(entryId), listAllAccountOptions(), getClosedThroughYear()]);
+  const [entry, accounts, closedThroughYear, { journalDiff }] = await Promise.all([
+    getJournalEntry(entryId),
+    listAllAccountOptions(),
+    getClosedThroughYear(),
+    getRegisterDiffs(),
+  ]);
   if (!entry) notFound();
 
   return (
@@ -20,6 +26,7 @@ export default async function EditJournalEntryPage({ params }: { params: Promise
         action={updateJournalEntryFormAction.bind(null, entryId)}
         submitLabel="Save entry"
         closedThroughYear={closedThroughYear}
+        registerDiff={journalDiff}
       />
     </div>
   );

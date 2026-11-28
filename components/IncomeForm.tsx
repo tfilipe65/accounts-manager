@@ -6,6 +6,7 @@ import type { SalesInvoiceDetail, SalesInvoiceLineInput } from "@/lib/actions/in
 import { confirmClosedYearWrite } from "@/lib/year-close-client";
 import VatSelect from "@/components/VatSelect";
 import AccountSelect from "@/components/AccountSelect";
+import AmountInput from "@/components/AmountInput";
 
 const DOC_TYPES = ["Invoice", "Credit Note", "Proforma", "Commission", "Tax Refund", "Interest", "Other"];
 
@@ -192,13 +193,7 @@ export default function IncomeForm({
                   />
                 </td>
                 <td className="p-1 w-28">
-                  <input
-                    type="number"
-                    step="any"
-                    className="input"
-                    value={l.price_ex_vat}
-                    onChange={(e) => updateLine(i, { price_ex_vat: Number(e.target.value) })}
-                  />
+                  <AmountInput value={l.price_ex_vat} onChange={(n) => updateLine(i, { price_ex_vat: n })} />
                 </td>
                 <td className="p-1 w-20">
                   <VatSelect value={l.vat_perc} onChange={(v) => updateLine(i, { vat_perc: v })} />
