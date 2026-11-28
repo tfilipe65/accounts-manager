@@ -22,13 +22,19 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-function Lines({ rows }: { rows: { label: string; value: string; bold?: boolean }[] }) {
+function Lines({ rows }: { rows: { label: string; value: string; bold?: boolean; count?: number }[] }) {
+  const hasCount = rows.some((r) => r.count != null);
   return (
     <table className="w-full text-sm">
       <tbody className="divide-y divide-line">
         {rows.map((r) => (
           <tr key={r.label} className={r.bold ? "font-semibold" : ""}>
             <td className="py-1.5">{r.label}</td>
+            {hasCount && (
+              <td className="w-40 py-1.5 pr-10 text-right font-normal text-neutral-500">
+                {r.count != null ? `${r.count} ${r.count === 1 ? "invoice" : "invoices"}` : ""}
+              </td>
+            )}
             <td className="py-1.5 text-right">{r.value}</td>
           </tr>
         ))}
@@ -129,9 +135,9 @@ export default async function SummaryPage() {
         <Block title="Sales invoices">
           <Lines
             rows={[
-              { label: "Invoiced (incl. IVA)", value: `${d.keySales.count} · ${fmt(d.keySales.gross)}` },
-              { label: "Paid", value: `${d.keySales.paidCount} · ${fmt(d.keySales.paid)}` },
-              { label: "Outstanding", value: `${d.keySales.outstandingCount} · ${fmt(d.keySales.outstanding)}`, bold: true },
+              { label: "Invoiced (incl. IVA)", count: d.keySales.count, value: fmt(d.keySales.gross) },
+              { label: "Paid", count: d.keySales.paidCount, value: fmt(d.keySales.paid) },
+              { label: "Outstanding", count: d.keySales.outstandingCount, value: fmt(d.keySales.outstanding), bold: true },
               { label: "% outstanding", value: pct(d.keySales.gross > 0.005 ? d.keySales.outstanding / d.keySales.gross : null) },
             ]}
           />
@@ -140,9 +146,9 @@ export default async function SummaryPage() {
         <Block title="Purchase invoices">
           <Lines
             rows={[
-              { label: "Invoiced (incl. IVA)", value: `${d.keyPurchases.count} · ${fmt(d.keyPurchases.gross)}` },
-              { label: "Paid", value: `${d.keyPurchases.paidCount} · ${fmt(d.keyPurchases.paid)}` },
-              { label: "Outstanding", value: `${d.keyPurchases.outstandingCount} · ${fmt(d.keyPurchases.outstanding)}`, bold: true },
+              { label: "Invoiced (incl. IVA)", count: d.keyPurchases.count, value: fmt(d.keyPurchases.gross) },
+              { label: "Paid", count: d.keyPurchases.paidCount, value: fmt(d.keyPurchases.paid) },
+              { label: "Outstanding", count: d.keyPurchases.outstandingCount, value: fmt(d.keyPurchases.outstanding), bold: true },
               { label: "% outstanding", value: pct(d.keyPurchases.gross > 0.005 ? d.keyPurchases.outstanding / d.keyPurchases.gross : null) },
             ]}
           />

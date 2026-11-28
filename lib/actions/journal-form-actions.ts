@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createJournalEntry, updateJournalEntry, deleteJournalEntry, type JournalEntryInput } from "@/lib/actions/journal-actions";
+import { createJournalEntry, updateJournalEntry, deleteJournalEntry, deleteJournalGroup, type JournalEntryInput } from "@/lib/actions/journal-actions";
 
 function toInput(fd: FormData): JournalEntryInput {
   return {
@@ -45,6 +45,10 @@ export async function updateJournalEntryFormAction(id: number, _prev: { error?: 
     return { error: e instanceof Error ? e.message : "Could not save the entry." };
   }
   redirect("/journal");
+}
+
+export async function deleteJournalGroupAction(entryId: string) {
+  await deleteJournalGroup(entryId);
 }
 
 export async function deleteJournalEntryAction(id: number) {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { listJournalEntries } from "@/lib/actions/journal-actions";
-import { createJournalEntryFormAction, deleteJournalEntryAction } from "@/lib/actions/journal-form-actions";
+import { createJournalEntryFormAction, deleteJournalEntryAction, deleteJournalGroupAction } from "@/lib/actions/journal-form-actions";
 import { listAllAccountOptions } from "@/lib/actions/reference-actions";
 import { getEffectiveReportingYear } from "@/lib/reporting-year";
 import { getClosedThroughYear } from "@/lib/year-close";
@@ -54,19 +54,37 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
                 <td className="px-4 py-2">
                   {e.account_no} {e.account_name}
                 </td>
-                <td className="px-4 py-2">{e.description}</td>
+                <td className="px-4 py-2">
+                  {e.description}
+                  {e.entry_id && !e.employee_id && <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary">multi-line entry</span>}
+                </td>
                 <td className="px-4 py-2 text-right">{e.debit > 0 ? fmt(e.debit) : ""}</td>
                 <td className="px-4 py-2 text-right">{e.credit > 0 ? fmt(e.credit) : ""}</td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex items-center justify-end gap-3">
-                    <Link href={`/journal/${e.id}`} className="text-xs text-primary hover:underline">
-                      Edit
-                    </Link>
-                    <form action={deleteJournalEntryAction.bind(null, e.id)}>
-                      <button type="submit" className="text-xs text-neutral-500 hover:text-red-700">
-                        Delete
-                      </button>
-                    </form>
+                    {e.entry_id && !e.employee_id ? (
+                      <>
+                        <Link href={`/journal/entry/${e.entry_id}`} className="text-xs text-primary hover:underline">
+                          Edit entry
+                        </Link>
+                        <form action={deleteJournalGroupAction.bind(null, e.entry_id)}>
+                          <button type="submit" title="Deletes every line of this entry" className="text-xs text-neutral-500 hover:text-red-700">
+                            Delete entry
+                          </button>
+                        </form>
+                      </>
+                    ) : (
+                      <>
+                        <Link href={`/journal/${e.id}`} className="text-xs text-primary hover:underline">
+                          Edit
+                        </Link>
+                        <form action={deleteJournalEntryAction.bind(null, e.id)}>
+                          <button type="submit" className="text-xs text-neutral-500 hover:text-red-700">
+                            Delete
+                          </button>
+                        </form>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
