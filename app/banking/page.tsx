@@ -14,8 +14,7 @@ import { listAccountOptions, listAllAccountOptions } from "@/lib/actions/referen
 import { getSession } from "@/lib/auth";
 import { accountNoByRole } from "@/lib/roles";
 import { queryOne } from "@/lib/db";
-import { groupRegister, partNote, splitInputFromRows } from "@/lib/banking-group";
-import SplitDialog from "@/components/SplitDialog";
+import { groupRegister, partNote } from "@/lib/banking-group";
 import { getEffectiveReportingYear } from "@/lib/reporting-year";
 import { getClosedThroughYear } from "@/lib/year-close";
 import { formatDate, formatMoney as fmt } from "@/lib/formatters";
@@ -85,15 +84,8 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
     ),
   ]);
   const splitProps = {
-    bankAccountId: active.id,
-    accounts,
-    salesInvoices,
-    purchaseInvoices,
-    employees,
     vatRates: [rateRow?.vat_rate_1, rateRow?.vat_rate_2, rateRow?.vat_rate_3, rateRow?.vat_rate_4].filter((v) => v != null).map(Number),
     presets: { loanPrincipal, interestExpense, bankCharges, withholding, socialSecurity },
-    closedThroughYear,
-    defaultDate: formDate,
   };
   const register = groupRegister(transactions);
 
@@ -158,7 +150,7 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
         purchaseInvoices={purchaseInvoices}
         employees={employees}
         closedThroughYear={closedThroughYear}
-        splitSlot={<SplitDialog {...splitProps} inline label="Split transaction" className="whitespace-nowrap rounded-md border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-background" />}
+        split={splitProps}
       />
 
       <div className="overflow-x-auto rounded-lg border border-line bg-surface">
@@ -205,12 +197,9 @@ export default async function BankingPage({ searchParams }: { searchParams: Prom
                       <td className="px-4 py-2 text-right font-medium">{fmt(running)}</td>
                       <td className="px-4 py-2 text-right">
                         <div className="flex items-center justify-end gap-3">
-                          <SplitDialog
-                            {...splitProps}
-                            initial={{ splitId: item.splitId, input: splitInputFromRows(active.id, item.rows) }}
-                            label="Edit split"
-                            className="text-xs text-primary hover:underline"
-                          />
+                          <Link href={`/banking/split/${item.splitId}`} className="text-xs text-primary hover:underline">
+                            Edit split
+                          </Link>
                           <form action={deleteBankTransactionAction.bind(null, first.id, active.key)}>
                             <button type="submit" className="text-xs text-neutral-500 hover:text-red-700">
                               Delete split

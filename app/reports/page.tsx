@@ -277,7 +277,15 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             <Stat label="Closing balance" value={fmt(statement.closing)} />
           </div>
           <div className="overflow-x-auto rounded-lg border border-line bg-surface">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[56rem] table-fixed text-sm">
+              <colgroup>
+                <col style={{ width: "7rem" }} />
+                <col style={{ width: "30%" }} />
+                <col />
+                <col style={{ width: "8.5rem" }} />
+                <col style={{ width: "8.5rem" }} />
+                <col style={{ width: "9rem" }} />
+              </colgroup>
               <thead>
                 <tr className="border-b border-line bg-background text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
                   <th className="px-4 py-2">Date</th>

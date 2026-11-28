@@ -410,12 +410,25 @@ export async function createTransfer(input: TransferInput): Promise<void> {
   revalidateBanking();
 }
 
+function keepList(k?: number | null | (number | null)[]): number[] {
+  return (Array.isArray(k) ? k : [k]).filter((x): x is number => x != null);
+}
+
+/** The rows of one split transaction (for editing it), or null when it no longer exists. */
+export async function getSplitRows(splitId: string): Promise<{ bankAccountId: number; rows: BankTransactionRow[] } | null> {
+  await requireSession();
+  const first = await queryOne<{ bank_account_id: number }>("SELECT bank_account_id FROM bank_transactions WHERE split_id = $1 LIMIT 1", [splitId]);
+  if (!first) return null;
+  const all = await listBankTransactions(first.bank_account_id);
+  return { bankAccountId: first.bank_account_id, rows: all.filter((r) => r.split_id === splitId) };
+}
+
 /**
  * Sales invoices that can still receive a payment (not proforma, not fully paid), plus credit notes still waiting to be
  * refunded to the client (enter the refund as money out). The label shows what is still owed. `keepId` is the invoice an entry being edited is already linked to
  * -- it stays in the list even when that payment has settled it.
  */
-export async function listOpenSalesInvoiceOptions(keepId?: number | null): Promise<{ id: number; label: string }[]> {
+export async function listOpenSalesInvoiceOptions(keepId?: number | null | (number | null)[]): Promise<{ id: number; label: string }[]> {
   await requireSession();
   const rows = await query<{ id: number; invoice_number: string; customer_name: string; gross: string; paid: string }>(
     `SELECT si.id, si.invoice_number, c.name AS customer_name, COALESCE(lt.gross, 0) AS gross, COALESCE(pt.paid, 0) AS paid
@@ -429,16 +442,16 @@ export async function listOpenSalesInvoiceOptions(keepId?: number | null): Promi
        SELECT sales_invoice_id, SUM(amount) AS paid FROM sales_invoice_settlements GROUP BY sales_invoice_id
      ) pt ON pt.sales_invoice_id = si.id
      WHERE si.doc_type <> 'Proforma'
-       AND (si.id = $1 OR (si.doc_type <> 'Credit Note' AND COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) >= 0.005)
+       AND (si.id = ANY($1::int[]) OR (si.doc_type <> 'Credit Note' AND COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) >= 0.005)
             OR (si.doc_type = 'Credit Note' AND COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) <= -0.005))
      ORDER BY si.date DESC, si.invoice_number DESC`,
-    [keepId ?? null]
+    [keepList(keepId)]
   );
   return rows.map((r) => ({ id: r.id, label: owedLabel(`${r.invoice_number} — ${r.customer_name}`, Number(r.gross), Number(r.paid)) }));
 }
 
 /** Purchase invoices that can still be paid: not fully paid yet. The label shows what is still owed. */
-export async function listOpenPurchaseInvoiceOptions(keepId?: number | null): Promise<{ id: number; label: string }[]> {
+export async function listOpenPurchaseInvoiceOptions(keepId?: number | null | (number | null)[]): Promise<{ id: number; label: string }[]> {
   await requireSession();
   const rows = await query<{ id: number; invoice_number: string; supplier_name: string; gross: string; paid: string }>(
     `SELECT pi.id, pi.invoice_number, s.name AS supplier_name, COALESCE(lt.gross, 0) AS gross, COALESCE(pt.paid, 0) AS paid
@@ -450,10 +463,10 @@ export async function listOpenPurchaseInvoiceOptions(keepId?: number | null): Pr
      LEFT JOIN (
        SELECT purchase_invoice_id, SUM(amount) AS paid FROM purchase_invoice_settlements GROUP BY purchase_invoice_id
      ) pt ON pt.purchase_invoice_id = pi.id
-     WHERE pi.id = $1 OR COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) >= 0.005
+     WHERE pi.id = ANY($1::int[]) OR COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) >= 0.005
         OR (pi.doc_type = 'Credit Note' AND COALESCE(lt.gross, 0) - COALESCE(pt.paid, 0) <= -0.005)
      ORDER BY pi.date DESC, pi.invoice_number DESC`,
-    [keepId ?? null]
+    [keepList(keepId)]
   );
   return rows.map((r) => ({ id: r.id, label: owedLabel(`${r.invoice_number} — ${r.supplier_name}`, Number(r.gross), Number(r.paid)) }));
 }
